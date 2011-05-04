@@ -8,8 +8,10 @@ Uses gtk toolkit to provide the graphical interface of the website
 Author: Gonzalo Garcia (A.K.A j0hn) <j0hn.com.ar@gmail.com>
 """
 
+import os
 import gtk
 
+import pycavane
 from utils import combobox_get_active_text
 
 
@@ -20,16 +22,22 @@ class MainWindow:
         Creates the main window based on the glade file `guifile`.
         """
 
-        # MUST have gui file
-        assert(guifile)
+        # Precondition: must have guifile
+        assert os.path.exists(guifile)
 
         self.builder = gtk.Builder()
         self.builder.add_from_file(guifile)
 
-        self.window = self.builder.get_object("mainWindow")
-        self.window.show_all()
+        self.pycavane = pycavane.Pycavane()
 
+        window = self.builder.get_object("mainWindow")
+        window.show_all()
+
+        # We leave the magic connection to glade
         self.builder.connect_signals(self)
+
+        # The default mode it's series
+        self.set_mode_series()
 
     def on_destroy(self, widget):
         """
@@ -47,12 +55,10 @@ class MainWindow:
 
         mode = combobox_get_active_text(combo)
 
-        seasson_combo = self.builder.get_object("seassonCombo")
-
         if mode == "Series":
-            seasson_combo.set_sensitive(True)
+            self.set_mode_series()
         else:
-            seasson_combo.set_sensitive(False)
+            self.set_mode_movies()
 
     def on_seasson_change(self, combo):
         """
@@ -67,6 +73,31 @@ class MainWindow:
 
 
         print combobox_get_active_text(combo)
+
+    def set_mode_series(self):
+        """
+        Sets the current mode to series.
+        """
+
+        # We show the seasson combobox
+        seasson_combo = self.builder.get_object("seassonCombo")
+        seasson_combo.set_sensitive(True)
+
+        series_list = self.builder.get_object("nameList")
+        series_model = series_list.get_model()
+
+        series = self.pycavane.get_shows()
+        for serie in series:
+            series_model.append([serie[1]])
+
+    def set_mode_movies(self):
+        """
+        Sets the current mode to movies.
+        """
+
+        # We won't be needing the seasson combobox so we hide it
+        seasson_combo = self.builder.get_object("seassonCombo")
+        seasson_combo.set_sensitive(False)
 
 
 def main():

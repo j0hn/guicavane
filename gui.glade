@@ -48,6 +48,9 @@
     </data>
   </object>
   <object class="GtkWindow" id="mainWindow">
+    <property name="title" translatable="yes">Guicavana</property>
+    <property name="default_width">200</property>
+    <property name="default_height">200</property>
     <signal name="destroy" handler="on_destroy"/>
     <child>
       <object class="GtkVBox" id="mainVbox">
@@ -155,22 +158,33 @@
                     <property name="resize_mode">queue</property>
                     <property name="shadow_type">etched-out</property>
                     <child>
-                      <object class="GtkTreeView" id="nameList">
+                      <object class="GtkScrolledWindow" id="nameScroll">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="model">nameListstore</property>
-                        <property name="headers_visible">False</property>
+                        <property name="hscrollbar_policy">automatic</property>
+                        <property name="vscrollbar_policy">automatic</property>
                         <child>
-                          <object class="GtkTreeViewColumn" id="name">
-                            <property name="title">name</property>
+                          <object class="GtkTreeView" id="nameList">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="model">nameListstore</property>
+                            <property name="headers_visible">False</property>
+                            <property name="headers_clickable">False</property>
+                            <property name="search_column">0</property>
                             <child>
-                              <object class="GtkCellRendererText" id="cellrenderertext">
-                                <property name="xalign">0</property>
+                              <object class="GtkTreeViewColumn" id="name">
+                                <property name="title">name</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="cellrenderertext">
+                                    <property name="xalign">0</property>
+                                  </object>
+                                  <attributes>
+                                    <attribute name="family">0</attribute>
+                                    <attribute name="size-points">0</attribute>
+                                    <attribute name="text">0</attribute>
+                                  </attributes>
+                                </child>
                               </object>
-                              <attributes>
-                                <attribute name="family">0</attribute>
-                                <attribute name="size-points">0</attribute>
-                              </attributes>
                             </child>
                           </object>
                         </child>
