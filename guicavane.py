@@ -57,9 +57,9 @@ class MainWindow:
         Called when the 'mode' combobox changes value.
         """
 
-        mode = combobox_get_active_text(combo)
+        mode = self.get_mode()
 
-        if mode == "Shows":
+        if mode == MODE_SHOWS:
             self.set_mode_shows()
         else:
             self.set_mode_movies()
@@ -71,18 +71,32 @@ class MainWindow:
         """
 
         # Precondition
-        assert self.get_mode() == MODE_SHOWS
+        if self.get_mode() != MODE_SHOWS:
+            return
 
-        print combobox_get_active_text(combo)
+        seasson = combobox_get_active_text(combo)
+        show = self.get_selected_name()
+
+        if not seasson:
+            return
+
+        file_viewer = self.builder.get_object("fileViewer")
+        file_model = file_viewer.get_model()
+
+        theme = gtk.icon_theme_get_default()
+        file_icon = theme.load_icon(gtk.STOCK_FILE, 48, 0)
+
+        seasson = "Temporada " + seasson  # Hopfully temporary fix
+        for episode in self.pycavane.episodes_by_season(show, seasson):
+            episode_name = "%.2d - %s" % (int(episode[1]), episode[2])
+            file_model.append([file_icon, episode_name])
 
     def on_name_change(self, treeview):
         """
         Called when the user selects a movie or a show from the 'name list'.
         """
 
-        selection = treeview.get_selection()
-        model, iter = selection.get_selected()
-        selected_text = model.get_value(iter, 0)
+        selected_text = self.get_selected_name()
 
         if self.get_mode() == MODE_SHOWS:
             seassons_combo = self.builder.get_object("seassonCombo")
@@ -132,11 +146,28 @@ class MainWindow:
         """
         Returns the current mode.
         e.g the value of the mode combobox.
+        The result will be the constant MODE_SHOWS or MODE_MOVIES.
         """
 
         mode_combobox = self.builder.get_object("modeCombo")
         mode_text = combobox_get_active_text(mode_combobox)
+
+        # Poscondition
+        assert mode_text == MODE_SHOWS or mode_text == MODE_MOVIES
+
         return mode_text
+
+    def get_selected_name(self):
+        """
+        Returns the string of the selected item on the 'name list'.
+        """
+
+        treeview = self.builder.get_object("nameList")
+        selection = treeview.get_selection()
+        model, iter = selection.get_selected()
+        selected_text = model.get_value(iter, 0)
+
+        return selected_text
 
 
 def main():

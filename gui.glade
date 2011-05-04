@@ -8,14 +8,6 @@
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkListStore" id="fileStore">
-    <columns>
-      <!-- column-name icon -->
-      <column type="GdkPixbuf"/>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
   <object class="GtkListStore" id="seassonListstore">
     <columns>
       <!-- column-name seasson -->
@@ -46,6 +38,14 @@
         <col id="0" translatable="yes">Movies</col>
       </row>
     </data>
+  </object>
+  <object class="GtkListStore" id="fileStore">
+    <columns>
+      <!-- column-name icon -->
+      <column type="GdkPixbuf"/>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+    </columns>
   </object>
   <object class="GtkWindow" id="mainWindow">
     <property name="title" translatable="yes">Guicavana</property>
