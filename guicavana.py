@@ -10,6 +10,7 @@ Author: Gonzalo Garcia (A.K.A j0hn) <j0hn.com.ar@gmail.com>
 
 import os
 import gtk
+import string
 
 import pycavane
 from utils import combobox_get_active_text
@@ -36,8 +37,8 @@ class MainWindow:
         # We leave the magic connection to glade
         self.builder.connect_signals(self)
 
-        # The default mode it's series
-        self.set_mode_series()
+        # The default mode it's shows
+        self.set_mode_shows()
 
     def on_destroy(self, widget):
         """
@@ -47,7 +48,6 @@ class MainWindow:
         # We kill gtk
         gtk.main_quit()
 
-
     def on_mode_change(self, combo):
         """
         Called when the 'mode' combobox changes value.
@@ -55,40 +55,40 @@ class MainWindow:
 
         mode = combobox_get_active_text(combo)
 
-        if mode == "Series":
-            self.set_mode_series()
+        if mode == "Shows":
+            self.set_mode_shows()
         else:
             self.set_mode_movies()
 
     def on_seasson_change(self, combo):
         """
         Called when the 'seasson' combobox changes value.
-        This will only be fired if the 'mode' combobox is setted to 'Series'.
+        This will only be fired if the 'mode' combobox is setted to 'Shows'.
         """
 
         # Precondition
         mode_combobox = self.builder.get_object("modeCombo")
         mode_text = combobox_get_active_text(mode_combobox)
-        assert mode_text == "Series"
-
+        assert mode_text == "Shows"
 
         print combobox_get_active_text(combo)
 
-    def set_mode_series(self):
+    def set_mode_shows(self):
         """
-        Sets the current mode to series.
+        Sets the current mode to shows.
         """
 
         # We show the seasson combobox
         seasson_combo = self.builder.get_object("seassonCombo")
         seasson_combo.set_sensitive(True)
 
-        series_list = self.builder.get_object("nameList")
-        series_model = series_list.get_model()
+        shows_list = self.builder.get_object("nameList")
+        shows_model = shows_list.get_model()
+        shows_model.clear()
 
-        series = self.pycavane.get_shows()
-        for serie in series:
-            series_model.append([serie[1]])
+        shows = self.pycavane.get_shows()
+        for show in shows:
+            shows_model.append([show[1]])
 
     def set_mode_movies(self):
         """
@@ -98,6 +98,13 @@ class MainWindow:
         # We won't be needing the seasson combobox so we hide it
         seasson_combo = self.builder.get_object("seassonCombo")
         seasson_combo.set_sensitive(False)
+
+        movies_list = self.builder.get_object("nameList")
+        movies_model = movies_list.get_model()
+        movies_model.clear()
+
+        for letter in string.uppercase:
+            movies_model.append([letter])
 
 
 def main():
