@@ -15,6 +15,10 @@ import string
 import pycavane
 from utils import combobox_get_active_text
 
+# Constants
+MODE_SHOWS = "Shows"
+MODE_MOVIES = "Movies"
+
 
 class MainWindow:
 
@@ -67,11 +71,29 @@ class MainWindow:
         """
 
         # Precondition
-        mode_combobox = self.builder.get_object("modeCombo")
-        mode_text = combobox_get_active_text(mode_combobox)
-        assert mode_text == "Shows"
+        assert self.get_mode() == MODE_SHOWS
 
         print combobox_get_active_text(combo)
+
+    def on_name_change(self, treeview):
+        """
+        Called when the user selects a movie or a show from the 'name list'.
+        """
+
+        selection = treeview.get_selection()
+        model, iter = selection.get_selected()
+        selected_text = model.get_value(iter, 0)
+
+        if self.get_mode() == MODE_SHOWS:
+            seassons_combo = self.builder.get_object("seassonCombo")
+            seassons_model = seassons_combo.get_model()
+            seassons_model.clear()
+
+            seassons = self.pycavane.seasson_by_show(selected_text)
+            for i in range(1, len(seassons)+1):
+                # Here we're assuming that the server has the
+                # seassons 1 to length(seassons) that could not be true. TODO
+                seassons_model.append([i])
 
     def set_mode_shows(self):
         """
@@ -105,6 +127,16 @@ class MainWindow:
 
         for letter in string.uppercase:
             movies_model.append([letter])
+
+    def get_mode(self):
+        """
+        Returns the current mode.
+        e.g the value of the mode combobox.
+        """
+
+        mode_combobox = self.builder.get_object("modeCombo")
+        mode_text = combobox_get_active_text(mode_combobox)
+        return mode_text
 
 
 def main():
