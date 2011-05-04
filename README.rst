@@ -22,5 +22,5 @@ To download the source and start enjoying Guicavana run:
 
 Here some mockups i made before starting the proyect:
 
-.. image:: mockup_series.png
-.. image:: mockup_movies.png
+.. image:: https://github.com/j0hn/guicavane/raw/master/mockup_movies.png
+.. image:: https://github.com/j0hn/guicavane/raw/master/mockup_series.png
