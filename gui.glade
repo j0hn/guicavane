@@ -147,6 +147,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">&#x25CF;</property>
+                    <signal name="changed" handler="on_name_filter_change"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -273,10 +274,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkViewport" id="fileViewport">
+                  <object class="GtkScrolledWindow" id="fileScroll">
                     <property name="visible">True</property>
-                    <property name="resize_mode">queue</property>
-                    <property name="shadow_type">etched-in</property>
+                    <property name="can_focus">True</property>
+                    <property name="hscrollbar_policy">automatic</property>
+                    <property name="vscrollbar_policy">automatic</property>
+                    <property name="shadow_type">etched-out</property>
                     <child>
                       <object class="GtkIconView" id="fileViewer">
                         <property name="visible">True</property>

@@ -38,6 +38,14 @@ class MainWindow:
         window = self.builder.get_object("mainWindow")
         window.show_all()
 
+        # Creating a new filter model to allow the user filter the
+        # shows and movies by typing on an entry box
+        name_list = self.builder.get_object("nameList")
+        name_model = name_list.get_model()
+        self.name_filter = name_model.filter_new()
+        self.name_filter.set_visible_func(self.visible_func)
+        name_list.set_model(self.name_filter)
+
         # We leave the magic connection to glade
         self.builder.connect_signals(self)
 
@@ -109,6 +117,9 @@ class MainWindow:
                 # seassons 1 to length(seassons) that could not be true. TODO
                 seassons_model.append([i])
 
+    def on_name_filter_change(self, entry):
+        self.name_filter.refilter()
+
     def set_mode_shows(self):
         """
         Sets the current mode to shows.
@@ -118,8 +129,7 @@ class MainWindow:
         seasson_combo = self.builder.get_object("seassonCombo")
         seasson_combo.set_sensitive(True)
 
-        shows_list = self.builder.get_object("nameList")
-        shows_model = shows_list.get_model()
+        shows_model = self.builder.get_object("nameListstore")
         shows_model.clear()
 
         shows = self.pycavane.get_shows()
@@ -135,8 +145,7 @@ class MainWindow:
         seasson_combo = self.builder.get_object("seassonCombo")
         seasson_combo.set_sensitive(False)
 
-        movies_list = self.builder.get_object("nameList")
-        movies_model = movies_list.get_model()
+        movies_model = self.builder.get_object("nameListstore")
         movies_model.clear()
 
         for letter in string.uppercase:
@@ -168,6 +177,21 @@ class MainWindow:
         selected_text = model.get_value(iter, 0)
 
         return selected_text
+
+    def visible_func(self, model, iter):
+        filter_entry = self.builder.get_object("nameFilter")
+        filtered_text = filter_entry.get_text()
+
+        row_text = model.get_value(iter, 0)
+
+        if row_text:
+            # Case insensitive search
+            filtered_text = filtered_text.lower()
+            row_text = row_text.lower()
+
+            return filtered_text in row_text
+
+        return False
 
 
 def main():
