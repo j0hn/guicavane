@@ -48,7 +48,7 @@
     </columns>
   </object>
   <object class="GtkWindow" id="mainWindow">
-    <property name="title" translatable="yes">Guicavana</property>
+    <property name="title" translatable="yes">Guicavane</property>
     <property name="default_width">200</property>
     <property name="default_height">200</property>
     <signal name="destroy" handler="on_destroy"/>

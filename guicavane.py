@@ -90,6 +90,7 @@ class MainWindow:
 
         file_viewer = self.builder.get_object("fileViewer")
         file_model = file_viewer.get_model()
+        file_model.clear()
 
         theme = gtk.icon_theme_get_default()
         file_icon = theme.load_icon(gtk.STOCK_FILE, 48, 0)
