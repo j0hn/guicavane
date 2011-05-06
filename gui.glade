@@ -256,7 +256,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="searchFilter">
+                      <object class="GtkEntry" id="fileFilter">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x25CF;</property>

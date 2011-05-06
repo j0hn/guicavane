@@ -45,8 +45,9 @@ class MainWindow:
         self.file_model = self.file_viewer.get_model()
         self.seassons_combo = self.builder.get_object("seassonCombo")
         self.seassons_model = self.seassons_combo.get_model()
-        self.mode_combobox = self.builder.get_object("modeCombo")
+        self.mode_combo = self.builder.get_object("modeCombo")
         self.name_filter = self.builder.get_object("nameFilter")
+        self.file_filter = self.builder.get_object("fileFilter")
 
         # Creating a new filter model to allow the user filter the
         # shows and movies by typing on an entry box
@@ -70,10 +71,28 @@ class MainWindow:
         """
 
         def decorate(self, *args):
-            self.main_window.set_sensitive(False)
+            self.mode_combo.set_sensitive(False)
+            self.seassons_combo.set_sensitive(False)
+            self.name_list.set_sensitive(False)
+            self.file_viewer.set_sensitive(False)
+            self.name_filter.set_sensitive(False)
+            self.file_filter.set_sensitive(False)
+
+            #context_id = self.statusbar.get_context_id("Loading")
+            #self.statusbar.push(context_id, "Loading...")
+
             res = f(self, *args)
-            self.main_window.set_sensitive(True)
+
+            #self.statusbar.push(context_id, "Loading done!")
+
+            self.mode_combo.set_sensitive(True)
+            self.seassons_combo.set_sensitive(True)
+            self.name_list.set_sensitive(True)
+            self.file_viewer.set_sensitive(True)
+            self.name_filter.set_sensitive(True)
+            self.file_filter.set_sensitive(True)
             return res
+
         return decorate
 
     def background_task(f):
@@ -207,7 +226,7 @@ class MainWindow:
         The result will be the constant MODE_SHOWS or MODE_MOVIES.
         """
 
-        mode_text = combobox_get_active_text(self.mode_combobox)
+        mode_text = combobox_get_active_text(self.mode_combo)
 
         # Poscondition
         assert mode_text == MODE_SHOWS or mode_text == MODE_MOVIES
