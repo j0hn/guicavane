@@ -20,7 +20,7 @@ To download the source and start enjoying Guicavana run:
     $ # profit
     $ python guicavane.py
 
-Here some mockups i made before starting the proyect:
+Here some mockups i made before starting the project:
 
 .. image:: https://github.com/j0hn/guicavane/raw/master/mockup_movies.png
 .. image:: https://github.com/j0hn/guicavane/raw/master/mockup_series.png
