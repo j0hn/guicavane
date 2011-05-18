@@ -1,44 +1,7 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkListStore" id="nameListstore">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="seassonListstore">
-    <columns>
-      <!-- column-name seasson -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">1</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">2</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">3</col>
-      </row>
-    </data>
-  </object>
-  <object class="GtkListStore" id="modeListstore">
-    <columns>
-      <!-- column-name label -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Shows</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Movies</col>
-      </row>
-    </data>
-  </object>
   <object class="GtkListStore" id="fileStore">
     <columns>
       <!-- column-name icon -->
@@ -48,28 +11,37 @@
     </columns>
   </object>
   <object class="GtkWindow" id="mainWindow">
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Guicavane</property>
-    <property name="default_width">200</property>
-    <property name="default_height">200</property>
-    <signal name="destroy" handler="on_destroy"/>
+    <property name="window_position">center</property>
+    <property name="default_width">900</property>
+    <property name="default_height">500</property>
+    <signal name="destroy" handler="on_destroy" swapped="no"/>
     <child>
       <object class="GtkVBox" id="mainVbox">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <child>
           <object class="GtkMenuBar" id="menubar">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <child>
               <object class="GtkMenuItem" id="settingsMenuItem">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">_Settings</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu" id="settingsMenu">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkImageMenuItem" id="preferencesItem">
                         <property name="label">gtk-preferences</property>
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -78,9 +50,11 @@
                       <object class="GtkImageMenuItem" id="quitItem">
                         <property name="label">gtk-quit</property>
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_destroy"/>
+                        <signal name="activate" handler="on_destroy" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -90,6 +64,7 @@
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
         </child>
@@ -102,13 +77,16 @@
               <object class="GtkVBox" id="sidebarVbox">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkHBox" id="modeHbox">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkLabel" id="modeLabel">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Mode:</property>
                       </object>
                       <packing>
@@ -120,9 +98,10 @@
                     <child>
                       <object class="GtkComboBox" id="modeCombo">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="model">modeListstore</property>
                         <property name="active">0</property>
-                        <signal name="changed" handler="on_mode_change"/>
+                        <signal name="changed" handler="on_mode_change" swapped="no"/>
                         <child>
                           <object class="GtkCellRendererText" id="modeRendererText"/>
                           <attributes>
@@ -131,6 +110,8 @@
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -146,8 +127,12 @@
                   <object class="GtkEntry" id="nameFilter">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="invisible_char">&#x25CF;</property>
-                    <signal name="changed" handler="on_name_filter_change"/>
+                    <property name="invisible_char">●</property>
+                    <property name="primary_icon_activatable">False</property>
+                    <property name="secondary_icon_activatable">False</property>
+                    <property name="primary_icon_sensitive">True</property>
+                    <property name="secondary_icon_sensitive">True</property>
+                    <signal name="changed" handler="on_name_filter_change" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -159,6 +144,7 @@
                 <child>
                   <object class="GtkViewport" id="nameViewport">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="resize_mode">queue</property>
                     <property name="shadow_type">etched-out</property>
                     <child>
@@ -175,7 +161,7 @@
                             <property name="headers_visible">False</property>
                             <property name="headers_clickable">False</property>
                             <property name="search_column">0</property>
-                            <signal name="cursor_changed" handler="on_name_change"/>
+                            <signal name="cursor-changed" handler="on_name_change" swapped="no"/>
                             <child>
                               <object class="GtkTreeViewColumn" id="name">
                                 <property name="title">name</property>
@@ -197,6 +183,8 @@
                     </child>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
@@ -210,13 +198,16 @@
               <object class="GtkVBox" id="centerVbox">
                 <property name="width_request">300</property>
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkHBox" id="seassonHbox">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="spacing">10</property>
                     <child>
                       <object class="GtkLabel" id="seassonLabel">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Seasson:</property>
                       </object>
                       <packing>
@@ -228,9 +219,10 @@
                     <child>
                       <object class="GtkComboBox" id="seassonCombo">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="model">seassonListstore</property>
                         <property name="active">0</property>
-                        <signal name="changed" handler="on_seasson_change"/>
+                        <signal name="changed" handler="on_seasson_change" swapped="no"/>
                         <child>
                           <object class="GtkCellRendererText" id="seassonRendererText"/>
                           <attributes>
@@ -247,6 +239,7 @@
                     <child>
                       <object class="GtkLabel" id="searchLabel">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Search:</property>
                       </object>
                       <packing>
@@ -259,9 +252,15 @@
                       <object class="GtkEntry" id="fileFilter">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="invisible_char">&#x25CF;</property>
+                        <property name="invisible_char">●</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">3</property>
                       </packing>
                     </child>
@@ -285,6 +284,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="model">fileStore</property>
+                        <signal name="item-activated" handler="on_open_file" swapped="no"/>
                         <child>
                           <object class="GtkCellRendererPixbuf" id="fileViewRendererPixbuf"/>
                           <attributes>
@@ -292,7 +292,9 @@
                           </attributes>
                         </child>
                         <child>
-                          <object class="GtkCellRendererText" id="fileViewRendererText"/>
+                          <object class="GtkCellRendererText" id="fileViewRendererText">
+                            <property name="alignment">center</property>
+                          </object>
                           <attributes>
                             <attribute name="text">1</attribute>
                           </attributes>
@@ -301,6 +303,8 @@
                     </child>
                   </object>
                   <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
@@ -312,21 +316,62 @@
             </child>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
         <child>
           <object class="GtkStatusbar" id="statusbar">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="spacing">2</property>
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="padding">5</property>
             <property name="position">2</property>
           </packing>
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="modeListstore">
+    <columns>
+      <!-- column-name label -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Shows</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Movies</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="nameListstore">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="seassonListstore">
+    <columns>
+      <!-- column-name seasson -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">1</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">2</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">3</col>
+      </row>
+    </data>
   </object>
 </interface>

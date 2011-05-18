@@ -10,15 +10,85 @@ Author: Gonzalo Garcia (A.K.A j0hn) <j0hn.com.ar@gmail.com>
 
 import os
 import gtk
+import glib
+import time
+import Queue
 import string
-import thread
+import gobject
+import threading
 
 import pycavane
-from utils import combobox_get_active_text
+from megaupload import MegaFile
 
 # Constants
 MODE_SHOWS = "Shows"
 MODE_MOVIES = "Movies"
+
+
+# Just a useful function
+def combobox_get_active_text(combobox):
+    """
+    Returns the text of the active item of a gtk combobox.
+    """
+
+    model = combobox.get_model()
+    active = combobox.get_active()
+
+    if active < 0:
+        return None
+
+    return model[active][0]
+
+
+class GtkThreadRunner(threading.Thread):
+    """
+    Run *func* in a thread with *args* and *kwargs* as arguments, when
+    finished call callback with a two item tuple containing a boolean as first
+    item informing if the function returned correctly and the returned value or
+    the exception thrown as second item
+    """
+
+    def __init__(self, callback, func, *args, **kwargs):
+        threading.Thread.__init__(self)
+        self.setDaemon(True)
+
+        self.callback = callback
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+
+        self.result = Queue.Queue()
+
+        self.start()
+        glib.timeout_add_seconds(1, self.check)
+
+    def run(self):
+        """
+        Main function of the thread, run func with args and kwargs
+        and get the result, call callback with the (True, result)
+
+        if an exception is thrown call callback with (False, exception)
+        """
+
+        try:
+            result = (True, self.func(*self.args, **self.kwargs))
+        except Exception, ex:
+            result = (False, ex)
+
+        self.result.put(result)
+
+    def check(self):
+        """
+        Check if func finished.
+        """
+
+        try:
+            result = self.result.get(False, 0.1)
+        except Queue.Empty:
+            return True
+
+        self.callback(result)
+        return False
 
 
 class MainWindow:
@@ -34,20 +104,20 @@ class MainWindow:
         self.builder = gtk.Builder()
         self.builder.add_from_file(guifile)
 
-        self.pycavane = pycavane.Pycavane()
+        self.pycavane = pycavane.Pycavane("j0hn", "berrotaran")
 
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
         self.statusbar = self.builder.get_object("statusbar")
+        self.name_filter = self.builder.get_object("nameFilter")
         self.name_list = self.builder.get_object("nameList")
         self.name_model = self.name_list.get_model()
+        self.file_filter = self.builder.get_object("fileFilter")
         self.file_viewer = self.builder.get_object("fileViewer")
         self.file_model = self.file_viewer.get_model()
         self.seassons_combo = self.builder.get_object("seassonCombo")
         self.seassons_model = self.seassons_combo.get_model()
         self.mode_combo = self.builder.get_object("modeCombo")
-        self.name_filter = self.builder.get_object("nameFilter")
-        self.file_filter = self.builder.get_object("fileFilter")
 
         # Creating a new filter model to allow the user filter the
         # shows and movies by typing on an entry box
@@ -58,51 +128,46 @@ class MainWindow:
         # We leave the magic connection to glade
         self.builder.connect_signals(self)
 
+        # Focusing on the name filter
+        self.name_filter.grab_focus()  # TODO: not working
+
         # Now we show the window
         self.main_window.show_all()
 
         # The default mode it's shows
         self.set_mode_shows()
 
-    def thread_safe(f):
-        """
-        Decorator to deny the user to interact with the interface
-        while the program is doing some background task.
-        """
+    def freeze_gui(self):
+        self.mode_combo.set_sensitive(False)
+        self.seassons_combo.set_sensitive(False)
+        self.name_list.set_sensitive(False)
+        self.file_viewer.set_sensitive(False)
+        self.name_filter.set_sensitive(False)
+        self.file_filter.set_sensitive(False)
+        #context_id = self.statusbar.get_context_id("Loading")
+        #self.statusbar.push(context_id, "Loading...")
 
-        def decorate(self, *args):
-            self.mode_combo.set_sensitive(False)
-            self.seassons_combo.set_sensitive(False)
-            self.name_list.set_sensitive(False)
-            self.file_viewer.set_sensitive(False)
-            self.name_filter.set_sensitive(False)
-            self.file_filter.set_sensitive(False)
-
-            #context_id = self.statusbar.get_context_id("Loading")
-            #self.statusbar.push(context_id, "Loading...")
-
-            res = f(self, *args)
-
+    def unfreeze_gui(self, result):
+        if result[0]:
             #self.statusbar.push(context_id, "Loading done!")
-
             self.mode_combo.set_sensitive(True)
             self.seassons_combo.set_sensitive(True)
             self.name_list.set_sensitive(True)
             self.file_viewer.set_sensitive(True)
             self.name_filter.set_sensitive(True)
             self.file_filter.set_sensitive(True)
-            return res
+        else:
+            print "ERROR"
 
-        return decorate
-
-    def background_task(f):
+    def background_task(func):
         """
         Decorator to start a function in background and not
         block the interface.
         """
 
-        def decorate(self, *args):
-            thread.start_new(f, tuple([self] + list(args)))
+        def decorate(self, *args, **kwargs):
+            self.freeze_gui()
+            GtkThreadRunner(self.unfreeze_gui, func, *([self] + list(args)), **kwargs)
 
         return decorate
 
@@ -122,12 +187,11 @@ class MainWindow:
         mode = self.get_mode()
 
         if mode == MODE_SHOWS:
-            self.set_mode_shows()
+            gobject.idle_add(self.set_mode_shows)
         else:
-            self.set_mode_movies()
+            gobject.idle_add(self.set_mode_movies)
 
     @background_task
-    @thread_safe
     def on_seasson_change(self, combo):
         """
         Called when the 'seasson' combobox changes value.
@@ -152,10 +216,11 @@ class MainWindow:
         seasson = "Temporada " + seasson  # Hopfully temporary fix
         for episode in self.pycavane.episodes_by_season(show, seasson):
             episode_name = "%.2d - %s" % (int(episode[1]), episode[2])
-            self.file_model.append([file_icon, episode_name])
+            #self.file_model.append([file_icon, episode_name])
+            gobject.idle_add(append_item_to_store,
+                             self.file_model, (file_icon, episode_name))
 
     @background_task
-    @thread_safe
     def on_name_change(self, treeview):
         """
         Called when the user selects a movie or a show from the 'name list'.
@@ -163,14 +228,17 @@ class MainWindow:
 
         selected_text = self.get_selected_name()
 
+        self.file_model.clear()
         if self.get_mode() == MODE_SHOWS:
             self.seassons_model.clear()
 
             seassons = self.pycavane.seasson_by_show(selected_text)
-            for i in range(1, len(seassons)+1):
+            for i in range(1, len(seassons) + 1):
                 # Here we're assuming that the server has the
                 # seassons 1 to length(seassons) that could not be true. TODO
-                self.seassons_model.append([i])
+                #self.seassons_model.append([i])
+                gobject.idle_add(append_item_to_store,
+                                 self.seassons_model, [i])
 
         else:
             self.file_model.clear()
@@ -181,7 +249,9 @@ class MainWindow:
             letter = selected_text
 
             for movie in self.pycavane.get_movies(letter):
-                self.file_model.append([file_icon, movie[1]])
+                #self.file_model.append([file_icon, movie[1]])
+                gobject.idle_add(append_item_to_store,
+                                 self.file_model, (file_icon, movie[1]))
 
     def on_name_filter_change(self, entry):
         """
@@ -190,12 +260,39 @@ class MainWindow:
 
         self.name_model_filter.refilter()
 
+    def on_open_file(self, iconview, path):
+        item_text = self.file_model[path][1]
+        selected_episode = item_text.split(" - ", 1)[1]
+
+        seasson = combobox_get_active_text(self.seassons_combo)
+        show = self.get_selected_name()
+
+        seasson = "Temporada " + seasson  # Hopfully temporary fix
+        for episode in self.pycavane.episodes_by_season(show, seasson):
+            if selected_episode == episode[2]:
+                episode_found = episode
+                break
+
+        link = self.pycavane.get_direct_links(episode_found, host="megaupload")
+        link = link[1]
+
+        self.download_file(link)
+
+    def download_file(self, link):
+        self.file_viewer.set_sensitive(False)
+        print "Bajando..."
+        megafile = MegaFile(link, ".")
+        megafile.start()
+        time.sleep(45)
+        filename = megafile.cache_file
+        os.popen("vlc %s" % filename)
+
     @background_task
-    @thread_safe
     def set_mode_shows(self, *args):
         """
         Sets the current mode to shows.
         """
+        print self
 
         # We show the seasson combobox
         self.seassons_combo.set_sensitive(True)
@@ -204,7 +301,8 @@ class MainWindow:
 
         shows = self.pycavane.get_shows()
         for show in shows:
-            self.name_model.append([show[1]])
+            #self.name_model.append([show[1]])
+            gobject.idle_add(append_item_to_store, self.name_model, (show[1],))
 
     def set_mode_movies(self):
         """
@@ -217,12 +315,13 @@ class MainWindow:
         self.name_model.clear()
 
         for letter in string.uppercase:
-            self.name_model.append([letter])
+            #self.name_model.append([letter])
+            gobject.idle_add(append_item_to_store, self.name_model, (letter,))
 
     def get_mode(self):
         """
         Returns the current mode.
-        e.g the value of the mode combobox.
+        i.e the value of the mode combobox.
         The result will be the constant MODE_SHOWS or MODE_MOVIES.
         """
 
@@ -257,6 +356,12 @@ class MainWindow:
             return filtered_text in row_text
 
         return False
+
+
+def append_item_to_store(store, item):
+    store.append(item)
+    return False
+
 
 def main():
     """
