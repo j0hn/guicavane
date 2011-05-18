@@ -144,20 +144,18 @@ class MainWindow:
         self.file_viewer.set_sensitive(False)
         self.name_filter.set_sensitive(False)
         self.file_filter.set_sensitive(False)
-        #context_id = self.statusbar.get_context_id("Loading")
-        #self.statusbar.push(context_id, "Loading...")
+        self.set_status_message("Loading...")
 
     def unfreeze_gui(self, result):
-        if result[0]:
-            #self.statusbar.push(context_id, "Loading done!")
-            self.mode_combo.set_sensitive(True)
-            self.seassons_combo.set_sensitive(True)
-            self.name_list.set_sensitive(True)
-            self.file_viewer.set_sensitive(True)
-            self.name_filter.set_sensitive(True)
-            self.file_filter.set_sensitive(True)
-        else:
-            print "ERROR"
+        self.set_status_message("")
+        self.mode_combo.set_sensitive(True)
+        self.seassons_combo.set_sensitive(True)
+        self.name_list.set_sensitive(True)
+        self.file_viewer.set_sensitive(True)
+        self.name_filter.set_sensitive(True)
+        self.file_filter.set_sensitive(True)
+        if not result[0]:
+            print "ERROR", result  # TODO: show error dialog
 
     def background_task(func):
         """
@@ -170,6 +168,14 @@ class MainWindow:
             GtkThreadRunner(self.unfreeze_gui, func, *([self] + list(args)), **kwargs)
 
         return decorate
+
+    def set_status_message(self, message):
+        """
+        Sets the message shown in the statusbar.
+        """
+
+        context_id = self.statusbar.get_context_id("Messages")
+        self.statusbar.push(context_id, message)
 
     def on_destroy(self, widget):
         """
@@ -261,6 +267,10 @@ class MainWindow:
         self.name_model_filter.refilter()
 
     def on_open_file(self, iconview, path):
+        """
+        Called when the user double clicks on a file inside the file viewer.
+        """
+
         item_text = self.file_model[path][1]
         selected_episode = item_text.split(" - ", 1)[1]
 
@@ -273,17 +283,28 @@ class MainWindow:
                 episode_found = episode
                 break
 
-        link = self.pycavane.get_direct_links(episode_found, host="megaupload")
+        self.download_file(episode_found)
+
+    @background_task
+    def download_file(self, episode):
+        """
+        Given an episode, downloads the subtitles then starts downloading
+        the file and starts the player.
+        """
+
+        self.file_viewer.set_sensitive(False)
+
+        link = self.pycavane.get_direct_links(episode, host="megaupload")
         link = link[1]
 
-        self.download_file(link)
+        filename = link.rsplit('/', 1)[1]
+        subtitle = self.pycavane.get_subtitle(episode, filename=filename)
 
-    def download_file(self, link):
-        self.file_viewer.set_sensitive(False)
-        print "Bajando..."
         megafile = MegaFile(link, ".")
         megafile.start()
-        time.sleep(45)
+        print "Waiting 45"
+        time.sleep(45 + 3)  # Megaupload's 45 plus some extra space
+        print "Done waiting"
         filename = megafile.cache_file
         os.popen("vlc %s" % filename)
 
