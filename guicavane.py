@@ -60,7 +60,7 @@ class GtkThreadRunner(threading.Thread):
         self.result = Queue.Queue()
 
         self.start()
-        glib.timeout_add_seconds(1, self.check)
+        glib.timeout_add(500, self.check)
 
     def run(self):
         """
@@ -104,6 +104,7 @@ class MainWindow:
         self.builder = gtk.Builder()
         self.builder.add_from_file(guifile)
 
+        self.cachedir = "/tmp"
         self.pycavane = pycavane.Pycavane("j0hn", "berrotaran")
 
         # Getting the used widgets
@@ -165,7 +166,8 @@ class MainWindow:
 
         def decorate(self, *args, **kwargs):
             self.freeze_gui()
-            GtkThreadRunner(self.unfreeze_gui, func, *([self] + list(args)), **kwargs)
+            GtkThreadRunner(self.unfreeze_gui, func,
+                            *([self] + list(args)), **kwargs)
 
         return decorate
 
@@ -266,6 +268,13 @@ class MainWindow:
 
         self.name_model_filter.refilter()
 
+    def on_file_filter_change(self, entry):
+        """
+        Called when the textbox to filter files changes.
+        """
+
+        pass  # TODO
+
     def on_open_file(self, iconview, path):
         """
         Called when the user double clicks on a file inside the file viewer.
@@ -297,16 +306,17 @@ class MainWindow:
         link = self.pycavane.get_direct_links(episode, host="megaupload")
         link = link[1]
 
-        filename = link.rsplit('/', 1)[1]
+        filename = self.cachedir + os.sep + link.rsplit('/', 1)[1]
         subtitle = self.pycavane.get_subtitle(episode, filename=filename)
 
-        megafile = MegaFile(link, ".")
+        megafile = MegaFile(link, self.cachedir)
         megafile.start()
         print "Waiting 45"
-        time.sleep(45 + 3)  # Megaupload's 45 plus some extra space
+        time.sleep(45 + 5)  # Megaupload's 45 plus some extra space
         print "Done waiting"
         filename = megafile.cache_file
-        os.popen("vlc %s" % filename)
+        os.system("vlc %s" % filename)
+        megafile.released = True
 
     @background_task
     def set_mode_shows(self, *args):
