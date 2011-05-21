@@ -9,6 +9,7 @@ Author: Gonzalo Garcia (A.K.A j0hn) <j0hn.com.ar@gmail.com>
 """
 
 import os
+import sys
 import gtk
 import glib
 import time
@@ -423,7 +424,11 @@ def main():
     """
     Creates the window and starts gtk main loop.
     """
-
+    path = os.path.dirname(sys.argv[0])
+    if path:
+        # Allow correctly opening from outside
+        os.chdir(path)
+        
     guifile = "gui.glade"
     guicavane = Guicavane(guifile)
     gtk.gdk.threads_init()
