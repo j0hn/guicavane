@@ -23,6 +23,7 @@ from megaupload import MegaFile
 # Constants
 MODE_SHOWS = "Shows"
 MODE_MOVIES = "Movies"
+MODE_FAVORITES = "Favorites"
 
 
 # Just a useful function
@@ -91,7 +92,7 @@ class GtkThreadRunner(threading.Thread):
         return False
 
 
-class MainWindow:
+class Guicavane:
 
     def __init__(self, guifile):
         """
@@ -105,10 +106,11 @@ class MainWindow:
         self.builder.add_from_file(guifile)
 
         self.cachedir = "/tmp"
-        self.pycavane = pycavane.Pycavane()
+        self.pycavane = pycavane.Pycavane("guicavane", "guicavane")
 
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
+        self.settings_window = self.builder.get_object("settingsWindow")
         self.statusbar = self.builder.get_object("statusbar")
         self.name_filter = self.builder.get_object("nameFilter")
         self.name_list = self.builder.get_object("nameList")
@@ -123,8 +125,14 @@ class MainWindow:
         # Creating a new filter model to allow the user filter the
         # shows and movies by typing on an entry box
         self.name_model_filter = self.name_model.filter_new()
-        self.name_model_filter.set_visible_func(self.visible_func)
+        self.name_model_filter.set_visible_func(self.visible_func,
+                                                (self.name_filter, 0))
         self.name_list.set_model(self.name_model_filter)
+
+        self.file_model_filter = self.file_model.filter_new()
+        self.file_model_filter.set_visible_func(self.visible_func,
+                                                (self.file_filter, 1))
+        self.file_viewer.set_model(self.file_model_filter)
 
         # We leave the magic connection to glade
         self.builder.connect_signals(self)
@@ -198,9 +206,9 @@ class MainWindow:
         mode = self.get_mode()
 
         if mode == MODE_SHOWS:
-            gobject.idle_add(self.set_mode_shows)
-        else:
-            gobject.idle_add(self.set_mode_movies)
+            self.set_mode_shows()
+        elif mode == MODE_MOVIES:
+            self.set_mode_movies()
 
     @background_task
     def on_seasson_change(self, combo):
@@ -228,8 +236,7 @@ class MainWindow:
         for episode in self.pycavane.episodes_by_season(show, seasson):
             episode_name = "%.2d - %s" % (int(episode[1]), episode[2])
             #self.file_model.append([file_icon, episode_name])
-            gobject.idle_add(append_item_to_store,
-                             self.file_model, (file_icon, episode_name))
+            append_item_to_store(self.file_model, (file_icon, episode_name))
 
     @background_task
     def on_name_change(self, treeview):
@@ -248,8 +255,7 @@ class MainWindow:
                 # Here we're assuming that the server has the
                 # seassons 1 to length(seassons) that could not be true. TODO
                 #self.seassons_model.append([i])
-                gobject.idle_add(append_item_to_store,
-                                 self.seassons_model, [i])
+                append_item_to_store(self.seassons_model, [i])
 
         else:
             self.file_model.clear()
@@ -261,8 +267,7 @@ class MainWindow:
 
             for movie in self.pycavane.get_movies(letter):
                 #self.file_model.append([file_icon, movie[1]])
-                gobject.idle_add(append_item_to_store,
-                                 self.file_model, (file_icon, movie[1]))
+                append_item_to_store(self.file_model, (file_icon, movie[1]))
 
     def on_name_filter_change(self, entry):
         """
@@ -276,7 +281,7 @@ class MainWindow:
         Called when the textbox to filter files changes.
         """
 
-        pass  # TODO
+        self.file_model_filter.refilter()
 
     def on_open_file(self, widget, path, *args):
         """
@@ -326,6 +331,9 @@ class MainWindow:
         os.system("vlc %s" % filename)
         megafile.released = True
 
+    def on_open_settings(self, button):
+        self.settings_window.show_all()
+
     def update_waiting_message(self):
         if self.waiting_time == 0:
             del self.waiting_time
@@ -351,7 +359,7 @@ class MainWindow:
         shows = self.pycavane.get_shows()
         for show in shows:
             #self.name_model.append([show[1]])
-            gobject.idle_add(append_item_to_store, self.name_model, (show[1],))
+            append_item_to_store(self.name_model, (show[1],))
 
     def set_mode_movies(self):
         """
@@ -365,19 +373,19 @@ class MainWindow:
 
         for letter in string.uppercase:
             #self.name_model.append([letter])
-            gobject.idle_add(append_item_to_store, self.name_model, (letter,))
+            append_item_to_store(self.name_model, (letter,))
 
     def get_mode(self):
         """
         Returns the current mode.
         i.e the value of the mode combobox.
-        The result will be the constant MODE_SHOWS or MODE_MOVIES.
+        The result will be the constant MODE_* (see constants definitions).
         """
 
         mode_text = combobox_get_active_text(self.mode_combo)
 
         # Poscondition
-        assert mode_text == MODE_SHOWS or mode_text == MODE_MOVIES
+        assert mode_text in [MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES]
 
         return mode_text
 
@@ -392,10 +400,10 @@ class MainWindow:
 
         return selected_text
 
-    def visible_func(self, model, iter):
-        filtered_text = self.name_filter.get_text()
+    def visible_func(self, model, iter, (entry, text_column)):
+        filtered_text = entry.get_text()
 
-        row_text = model.get_value(iter, 0)
+        row_text = model.get_value(iter, text_column)
 
         if row_text:
             # Case insensitive search
@@ -405,7 +413,6 @@ class MainWindow:
             return filtered_text in row_text
 
         return False
-
 
 def append_item_to_store(store, item):
     store.append(item)
@@ -418,7 +425,7 @@ def main():
     """
 
     guifile = "gui.glade"
-    mainWindow = MainWindow(guifile)
+    guicavane = Guicavane(guifile)
     gtk.gdk.threads_init()
     gtk.main()
 
