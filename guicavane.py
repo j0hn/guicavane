@@ -232,6 +232,9 @@ class Guicavane:
 
         theme = gtk.icon_theme_get_default()
         file_icon = theme.load_icon(gtk.STOCK_FILE, 48, 0)
+        file_image = gtk.Image()
+        file_image.set_from_file("images/video_file.png")
+        file_icon = file_image.get_pixbuf()
 
         seasson = "Temporada " + seasson  # Hopfully temporary fix
         for episode in self.pycavane.episodes_by_season(show, seasson):
@@ -341,7 +344,7 @@ class Guicavane:
             return False
         else:
             loading_dots = "." * (3 - self.waiting_time % 4)
-            self.set_status_message("Waiting %d seconds %s" %
+            self.set_status_message("Waiting %d seconds%s" %
                                    (self.waiting_time, loading_dots))
             self.waiting_time -= 1
             return True
@@ -428,7 +431,7 @@ def main():
     if path:
         # Allow correctly opening from outside
         os.chdir(path)
-        
+
     guifile = "gui.glade"
     guicavane = Guicavane(guifile)
     gtk.gdk.threads_init()
