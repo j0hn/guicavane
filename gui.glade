@@ -281,24 +281,28 @@
                     <property name="vscrollbar_policy">automatic</property>
                     <property name="shadow_type">etched-out</property>
                     <child>
-                      <object class="GtkIconView" id="fileViewer">
+                      <object class="GtkTreeView" id="fileViewer">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="model">fileStore</property>
-                        <signal name="item-activated" handler="on_open_file" swapped="no"/>
+                        <property name="headers_visible">False</property>
+                        <signal name="row-activated" handler="on_open_file" swapped="no"/>
                         <child>
-                          <object class="GtkCellRendererPixbuf" id="fileViewRendererPixbuf"/>
-                          <attributes>
-                            <attribute name="pixbuf">0</attribute>
-                          </attributes>
-                        </child>
-                        <child>
-                          <object class="GtkCellRendererText" id="fileViewRendererText">
-                            <property name="alignment">center</property>
+                          <object class="GtkTreeViewColumn" id="fileViewerColumn">
+                            <property name="title" translatable="yes">column</property>
+                            <child>
+                              <object class="GtkCellRendererPixbuf" id="fileViewerRendererText"/>
+                              <attributes>
+                                <attribute name="pixbuf">0</attribute>
+                              </attributes>
+                            </child>
+                            <child>
+                              <object class="GtkCellRendererText" id="fileViewerRendererTex"/>
+                              <attributes>
+                                <attribute name="text">1</attribute>
+                              </attributes>
+                            </child>
                           </object>
-                          <attributes>
-                            <attribute name="text">1</attribute>
-                          </attributes>
                         </child>
                       </object>
                     </child>
@@ -363,16 +367,5 @@
       <!-- column-name seasson -->
       <column type="gchararray"/>
     </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">1</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">2</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">3</col>
-      </row>
-    </data>
   </object>
 </interface>

@@ -278,7 +278,7 @@ class MainWindow:
 
         pass  # TODO
 
-    def on_open_file(self, iconview, path):
+    def on_open_file(self, widget, path, *args):
         """
         Called when the user double clicks on a file inside the file viewer.
         """
@@ -342,7 +342,6 @@ class MainWindow:
         """
         Sets the current mode to shows.
         """
-        print self
 
         # We show the seasson combobox
         self.seassons_combo.set_sensitive(True)
