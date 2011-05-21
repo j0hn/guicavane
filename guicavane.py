@@ -105,7 +105,7 @@ class MainWindow:
         self.builder.add_from_file(guifile)
 
         self.cachedir = "/tmp"
-        self.pycavane = pycavane.Pycavane("j0hn", "berrotaran")
+        self.pycavane = pycavane.Pycavane()
 
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
@@ -145,6 +145,7 @@ class MainWindow:
         self.file_viewer.set_sensitive(False)
         self.name_filter.set_sensitive(False)
         self.file_filter.set_sensitive(False)
+        self.seassons_combo.set_sensitive(False)
         self.set_status_message("Loading...")
 
     def unfreeze_gui(self, result):
@@ -155,6 +156,8 @@ class MainWindow:
         self.file_viewer.set_sensitive(True)
         self.name_filter.set_sensitive(True)
         self.file_filter.set_sensitive(True)
+        self.seassons_combo.set_sensitive(True)
+
         if not result[0]:
             print "ERROR", result  # TODO: show error dialog
 
@@ -311,12 +314,28 @@ class MainWindow:
 
         megafile = MegaFile(link, self.cachedir)
         megafile.start()
-        print "Waiting 45"
+
+        self.waiting_time = 45
+        glib.timeout_add_seconds(1, self.update_waiting_message)
+
         time.sleep(45 + 5)  # Megaupload's 45 plus some extra space
-        print "Done waiting"
+
+        self.set_status_message("Now playing: %s" % episode[2])
         filename = megafile.cache_file
+
         os.system("vlc %s" % filename)
         megafile.released = True
+
+    def update_waiting_message(self):
+        if self.waiting_time == 0:
+            del self.waiting_time
+            return False
+        else:
+            loading_dots = "." * (3 - self.waiting_time % 4)
+            self.set_status_message("Waiting %d seconds %s" %
+                                   (self.waiting_time, loading_dots))
+            self.waiting_time -= 1
+            return True
 
     @background_task
     def set_mode_shows(self, *args):
