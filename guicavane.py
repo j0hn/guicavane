@@ -200,6 +200,10 @@ class Guicavane:
         getattr(self, "set_mode_%s" % last_mode)()
 
     def freeze_gui(self):
+        """
+        Freezes the gui so the user can't interact with it.
+        """
+
         self.mode_combo.set_sensitive(False)
         self.seassons_combo.set_sensitive(False)
         self.name_list.set_sensitive(False)
@@ -210,6 +214,10 @@ class Guicavane:
         self.set_status_message("Loading...")
 
     def unfreeze_gui(self, result):
+        """
+        Free the gui so the user can interact with it.
+        """
+
         self.set_status_message("")
         self.mode_combo.set_sensitive(True)
         self.seassons_combo.set_sensitive(True)
@@ -335,12 +343,18 @@ class Guicavane:
 
         self.name_model_filter.refilter()
 
+    def on_name_filter_clear_clicked(self, button):
+        self.name_filter.set_text("")
+
     def on_file_filter_change(self, entry):
         """
         Called when the textbox to filter files changes.
         """
 
         self.file_model_filter.refilter()
+
+    def on_file_filter_clear_clicked(self, button):
+        self.file_filter.set_text("")
 
     def on_open_file(self, widget, path, *args):
         """
