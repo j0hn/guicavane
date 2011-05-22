@@ -11,7 +11,8 @@ import os
 import json
 
 DEFAULT_VALUES = {"player_command": "vlc %s",
-                  "cache_dir": "/tmp"}
+                  "cache_dir": "/tmp",
+                  "last_mode": "Shows"}
 
 
 class Config:
@@ -49,6 +50,16 @@ class Config:
         """
 
         self.data[key] = value
+
+    def save(self):
+        """
+        Saves the config on the disk file and fills
+        the empty values with default ones.
+        """
+
+        for key in self.data:
+            if not self.data[key]:
+                self.data[key] = self.get_default(key)
 
         with open(self.config_file, "w") as f:
             f.write(json.dumps(self.data) + "\n")

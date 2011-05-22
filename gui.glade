@@ -423,18 +423,7 @@
             <property name="row_spacing">2</property>
             <property name="homogeneous">True</property>
             <child>
-              <object class="GtkLabel" id="playerLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="xalign">0</property>
-                <property name="label" translatable="yes">Player command:</property>
-                <attributes>
-                  <attribute name="weight" value="bold"/>
-                </attributes>
-              </object>
-            </child>
-            <child>
-              <object class="GtkEntry" id="playerEntry">
+              <object class="GtkEntry" id="playerCommandEntry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
@@ -443,6 +432,7 @@
                 <property name="secondary_icon_activatable">False</property>
                 <property name="primary_icon_sensitive">True</property>
                 <property name="secondary_icon_sensitive">True</property>
+                <signal name="activate" handler="on_save_settings" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -450,11 +440,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="folderLabel">
+              <object class="GtkLabel" id="cacheDirLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">0</property>
-                <property name="label" translatable="yes">Temporal folder:</property>
+                <property name="label" translatable="yes">Cache directory:</property>
                 <attributes>
                   <attribute name="weight" value="bold"/>
                 </attributes>
@@ -465,7 +455,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="folderEntry">
+              <object class="GtkEntry" id="cacheDirEntry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
@@ -474,6 +464,7 @@
                 <property name="secondary_icon_activatable">False</property>
                 <property name="primary_icon_sensitive">True</property>
                 <property name="secondary_icon_sensitive">True</property>
+                <signal name="activate" handler="on_save_settings" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -481,6 +472,47 @@
                 <property name="top_attach">1</property>
                 <property name="bottom_attach">2</property>
               </packing>
+            </child>
+            <child>
+              <object class="GtkVBox" id="playerCommandLabelVbox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkLabel" id="playerCommandLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="xalign">0</property>
+                    <property name="yalign">1</property>
+                    <property name="label" translatable="yes">Player command:</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="playerCommandLabel2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="xalign">0</property>
+                    <property name="yalign">0</property>
+                    <property name="label" translatable="yes">(%s will be replaced with the file path)</property>
+                    <attributes>
+                      <attribute name="style" value="italic"/>
+                      <attribute name="size" value="8700"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
             </child>
           </object>
           <packing>
@@ -502,6 +534,7 @@
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_hide_settings" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -517,6 +550,7 @@
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_save_settings" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>

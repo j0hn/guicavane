@@ -1,8 +1,7 @@
 #!/usr/bin/evn python
 # coding: utf-8
-
 """
-guicavana: graphical user interface for the website cuevana.tv
+guicavane: graphical user interface for the website cuevana.tv
 
 Uses gtk toolkit to provide the graphical interface of the website
 Author: Gonzalo Garcia (A.K.A j0hn) <j0hn.com.ar@gmail.com>
@@ -26,6 +25,8 @@ from megaupload import MegaFile
 MODE_SHOWS = "Shows"
 MODE_MOVIES = "Movies"
 MODE_FAVORITES = "Favorites"
+MODES = [MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES]
+# NOTE: MODES must be in the same order as they appear in the combobox
 
 
 # Just a useful function
@@ -105,6 +106,7 @@ class ErrorDialog(gtk.MessageDialog):
         self.run()
         self.destroy()
 
+
 class WarningDialog(gtk.MessageDialog):
     """
     Simple warning dialog.
@@ -112,7 +114,7 @@ class WarningDialog(gtk.MessageDialog):
 
     def __init__(self, message, parent=None):
         gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL,
-                                   gtk.MESSAGE_WARNING, gtk.BUTTONS_OK, message)
+                                  gtk.MESSAGE_WARNING, gtk.BUTTONS_OK, message)
         self.run()
         self.destroy()
 
@@ -132,9 +134,6 @@ class Guicavane:
 
         # Config
         self.config = Config(config_file)
-        self.cache_dir = self.config.get_key("cache_dir")
-        if self.cache_dir[-1] == os.sep:
-            self.cache_dir = self.cache_dir[:-1]
 
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
@@ -172,8 +171,12 @@ class Guicavane:
         self.main_window.show_all()
 
         # Loading the API
+        cache_dir = self.config.get_key("cache_dir")
+        if cache_dir[-1] == os.sep:
+            cache_dir = cache_dir[:-1]
         try:
-            self.pycavane = pycavane.Pycavane("guicavane", "guicavane")
+            self.pycavane = pycavane.Pycavane("guicavane", "guicavane",
+                                              cache_dir=cache_dir)
         except Exception, error:
             self.pycavane = pycavane.Pycavane()
             if "Login fail" in error.message:
@@ -182,8 +185,19 @@ class Guicavane:
             else:
                 print "UNKNOWN ERROR: %s" % error
 
-        # The default mode it's shows
-        self.set_mode_shows()
+        self.setup()
+
+    def setup(self):
+        """
+        Sets the default things.
+        """
+
+        # Get and set the last used mode
+        last_mode = self.config.get_key("last_mode")
+        if last_mode not in MODES:
+            last_mode = MODE_SHOWS
+        last_mode = last_mode.lower()
+        getattr(self, "set_mode_%s" % last_mode)()
 
     def freeze_gui(self):
         self.mode_combo.set_sensitive(False)
@@ -236,6 +250,9 @@ class Guicavane:
         Called when the window closes.
         """
 
+        # Save the config to disk
+        self.config.save()
+
         # We kill gtk
         gtk.main_quit()
 
@@ -245,11 +262,11 @@ class Guicavane:
         """
 
         mode = self.get_mode()
+        self.config.set_key("last_mode", mode)
+        mode = mode.lower()
 
-        if mode == MODE_SHOWS:
-            self.set_mode_shows()
-        elif mode == MODE_MOVIES:
-            self.set_mode_movies()
+        # Call the corresponding set_mode method
+        getattr(self, "set_mode_%s" % mode)()
 
     @background_task
     def on_seasson_change(self, combo):
@@ -375,7 +392,12 @@ class Guicavane:
         link = link[1]
 
         filename = self.cache_dir + os.sep + link.rsplit('/', 1)[1]
-        subtitle = self.pycavane.get_subtitle(episode, filename=filename)
+
+        # Download the subtitle if it exists
+        try:
+            subtitle = self.pycavane.get_subtitle(episode, filename=filename)
+        except:
+            self.set_status_message("Not subtitles found")
 
         megafile = MegaFile(link, self.cache_dir)
         megafile.start()
@@ -383,17 +405,18 @@ class Guicavane:
         self.waiting_time = 45
         glib.timeout_add_seconds(1, self.update_waiting_message)
 
-        time.sleep(45 + 5)  # Megaupload's 45 plus some extra space
+        time.sleep(45)  # Megaupload's 45
+
+        filename = megafile.cache_file
+        file_exists = False
+        while not file_exists:  # Wait untile the file exists
+            file_exists = os.path.exists(filename)
+            time.sleep(5)
 
         self.set_status_message("Now playing: %s" % episode[2])
-        filename = megafile.cache_file
-
         player_command = self.config.get_key("player_command")
         os.system(player_command % filename)
         megafile.released = True
-
-    def on_open_settings(self, button):
-        self.settings_window.show_all()
 
     def update_waiting_message(self):
         if self.waiting_time == 0:
@@ -412,6 +435,9 @@ class Guicavane:
         Sets the current mode to shows.
         """
 
+        # Set the combobox in case it isn't in the right mode
+        self.mode_combo.set_active(MODES.index(MODE_SHOWS))
+
         # We show the seasson combobox
         self.seassons_combo.set_sensitive(True)
 
@@ -427,6 +453,9 @@ class Guicavane:
         Sets the current mode to movies.
         """
 
+        # Set the combobox in case it isn't in the right mode
+        self.mode_combo.set_active(MODES.index(MODE_MOVIES))
+
         # We won't be needing the seasson combobox so we hide it
         self.seassons_combo.set_sensitive(False)
 
@@ -434,6 +463,16 @@ class Guicavane:
 
         for letter in string.uppercase:
             append_item_to_store(self.name_model, (letter,))
+
+    def set_mode_favorites(self):
+        """
+        Sets the current mode to favorites.
+        """
+
+        # Set the combobox in case it isn't in the right mode
+        self.mode_combo.set_active(MODES.index(MODE_FAVORITES))
+
+        self.name_model.clear()
 
     def get_mode(self):
         """
@@ -445,7 +484,7 @@ class Guicavane:
         mode_text = combobox_get_active_text(self.mode_combo)
 
         # Poscondition
-        assert mode_text in [MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES]
+        assert mode_text in MODES
 
         return mode_text
 
@@ -473,6 +512,26 @@ class Guicavane:
             return filtered_text in row_text
 
         return False
+
+    def on_open_settings(self, button):
+        player_cmd = self.builder.get_object("playerCommandEntry")
+        cache_dir = self.builder.get_object("cacheDirEntry")
+
+        player_cmd.set_text(self.config.get_key("player_command"))
+        cache_dir.set_text(self.config.get_key("cache_dir"))
+        self.settings_window.show_all()
+
+    def on_hide_settings(self, *args):
+        self.settings_window.hide()
+
+    def on_save_settings(self, *args):
+        player_cmd = self.builder.get_object("playerCommandEntry").get_text()
+        cache_dir = self.builder.get_object("cacheDirEntry").get_text()
+
+        self.config.set_key("player_command", player_cmd)
+        self.config.set_key("cache_dir", cache_dir)
+        self.config.save()
+        self.on_hide_settings()
 
 
 def append_item_to_store(store, item):
