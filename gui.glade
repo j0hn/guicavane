@@ -5,8 +5,10 @@
   <object class="GtkAboutDialog" id="aboutDialog">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
+    <property name="window_position">center</property>
     <property name="icon">images/logo.png</property>
     <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
     <property name="has_separator">True</property>
     <property name="program_name">Guicavane</property>
     <property name="version">0.3</property>
@@ -25,7 +27,6 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</property>
     <property name="authors">j0hn &lt;j0hn.com.ar@gmail.com&gt; - Lead developer</property>
     <property name="wrap_license">True</property>
-    <signal name="destroy" handler="on_about_hide" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
         <property name="visible">True</property>
@@ -478,22 +479,67 @@ You should have received a copy of the GNU General Public License along with thi
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkWindow" id="settingsWindow">
+  <object class="GtkDialog" id="settingsDialog">
     <property name="can_focus">False</property>
+    <property name="border_width">5</property>
     <property name="title" translatable="yes">Settings</property>
     <property name="resizable">False</property>
-    <property name="modal">True</property>
     <property name="window_position">center</property>
     <property name="icon">images/logo.png</property>
     <property name="type_hint">dialog</property>
-    <child>
-      <object class="GtkVBox" id="settingsMainVbox">
+    <property name="skip_taskbar_hint">True</property>
+    <property name="has_separator">True</property>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="settingsVbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="border_width">10</property>
-        <property name="spacing">5</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="settingsButtonBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="cancelButton">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="applyButton">
+                <property name="label">gtk-apply</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_save_settings" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
         <child>
-          <object class="GtkTable" id="mainTable">
+          <object class="GtkTable" id="settingsMainTable">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="border_width">10</property>
@@ -598,54 +644,14 @@ You should have received a copy of the GNU General Public License along with thi
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkHBox" id="settingsButtonsHbox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="spacing">5</property>
-            <child>
-              <object class="GtkButton" id="cancelButton">
-                <property name="label">gtk-cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_settings_hide" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="applyButton">
-                <property name="label">gtk-apply</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_action_appearance">False</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_save_settings" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>
     </child>
+    <action-widgets>
+      <action-widget response="0">cancelButton</action-widget>
+      <action-widget response="0">applyButton</action-widget>
+    </action-widgets>
   </object>
 </interface>

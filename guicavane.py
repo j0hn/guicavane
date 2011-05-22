@@ -137,7 +137,7 @@ class Guicavane:
 
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
-        self.settings_window = self.builder.get_object("settingsWindow")
+        self.settings_dialog = self.builder.get_object("settingsDialog")
         self.statusbar = self.builder.get_object("statusbar")
         self.name_filter = self.builder.get_object("nameFilter")
         self.name_list = self.builder.get_object("nameList")
@@ -524,10 +524,8 @@ class Guicavane:
 
         player_cmd.set_text(self.config.get_key("player_command"))
         cache_dir.set_text(self.config.get_key("cache_dir"))
-        self.settings_window.show_all()
-
-    def on_settings_hide(self, *args):
-        self.settings_window.hide()
+        self.settings_dialog.run()
+        self.settings_dialog.hide()
 
     def on_save_settings(self, *args):
         player_cmd = self.builder.get_object("playerCommandEntry").get_text()
@@ -536,7 +534,7 @@ class Guicavane:
         self.config.set_key("player_command", player_cmd)
         self.config.set_key("cache_dir", cache_dir)
         self.config.save()
-        self.on_hide_settings()
+        self.settings_dialog.hide()
 
 
 def append_item_to_store(store, item):
