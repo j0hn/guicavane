@@ -133,6 +133,8 @@ class Guicavane:
         # Config
         self.config = Config(config_file)
         self.cache_dir = self.config.get_key("cache_dir")
+        if self.cache_dir[-1] == os.sep:
+            self.cache_dir = self.cache_dir[:-1]
 
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
@@ -372,10 +374,10 @@ class Guicavane:
         link = self.pycavane.get_direct_links(episode, host="megaupload")
         link = link[1]
 
-        filename = self.cachedir + os.sep + link.rsplit('/', 1)[1]
+        filename = self.cache_dir + os.sep + link.rsplit('/', 1)[1]
         subtitle = self.pycavane.get_subtitle(episode, filename=filename)
 
-        megafile = MegaFile(link, self.cachedir)
+        megafile = MegaFile(link, self.cache_dir)
         megafile.start()
 
         self.waiting_time = 45
