@@ -513,6 +513,11 @@ class Guicavane:
 
         return False
 
+    def on_about_clicked(self, *args):
+        help_dialog = self.builder.get_object("aboutDialog")
+        help_dialog.run()
+        help_dialog.hide()
+
     def on_open_settings(self, button):
         player_cmd = self.builder.get_object("playerCommandEntry")
         cache_dir = self.builder.get_object("cacheDirEntry")
@@ -521,7 +526,7 @@ class Guicavane:
         cache_dir.set_text(self.config.get_key("cache_dir"))
         self.settings_window.show_all()
 
-    def on_hide_settings(self, *args):
+    def on_settings_hide(self, *args):
         self.settings_window.hide()
 
     def on_save_settings(self, *args):
