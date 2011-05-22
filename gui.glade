@@ -66,7 +66,7 @@ You should have received a copy of the GNU General Public License along with thi
     <property name="default_width">900</property>
     <property name="default_height">500</property>
     <property name="icon">images/logo.png</property>
-    <signal name="destroy" handler="on_destroy" swapped="no"/>
+    <signal name="destroy" handler="_on_destroy" swapped="no"/>
     <child>
       <object class="GtkVBox" id="mainVbox">
         <property name="visible">True</property>
@@ -94,7 +94,7 @@ You should have received a copy of the GNU General Public License along with thi
                         <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_open_settings" swapped="no"/>
+                        <signal name="activate" handler="_on_open_settings" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -105,7 +105,7 @@ You should have received a copy of the GNU General Public License along with thi
                         <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_destroy" swapped="no"/>
+                        <signal name="activate" handler="_on_destroy" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -131,7 +131,7 @@ You should have received a copy of the GNU General Public License along with thi
                         <property name="use_action_appearance">False</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
-                        <signal name="activate" handler="on_about_clicked" swapped="no"/>
+                        <signal name="activate" handler="_on_about_clicked" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -178,7 +178,7 @@ You should have received a copy of the GNU General Public License along with thi
                         <property name="can_focus">False</property>
                         <property name="model">modeListstore</property>
                         <property name="active">0</property>
-                        <signal name="changed" handler="on_mode_change" swapped="no"/>
+                        <signal name="changed" handler="_on_mode_change" swapped="no"/>
                         <child>
                           <object class="GtkCellRendererText" id="modeRendererText"/>
                           <attributes>
@@ -226,7 +226,7 @@ You should have received a copy of the GNU General Public License along with thi
                         <property name="secondary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">True</property>
                         <property name="secondary_icon_sensitive">True</property>
-                        <signal name="changed" handler="on_name_filter_change" swapped="no"/>
+                        <signal name="changed" handler="_on_name_filter_change" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -241,7 +241,7 @@ You should have received a copy of the GNU General Public License along with thi
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
                         <property name="relief">none</property>
-                        <signal name="clicked" handler="on_name_filter_clear_clicked" swapped="no"/>
+                        <signal name="clicked" handler="_on_name_filter_clear_clicked" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="nameFilterClearImage">
                             <property name="visible">True</property>
@@ -284,7 +284,7 @@ You should have received a copy of the GNU General Public License along with thi
                             <property name="headers_visible">False</property>
                             <property name="headers_clickable">False</property>
                             <property name="search_column">0</property>
-                            <signal name="cursor-changed" handler="on_name_change" swapped="no"/>
+                            <signal name="cursor-changed" handler="_on_name_change" swapped="no"/>
                             <child>
                               <object class="GtkTreeViewColumn" id="name">
                                 <property name="title">name</property>
@@ -344,7 +344,7 @@ You should have received a copy of the GNU General Public License along with thi
                         <property name="can_focus">False</property>
                         <property name="model">seassonListstore</property>
                         <property name="active">0</property>
-                        <signal name="changed" handler="on_seasson_change" swapped="no"/>
+                        <signal name="changed" handler="_on_seasson_change" swapped="no"/>
                         <child>
                           <object class="GtkCellRendererText" id="seassonRendererText"/>
                           <attributes>
@@ -381,7 +381,7 @@ You should have received a copy of the GNU General Public License along with thi
                         <property name="secondary_icon_activatable">False</property>
                         <property name="primary_icon_sensitive">True</property>
                         <property name="secondary_icon_sensitive">True</property>
-                        <signal name="changed" handler="on_file_filter_change" swapped="no"/>
+                        <signal name="changed" handler="_on_file_filter_change" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -396,7 +396,7 @@ You should have received a copy of the GNU General Public License along with thi
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
                         <property name="relief">none</property>
-                        <signal name="clicked" handler="on_file_filter_clear_clicked" swapped="no"/>
+                        <signal name="clicked" handler="_on_file_filter_clear_clicked" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="fileFilterClearImage">
                             <property name="visible">True</property>
@@ -432,7 +432,7 @@ You should have received a copy of the GNU General Public License along with thi
                         <property name="can_focus">True</property>
                         <property name="model">fileStore</property>
                         <property name="headers_visible">False</property>
-                        <signal name="row-activated" handler="on_open_file" swapped="no"/>
+                        <signal name="row-activated" handler="_on_open_file" swapped="no"/>
                         <child>
                           <object class="GtkTreeViewColumn" id="fileViewerColumn">
                             <property name="title" translatable="yes">column</property>
@@ -560,7 +560,7 @@ You should have received a copy of the GNU General Public License along with thi
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_save_settings" swapped="no"/>
+                <signal name="clicked" handler="_on_save_settings" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -596,7 +596,7 @@ You should have received a copy of the GNU General Public License along with thi
                 <property name="secondary_icon_activatable">False</property>
                 <property name="primary_icon_sensitive">True</property>
                 <property name="secondary_icon_sensitive">True</property>
-                <signal name="activate" handler="on_save_settings" swapped="no"/>
+                <signal name="activate" handler="_on_save_settings" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -628,7 +628,7 @@ You should have received a copy of the GNU General Public License along with thi
                 <property name="secondary_icon_activatable">False</property>
                 <property name="primary_icon_sensitive">True</property>
                 <property name="secondary_icon_sensitive">True</property>
-                <signal name="activate" handler="on_save_settings" swapped="no"/>
+                <signal name="activate" handler="_on_save_settings" swapped="no"/>
               </object>
               <packing>
                 <property name="left_attach">1</property>

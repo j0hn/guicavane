@@ -14,7 +14,6 @@ import glib
 import time
 import Queue
 import string
-import logging
 import threading
 
 import pycavane
@@ -120,6 +119,9 @@ class WarningDialog(gtk.MessageDialog):
 
 
 class Guicavane:
+    """
+    Main class, loads the gui and handles all events.
+    """
 
     def __init__(self, gui_file, config_file):
         """
@@ -140,9 +142,11 @@ class Guicavane:
         self.settings_dialog = self.builder.get_object("settingsDialog")
         self.statusbar = self.builder.get_object("statusbar")
         self.name_filter = self.builder.get_object("nameFilter")
+        self.name_filter_clear = self.builder.get_object("nameFilterClear")
         self.name_list = self.builder.get_object("nameList")
         self.name_model = self.name_list.get_model()
         self.file_filter = self.builder.get_object("fileFilter")
+        self.file_filter_clear = self.builder.get_object("fileFilterClear")
         self.file_viewer = self.builder.get_object("fileViewer")
         self.file_model = self.file_viewer.get_model()
         self.seassons_combo = self.builder.get_object("seassonCombo")
@@ -207,9 +211,11 @@ class Guicavane:
         self.mode_combo.set_sensitive(False)
         self.seassons_combo.set_sensitive(False)
         self.name_list.set_sensitive(False)
-        self.file_viewer.set_sensitive(False)
         self.name_filter.set_sensitive(False)
+        self.name_filter_clear.set_sensitive(False)
+        self.file_viewer.set_sensitive(False)
         self.file_filter.set_sensitive(False)
+        self.file_filter_clear.set_sensitive(False)
         self.seassons_combo.set_sensitive(False)
         self.set_status_message("Loading...")
 
@@ -222,9 +228,11 @@ class Guicavane:
         self.mode_combo.set_sensitive(True)
         self.seassons_combo.set_sensitive(True)
         self.name_list.set_sensitive(True)
-        self.file_viewer.set_sensitive(True)
         self.name_filter.set_sensitive(True)
+        self.name_filter_clear.set_sensitive(True)
+        self.file_viewer.set_sensitive(True)
         self.file_filter.set_sensitive(True)
+        self.file_filter_clear.set_sensitive(True)
         self.seassons_combo.set_sensitive(True)
 
         if not result[0]:
@@ -254,7 +262,7 @@ class Guicavane:
         context_id = self.statusbar.get_context_id("Messages")
         self.statusbar.push(context_id, message)
 
-    def on_destroy(self, widget):
+    def _on_destroy(self, *args):
         """
         Called when the window closes.
         """
@@ -265,7 +273,7 @@ class Guicavane:
         # We kill gtk
         gtk.main_quit()
 
-    def on_mode_change(self, combo):
+    def _on_mode_change(self, *args):
         """
         Called when the 'mode' combobox changes value.
         """
@@ -280,7 +288,7 @@ class Guicavane:
         getattr(self, "set_mode_%s" % mode)()
 
     @background_task
-    def on_seasson_change(self, combo):
+    def _on_seasson_change(self, *args):
         """
         Called when the 'seasson' combobox changes value.
         This will only be fired if the 'mode' combobox is setted to 'Shows'.
@@ -290,7 +298,7 @@ class Guicavane:
         if self.get_mode() != MODE_SHOWS:
             return
 
-        seasson = combobox_get_active_text(combo)
+        seasson = combobox_get_active_text(self.seassons_combo)
         show = self.get_selected_name()
 
         if not seasson:
@@ -305,10 +313,10 @@ class Guicavane:
         seasson = "Temporada " + seasson  # Hopfully temporary fix
         for episode in self.pycavane.episodes_by_season(show, seasson):
             episode_name = "%.2d - %s" % (int(episode[1]), episode[2])
-            append_item_to_store(self.file_model, (file_icon, episode_name))
+            self.file_model.append((file_icon, episode_name))
 
     @background_task
-    def on_name_change(self, treeview):
+    def _on_name_change(self, *args):
         """
         Called when the user selects a movie or a show from the 'name list'.
         """
@@ -322,7 +330,7 @@ class Guicavane:
             seassons = self.pycavane.seasson_by_show(selected_text)
             for i in seassons:
                 seasson_number = i[1].split("Temporada ")[1]
-                append_item_to_store(self.seassons_model, [seasson_number])
+                self.seassons_model.append([seasson_number])
 
         else:
             self.file_model.clear()
@@ -334,29 +342,29 @@ class Guicavane:
             letter = selected_text
 
             for movie in self.pycavane.get_movies(letter):
-                append_item_to_store(self.file_model, (file_icon, movie[1]))
+                self.file_model.append((file_icon, movie[1]))
 
-    def on_name_filter_change(self, entry):
+    def _on_name_filter_change(self, *args):
         """
         Called when the textbox to filter names changes.
         """
 
         self.name_model_filter.refilter()
 
-    def on_name_filter_clear_clicked(self, button):
+    def _on_name_filter_clear_clicked(self, *args):
         self.name_filter.set_text("")
 
-    def on_file_filter_change(self, entry):
+    def _on_file_filter_change(self, *args):
         """
         Called when the textbox to filter files changes.
         """
 
         self.file_model_filter.refilter()
 
-    def on_file_filter_clear_clicked(self, button):
+    def _on_file_filter_clear_clicked(self, *args):
         self.file_filter.set_text("")
 
-    def on_open_file(self, widget, path, *args):
+    def _on_open_file(self, widget, path, *args):
         """
         Called when the user double clicks on a file inside the file viewer.
         """
@@ -366,7 +374,7 @@ class Guicavane:
         if self.get_mode() == MODE_SHOWS:
             self.open_show(item_text)
         elif self.get_mode() == MODE_MOVIES:
-            self.open_movies(item_text)
+            self.open_movie(item_text)
 
     def open_show(self, episode_text):
         """
@@ -386,7 +394,7 @@ class Guicavane:
 
         self.download_file(episode_found)
 
-    def open_move(self, movie_text):
+    def open_movie(self, movie_text):
         """
         Starts the download of the given movie.
         """
@@ -413,7 +421,7 @@ class Guicavane:
 
         # Download the subtitle if it exists
         try:
-            subtitle = self.pycavane.get_subtitle(episode, filename=filename)
+            self.pycavane.get_subtitle(episode, filename=filename)
         except:
             self.set_status_message("Not subtitles found")
 
@@ -464,7 +472,7 @@ class Guicavane:
         shows = self.pycavane.get_shows()
         for show in shows:
             #self.name_model.append([show[1]])
-            append_item_to_store(self.name_model, (show[1],))
+            self.name_model.append((show[1],))
 
     def set_mode_movies(self):
         """
@@ -480,7 +488,7 @@ class Guicavane:
         self.name_model.clear()
 
         for letter in string.uppercase:
-            append_item_to_store(self.name_model, (letter,))
+            self.name_model.append([letter])
 
     def set_mode_favorites(self):
         """
@@ -512,15 +520,21 @@ class Guicavane:
         """
 
         selection = self.name_list.get_selection()
-        model, iter = selection.get_selected()
-        selected_text = model.get_value(iter, 0)
+        model, iteration = selection.get_selected()
+        selected_text = model.get_value(iteration, 0)
 
         return selected_text
 
-    def visible_func(self, model, iter, (entry, text_column)):
+    def visible_func(self, model, iteration, (entry, text_column)):
+        """
+        Filters the treeview based on the text found on `entry`.
+        text_column should be the column index where the text can be
+        found.
+        """
+
         filtered_text = entry.get_text()
 
-        row_text = model.get_value(iter, text_column)
+        row_text = model.get_value(iteration, text_column)
 
         if row_text:
             # Case insensitive search
@@ -531,12 +545,16 @@ class Guicavane:
 
         return False
 
-    def on_about_clicked(self, *args):
+    def _on_about_clicked(self, *args):
+        """
+        Opens the about dialog.
+        """
+
         help_dialog = self.builder.get_object("aboutDialog")
         help_dialog.run()
         help_dialog.hide()
 
-    def on_open_settings(self, button):
+    def _on_open_settings(self, *args):
         player_cmd = self.builder.get_object("playerCommandEntry")
         cache_dir = self.builder.get_object("cacheDirEntry")
 
@@ -545,7 +563,7 @@ class Guicavane:
         self.settings_dialog.run()
         self.settings_dialog.hide()
 
-    def on_save_settings(self, *args):
+    def _on_save_settings(self, *args):
         player_cmd = self.builder.get_object("playerCommandEntry").get_text()
         cache_dir = self.builder.get_object("cacheDirEntry").get_text()
 
@@ -553,11 +571,6 @@ class Guicavane:
         self.config.set_key("cache_dir", cache_dir)
         self.config.save()
         self.settings_dialog.hide()
-
-
-def append_item_to_store(store, item):
-    store.append(item)
-    return False
 
 
 def main():
@@ -571,7 +584,7 @@ def main():
 
     gui_file = "gui.glade"
     config_file = os.path.expanduser("~") + os.sep + ".guicavane.conf"
-    guicavane = Guicavane(gui_file, config_file)
+    Guicavane(gui_file, config_file)
     gtk.gdk.threads_init()
     gtk.main()
 
