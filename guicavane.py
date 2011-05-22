@@ -15,7 +15,7 @@ import glib
 import time
 import Queue
 import string
-import gobject
+import logging
 import threading
 
 import pycavane
@@ -107,7 +107,6 @@ class Guicavane:
         self.builder.add_from_file(guifile)
 
         self.cachedir = "/tmp"
-        self.pycavane = pycavane.Pycavane("guicavane", "guicavane")
 
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
@@ -143,6 +142,17 @@ class Guicavane:
 
         # Now we show the window
         self.main_window.show_all()
+
+        # Loading the API
+        try:
+            self.pycavane = pycavane.Pycavane("guicavane", "guicavane")
+        except Exception, error:
+            self.pycavane = pycavane.Pycavane()
+            if "Login fail" in error.message:
+                print "LOGIN FAIL"
+                # TODO: show warning dialog
+            else:
+                print "UNKNOWN ERROR: %s" % error
 
         # The default mode it's shows
         self.set_mode_shows()
@@ -255,11 +265,9 @@ class Guicavane:
             self.seassons_model.clear()
 
             seassons = self.pycavane.seasson_by_show(selected_text)
-            for i in range(1, len(seassons) + 1):
-                # Here we're assuming that the server has the
-                # seassons 1 to length(seassons) that could not be true. TODO
-                #self.seassons_model.append([i])
-                append_item_to_store(self.seassons_model, [i])
+            for i in seassons:
+                seasson_number = i[1].split("Temporada ")[1]
+                append_item_to_store(self.seassons_model, [seasson_number])
 
         else:
             self.file_model.clear()
@@ -293,7 +301,18 @@ class Guicavane:
         """
 
         item_text = self.file_model[path][1]
-        selected_episode = item_text.split(" - ", 1)[1]
+
+        if self.get_mode() == MODE_SHOWS:
+            self.open_show(item_text)
+        elif self.get_mode() == MODE_MOVIES:
+            self.open_movies(item_text)
+
+    def open_show(self, episode_text):
+        """
+        Starts the download of the given episode.
+        """
+
+        selected_episode = episode_text.split(" - ", 1)[1]
 
         seasson = combobox_get_active_text(self.seassons_combo)
         show = self.get_selected_name()
@@ -305,6 +324,13 @@ class Guicavane:
                 break
 
         self.download_file(episode_found)
+
+    def open_move(self, movie_text):
+        """
+        Starts the download of the given movie.
+        """
+
+        print "Open %s" % movie_text
 
     @background_task
     def download_file(self, episode):
@@ -376,7 +402,6 @@ class Guicavane:
         self.name_model.clear()
 
         for letter in string.uppercase:
-            #self.name_model.append([letter])
             append_item_to_store(self.name_model, (letter,))
 
     def get_mode(self):
@@ -417,6 +442,7 @@ class Guicavane:
             return filtered_text in row_text
 
         return False
+
 
 def append_item_to_store(store, item):
     store.append(item)
