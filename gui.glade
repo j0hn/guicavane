@@ -106,12 +106,6 @@ You should have received a copy of the GNU General Public License along with thi
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <signal name="activate" handler="on_destroy" swapped="no"/>
-                        <child type="submenu">
-                          <object class="GtkMenu" id="menu2">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                          </object>
-                        </child>
                       </object>
                     </child>
                   </object>

@@ -221,6 +221,7 @@ class Guicavane:
 
         if not result[0]:
             print "Error", result[1]
+            self.set_status_message("Error: %s" % result[1])
             # TODO: check why this locks the gui
             # ErrorDialog("An error has ocurred\nDetails: %s" % result[1])
 
@@ -265,6 +266,8 @@ class Guicavane:
         self.config.set_key("last_mode", mode)
         mode = mode.lower()
 
+        self.file_model.clear()
+
         # Call the corresponding set_mode method
         getattr(self, "set_mode_%s" % mode)()
 
@@ -287,8 +290,6 @@ class Guicavane:
 
         self.file_model.clear()
 
-        theme = gtk.icon_theme_get_default()
-        file_icon = theme.load_icon(gtk.STOCK_FILE, 48, 0)
         file_image = gtk.Image()
         file_image.set_from_file("images/video_file.png")
         file_icon = file_image.get_pixbuf()
@@ -296,7 +297,6 @@ class Guicavane:
         seasson = "Temporada " + seasson  # Hopfully temporary fix
         for episode in self.pycavane.episodes_by_season(show, seasson):
             episode_name = "%.2d - %s" % (int(episode[1]), episode[2])
-            #self.file_model.append([file_icon, episode_name])
             append_item_to_store(self.file_model, (file_icon, episode_name))
 
     @background_task
@@ -319,13 +319,13 @@ class Guicavane:
         else:
             self.file_model.clear()
 
-            theme = gtk.icon_theme_get_default()
-            file_icon = theme.load_icon(gtk.STOCK_FILE, 48, 0)
+            file_image = gtk.Image()
+            file_image.set_from_file("images/video_file.png")
+            file_icon = file_image.get_pixbuf()
 
             letter = selected_text
 
             for movie in self.pycavane.get_movies(letter):
-                #self.file_model.append([file_icon, movie[1]])
                 append_item_to_store(self.file_model, (file_icon, movie[1]))
 
     def on_name_filter_change(self, entry):
@@ -389,9 +389,13 @@ class Guicavane:
         self.file_viewer.set_sensitive(False)
 
         link = self.pycavane.get_direct_links(episode, host="megaupload")
-        link = link[1]
+        if link:
+            link = link[1]
+        else:
+            raise Exception("Not download source found")
 
-        filename = self.cache_dir + os.sep + link.rsplit('/', 1)[1]
+        cache_dir = self.config.get_key("cache_dir")
+        filename = cache_dir + os.sep + link.rsplit('/', 1)[1]
 
         # Download the subtitle if it exists
         try:
@@ -399,7 +403,7 @@ class Guicavane:
         except:
             self.set_status_message("Not subtitles found")
 
-        megafile = MegaFile(link, self.cache_dir)
+        megafile = MegaFile(link, cache_dir)
         megafile.start()
 
         self.waiting_time = 45
@@ -424,7 +428,7 @@ class Guicavane:
             return False
         else:
             loading_dots = "." * (3 - self.waiting_time % 4)
-            self.set_status_message("Waiting %d seconds%s" %
+            self.set_status_message("Please wait %d seconds%s" %
                                    (self.waiting_time, loading_dots))
             self.waiting_time -= 1
             return True
