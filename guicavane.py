@@ -19,6 +19,7 @@ import logging
 import threading
 
 import pycavane
+from config import Config
 from megaupload import MegaFile
 
 # Constants
@@ -93,20 +94,45 @@ class GtkThreadRunner(threading.Thread):
         return False
 
 
+class ErrorDialog(gtk.MessageDialog):
+    """
+    Simple error dialog.
+    """
+
+    def __init__(self, message, parent=None):
+        gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL,
+                                   gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, message)
+        self.run()
+        self.destroy()
+
+class WarningDialog(gtk.MessageDialog):
+    """
+    Simple warning dialog.
+    """
+
+    def __init__(self, message, parent=None):
+        gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL,
+                                   gtk.MESSAGE_WARNING, gtk.BUTTONS_OK, message)
+        self.run()
+        self.destroy()
+
+
 class Guicavane:
 
-    def __init__(self, guifile):
+    def __init__(self, gui_file, config_file):
         """
-        Creates the main window based on the glade file `guifile`.
+        Creates the main window based on the glade file `gui_file`.
         """
 
-        # Precondition: must have guifile
-        assert os.path.exists(guifile)
+        # Precondition: must have gui_file
+        assert os.path.exists(gui_file)
 
         self.builder = gtk.Builder()
-        self.builder.add_from_file(guifile)
+        self.builder.add_from_file(gui_file)
 
-        self.cachedir = "/tmp"
+        # Config
+        self.config = Config(config_file)
+        self.cache_dir = self.config.get_key("cache_dir")
 
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
@@ -178,7 +204,9 @@ class Guicavane:
         self.seassons_combo.set_sensitive(True)
 
         if not result[0]:
-            print "ERROR", result  # TODO: show error dialog
+            print "Error", result[1]
+            # TODO: check why this locks the gui
+            # ErrorDialog("An error has ocurred\nDetails: %s" % result[1])
 
     def background_task(func):
         """
@@ -358,7 +386,8 @@ class Guicavane:
         self.set_status_message("Now playing: %s" % episode[2])
         filename = megafile.cache_file
 
-        os.system("vlc %s" % filename)
+        player_command = self.config.get_key("player_command")
+        os.system(player_command % filename)
         megafile.released = True
 
     def on_open_settings(self, button):
@@ -458,8 +487,9 @@ def main():
         # Allow correctly opening from outside
         os.chdir(path)
 
-    guifile = "gui.glade"
-    guicavane = Guicavane(guifile)
+    gui_file = "gui.glade"
+    config_file = os.path.expanduser("~") + os.sep + ".guicavane.conf"
+    guicavane = Guicavane(gui_file, config_file)
     gtk.gdk.threads_init()
     gtk.main()
 
