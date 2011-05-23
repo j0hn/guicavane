@@ -294,10 +294,6 @@ class Guicavane:
         This will only be fired if the 'mode' combobox is setted to 'Shows'.
         """
 
-        # Precondition
-        if self.get_mode() != MODE_SHOWS:
-            return
-
         seasson = combobox_get_active_text(self.seassons_combo)
         show = self.get_selected_name()
 
@@ -324,7 +320,8 @@ class Guicavane:
         selected_text = self.get_selected_name()
 
         self.file_model.clear()
-        if self.get_mode() == MODE_SHOWS:
+        mode = self.get_mode()
+        if mode == MODE_SHOWS or mode == MODE_FAVORITES:
             self.seassons_model.clear()
 
             seassons = self.pycavane.seasson_by_show(selected_text)
@@ -352,7 +349,44 @@ class Guicavane:
         self.name_model_filter.refilter()
 
     def _on_name_filter_clear_clicked(self, *args):
+        """
+        Clears the name filter input.
+        """
+
         self.name_filter.set_text("")
+
+    def _on_name_button_press(self, view, event):
+        """
+        Called when the user press any mouse button on the name list.
+        """
+
+        if event.button == 3:
+
+            if self.get_mode() == MODE_FAVORITES:
+                popupMenu = self.builder.get_object("nameFavoritesMenu")
+            else:
+                popupMenu = self.builder.get_object("nameShowsMenu")
+
+            popupMenu.popup(None, None, None, event.button, event.time)
+
+    def _on_name_add_favorite(self, *args):
+        """
+        Adds the selected show from favorites.
+        """
+
+        selected = self.get_selected_name()
+        if selected not in self.config.get_key("favorites"):
+            self.config.append_key("favorites", selected)
+
+    def _on_name_remove_favorite(self, *args):
+        """
+        Removes the selected show from favorites.
+        """
+
+        selected = self.get_selected_name()
+        if selected in self.config.get_key("favorites"):
+            self.config.remove_key("favorites", selected)
+            self.set_mode_favorites()
 
     def _on_file_filter_change(self, *args):
         """
@@ -362,6 +396,10 @@ class Guicavane:
         self.file_model_filter.refilter()
 
     def _on_file_filter_clear_clicked(self, *args):
+        """
+        Clears the file filter input.
+        """
+
         self.file_filter.set_text("")
 
     def _on_open_file(self, widget, path, *args):
@@ -371,9 +409,10 @@ class Guicavane:
 
         item_text = self.file_model[path][1]
 
-        if self.get_mode() == MODE_SHOWS:
+        mode = self.get_mode()
+        if mode == MODE_SHOWS or mode == MODE_FAVORITES:
             self.open_show(item_text)
-        elif self.get_mode() == MODE_MOVIES:
+        elif mode == MODE_MOVIES:
             self.open_movie(item_text)
 
     def open_show(self, episode_text):
@@ -497,8 +536,9 @@ class Guicavane:
 
         # Set the combobox in case it isn't in the right mode
         self.mode_combo.set_active(MODES.index(MODE_FAVORITES))
-
         self.name_model.clear()
+        for favorite in self.config.get_key("favorites"):
+            self.name_model.append([favorite])
 
     def get_mode(self):
         """

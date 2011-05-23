@@ -12,7 +12,16 @@ import json
 
 DEFAULT_VALUES = {"player_command": "vlc %s",
                   "cache_dir": "/tmp",
-                  "last_mode": "Shows"}
+                  "last_mode": "Shows",
+                  "favorites": []}
+
+
+def get_default(key):
+    """
+    Returns the default value of the given key.
+    """
+
+    return DEFAULT_VALUES.get(key, None)
 
 
 class Config:
@@ -26,14 +35,17 @@ class Config:
         self.data = {}
 
         if not os.path.exists(self.config_file):
-            with open(self.config_file, "w") as f:
-                f.write(json.dumps(DEFAULT_VALUES) + "\n")
+            with open(self.config_file, "w") as filehandler:
+                filehandler.write(json.dumps(DEFAULT_VALUES) + "\n")
                 return
 
-        with open(self.config_file) as f:
-            data = f.read()
-            if data:
-                self.data = json.loads(data)
+        with open(self.config_file) as filehandler:
+            data = filehandler.read()
+            if data == [] or data:
+                try:
+                    self.data = json.loads(data)
+                except ValueError:
+                    self.data = DEFAULT_VALUES
 
     def get_key(self, key):
         """
@@ -42,7 +54,7 @@ class Config:
         if the key doesn't exists.
         """
 
-        return self.data.get(key, self.get_default(key))
+        return self.data.get(key, get_default(key))
 
     def set_key(self, key, value):
         """
@@ -50,6 +62,25 @@ class Config:
         """
 
         self.data[key] = value
+
+    def append_key(self, key, value):
+        """
+        If the key is a list, appends the value to the list.
+        """
+
+        assert type(self.data[key]) == list
+
+        self.data[key].append(value)
+
+    def remove_key(self, key, value):
+        """
+        If the key is a list, removes the value from it.
+        """
+
+        assert type(self.data[key]) == list
+        assert value in self.data[key]
+
+        self.data[key].remove(value)
 
     def save(self):
         """
@@ -59,14 +90,8 @@ class Config:
 
         for key in self.data:
             if not self.data[key]:
-                self.data[key] = self.get_default(key)
+                self.data[key] = get_default(key)
 
-        with open(self.config_file, "w") as f:
-            f.write(json.dumps(self.data) + "\n")
-
-    def get_default(self, key):
-        """
-        Returns the default value of the given key.
-        """
-
-        return DEFAULT_VALUES.get(key, None)
+        with open(self.config_file, "w") as filehandler:
+            filehandler.write(json.dumps(self.data,
+                                         sort_keys=True, indent=4) + "\n")

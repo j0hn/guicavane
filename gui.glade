@@ -11,7 +11,7 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="has_separator">True</property>
     <property name="program_name">Guicavane</property>
-    <property name="version">0.3</property>
+    <property name="version">0.4</property>
     <property name="copyright" translatable="yes">j0hn &lt;j0hn.com.ar@gmail.com&gt;</property>
     <property name="comments" translatable="yes">A Graphical User Interface for 
 the website www.cuevana.tv
@@ -58,6 +58,18 @@ You should have received a copy of the GNU General Public License along with thi
       <!-- column-name name -->
       <column type="gchararray"/>
     </columns>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-add</property>
+    <property name="icon-size">1</property>
+  </object>
+  <object class="GtkImage" id="image2">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-remove</property>
+    <property name="icon-size">1</property>
   </object>
   <object class="GtkWindow" id="mainWindow">
     <property name="can_focus">False</property>
@@ -284,7 +296,8 @@ You should have received a copy of the GNU General Public License along with thi
                             <property name="headers_visible">False</property>
                             <property name="headers_clickable">False</property>
                             <property name="search_column">0</property>
-                            <signal name="cursor-changed" handler="_on_name_change" swapped="no"/>
+                            <signal name="button-press-event" handler="_on_name_button_press" swapped="no"/>
+                            <signal name="row-activated" handler="_on_name_change" swapped="no"/>
                             <child>
                               <object class="GtkTreeViewColumn" id="name">
                                 <property name="title">name</property>
@@ -505,11 +518,43 @@ You should have received a copy of the GNU General Public License along with thi
       </row>
     </data>
   </object>
+  <object class="GtkMenu" id="nameFavoritesMenu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="removeFavoriteItem">
+        <property name="label" translatable="yes">Remove from favorites</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_action_appearance">False</property>
+        <property name="image">image2</property>
+        <property name="use_stock">False</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="_on_name_remove_favorite" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkListStore" id="nameListstore">
     <columns>
       <!-- column-name name -->
       <column type="gchararray"/>
     </columns>
+  </object>
+  <object class="GtkMenu" id="nameShowsMenu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="addfavoriteItem">
+        <property name="label" translatable="yes">Add to favorites</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_action_appearance">False</property>
+        <property name="image">image1</property>
+        <property name="use_stock">False</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="_on_name_add_favorite" swapped="no"/>
+      </object>
+    </child>
   </object>
   <object class="GtkListStore" id="seassonListstore">
     <columns>
