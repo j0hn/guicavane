@@ -149,8 +149,6 @@ class Guicavane:
         self.file_filter_clear = self.builder.get_object("fileFilterClear")
         self.file_viewer = self.builder.get_object("fileViewer")
         self.file_model = self.file_viewer.get_model()
-        self.seassons_combo = self.builder.get_object("seassonCombo")
-        self.seassons_model = self.seassons_combo.get_model()
         self.mode_combo = self.builder.get_object("modeCombo")
 
         # Creating a new filter model to allow the user filter the
@@ -209,14 +207,12 @@ class Guicavane:
         """
 
         self.mode_combo.set_sensitive(False)
-        self.seassons_combo.set_sensitive(False)
         self.name_list.set_sensitive(False)
         self.name_filter.set_sensitive(False)
         self.name_filter_clear.set_sensitive(False)
         self.file_viewer.set_sensitive(False)
         self.file_filter.set_sensitive(False)
         self.file_filter_clear.set_sensitive(False)
-        self.seassons_combo.set_sensitive(False)
         self.set_status_message("Loading...")
 
     def unfreeze_gui(self, result):
@@ -226,14 +222,12 @@ class Guicavane:
 
         self.set_status_message("")
         self.mode_combo.set_sensitive(True)
-        self.seassons_combo.set_sensitive(True)
         self.name_list.set_sensitive(True)
         self.name_filter.set_sensitive(True)
         self.name_filter_clear.set_sensitive(True)
         self.file_viewer.set_sensitive(True)
         self.file_filter.set_sensitive(True)
         self.file_filter_clear.set_sensitive(True)
-        self.seassons_combo.set_sensitive(True)
 
         if not result[0]:
             print "Error", result[1]
@@ -288,30 +282,6 @@ class Guicavane:
         getattr(self, "set_mode_%s" % mode)()
 
     @background_task
-    def _on_seasson_change(self, *args):
-        """
-        Called when the 'seasson' combobox changes value.
-        This will only be fired if the 'mode' combobox is setted to 'Shows'.
-        """
-
-        seasson = combobox_get_active_text(self.seassons_combo)
-        show = self.get_selected_name()
-
-        if not seasson:
-            return
-
-        self.file_model.clear()
-
-        file_image = gtk.Image()
-        file_image.set_from_file("images/video_file.png")
-        file_icon = file_image.get_pixbuf()
-
-        seasson = "Temporada " + seasson  # Hopfully temporary fix
-        for episode in self.pycavane.episodes_by_season(show, seasson):
-            episode_name = "%.2d - %s" % (int(episode[1]), episode[2])
-            self.file_model.append((file_icon, episode_name))
-
-    @background_task
     def _on_name_change(self, *args):
         """
         Called when the user selects a movie or a show from the 'name list'.
@@ -322,13 +292,7 @@ class Guicavane:
         self.file_model.clear()
         mode = self.get_mode()
         if mode == MODE_SHOWS or mode == MODE_FAVORITES:
-            self.seassons_model.clear()
-
-            seassons = self.pycavane.seasson_by_show(selected_text)
-            for i in seassons:
-                seasson_number = i[1].split("Temporada ")[1]
-                self.seassons_model.append([seasson_number])
-
+            pass
         else:
             self.file_model.clear()
 
@@ -422,16 +386,7 @@ class Guicavane:
 
         selected_episode = episode_text.split(" - ", 1)[1]
 
-        seasson = combobox_get_active_text(self.seassons_combo)
-        show = self.get_selected_name()
-
-        seasson = "Temporada " + seasson  # Hopfully temporary fix
-        for episode in self.pycavane.episodes_by_season(show, seasson):
-            if selected_episode == episode[2]:
-                episode_found = episode
-                break
-
-        self.download_file(episode_found)
+        #self.download_file(episode_found)
 
     def open_movie(self, movie_text):
         """
@@ -503,9 +458,6 @@ class Guicavane:
         # Set the combobox in case it isn't in the right mode
         self.mode_combo.set_active(MODES.index(MODE_SHOWS))
 
-        # We show the seasson combobox
-        self.seassons_combo.set_sensitive(True)
-
         self.name_model.clear()
 
         shows = self.pycavane.get_shows()
@@ -520,9 +472,6 @@ class Guicavane:
 
         # Set the combobox in case it isn't in the right mode
         self.mode_combo.set_active(MODES.index(MODE_MOVIES))
-
-        # We won't be needing the seasson combobox so we hide it
-        self.seassons_combo.set_sensitive(False)
 
         self.name_model.clear()
 
