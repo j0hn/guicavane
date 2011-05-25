@@ -4,7 +4,7 @@ import time
 from threading import Thread
 
 import shutil
-from util import UrlOpen
+from pycavane.util import UrlOpen
 
 
 megalink_re = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')
