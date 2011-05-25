@@ -128,11 +128,11 @@ class Guicavane:
         last_mode = self.config.get_key("last_mode")
         if last_mode not in MODES:
             last_mode = MODE_SHOWS
-        last_mode = last_mode.lower()
 
         # Set the combobox in the right mode
-        self.mode_combo.set_active(MODES.index(MODE_FAVORITES))
+        self.mode_combo.set_active(MODES.index(last_mode))
 
+        last_mode = last_mode.lower()
         getattr(self, "set_mode_%s" % last_mode)()
 
     def freeze(self):  # TODO: parameter to set the status message?
