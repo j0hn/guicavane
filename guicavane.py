@@ -12,12 +12,14 @@ import sys
 import gtk
 import time
 import string
+import gobject
 
 import pycavane
-from constants import *
 from config import Config
 from megaupload import MegaFile
 from threadrunner import GtkThreadRunner
+from constants import MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES, MODES, \
+                      ICON_FILE_MOVIE, ICON_FOLDER
 
 
 class ErrorDialog(gtk.MessageDialog):
@@ -80,12 +82,12 @@ class Guicavane:
         # Creating a new filter model to allow the user filter the
         # shows and movies by typing on an entry box
         self.name_model_filter = self.name_model.filter_new()
-        self.name_model_filter.set_visible_func(self.visible_func,
+        self.name_model_filter.set_visible_func(generic_visible_func,
                                                 (self.name_filter, 0))
         self.name_list.set_model(self.name_model_filter)
 
         self.file_model_filter = self.file_model.filter_new()
-        self.file_model_filter.set_visible_func(self.visible_func,
+        self.file_model_filter.set_visible_func(generic_visible_func,
                                                 (self.file_filter, 1))
         self.file_viewer.set_model(self.file_model_filter)
 
@@ -248,11 +250,11 @@ class Guicavane:
         if event.button == 3:
 
             if self.get_mode() == MODE_FAVORITES:
-                popupMenu = self.builder.get_object("nameFavoritesMenu")
+                popup_menu = self.builder.get_object("nameFavoritesMenu")
             else:
-                popupMenu = self.builder.get_object("nameShowsMenu")
+                popup_menu = self.builder.get_object("nameShowsMenu")
 
-            popupMenu.popup(None, None, None, event.button, event.time)
+            popup_menu.popup(None, None, None, event.button, event.time)
 
     def _on_name_add_favorite(self, *args):
         """
@@ -313,6 +315,10 @@ class Guicavane:
         help_dialog.hide()
 
     def _on_open_settings(self, *args):
+        """
+        Called when the user opens the preferences from the menu.
+        """
+
         player_cmd = self.builder.get_object("playerCommandEntry")
         cache_dir = self.builder.get_object("cacheDirEntry")
 
@@ -322,6 +328,10 @@ class Guicavane:
         self.settings_dialog.hide()
 
     def _on_save_settings(self, *args):
+        """
+        Saves the settings to the disk.
+        """
+
         player_cmd = self.builder.get_object("playerCommandEntry").get_text()
         cache_dir = self.builder.get_object("cacheDirEntry").get_text()
 
@@ -338,7 +348,7 @@ class Guicavane:
 
         self.file_model.clear()
 
-        for show_id, show_name in shows:
+        for _, show_name in shows:
             self.name_model.append([show_name])
 
     @unfreeze
@@ -349,7 +359,7 @@ class Guicavane:
 
         self.file_model.clear()
 
-        for seasson_id, seasson_name in seassons:
+        for _, seasson_name in seassons:
             self.file_model.append((ICON_FOLDER, seasson_name))
 
     @unfreeze
@@ -360,10 +370,9 @@ class Guicavane:
 
         self.file_model.clear()
 
-        for episode_id, episode_number, episode_name in episodes:
+        for _, episode_number, episode_name in episodes:
             episode_name = "%.2d - %s" % (int(episode_number), episode_name)
             self.file_model.append((ICON_FILE_MOVIE, episode_name))
-
 
     def open_seasson(self, seasson_text):
         """
@@ -385,7 +394,7 @@ class Guicavane:
         seasson = self.current_seasson
 
         for episode in self.pycavane.episodes_by_season(show, seasson):
-            if episode[2] == selected_episode :
+            if episode[2] == selected_episode:
                 episode_found = episode
                 break
 
@@ -423,7 +432,7 @@ class Guicavane:
         megafile.start()
 
         self.waiting_time = 45
-        glib.timeout_add_seconds(1, self.update_waiting_message)
+        gobject.timeout_add_seconds(1, self.update_waiting_message)
 
         time.sleep(45)  # Megaupload's 45
 
@@ -439,6 +448,10 @@ class Guicavane:
         megafile.released = True
 
     def update_waiting_message(self):
+        """
+        Updates the status bar with the remaining time of wait.
+        """
+
         if self.waiting_time == 0:
             del self.waiting_time
             return False
@@ -456,7 +469,6 @@ class Guicavane:
 
         self.name_model.clear()
         self.background_task(self.pycavane.get_shows, self.show_shows)
-
 
     def set_mode_movies(self):
         """
@@ -504,25 +516,26 @@ class Guicavane:
 
         return selected_text
 
-    def visible_func(self, model, iteration, (entry, text_column)):
-        """
-        Filters the treeview based on the text found on `entry`.
-        text_column should be the column index where the text can be
-        found.
-        """
 
-        filtered_text = entry.get_text()
+def generic_visible_func(model, iteration, (entry, text_column)):
+    """
+    Filters the treeview based on the text found on `entry`.
+    text_column should be the column index where the text can be
+    found.
+    """
 
-        row_text = model.get_value(iteration, text_column)
+    filtered_text = entry.get_text()
 
-        if row_text:
-            # Case insensitive search
-            filtered_text = filtered_text.lower()
-            row_text = row_text.lower()
+    row_text = model.get_value(iteration, text_column)
 
-            return filtered_text in row_text
+    if row_text:
+        # Case insensitive search
+        filtered_text = filtered_text.lower()
+        row_text = row_text.lower()
 
-        return False
+        return filtered_text in row_text
+
+    return False
 
 
 def main():
