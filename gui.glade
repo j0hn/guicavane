@@ -25,7 +25,8 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</property>
-    <property name="authors">j0hn &lt;j0hn.com.ar@gmail.com&gt; - Lead developer</property>
+    <property name="authors">j0hn &lt;j0hn.com.ar@gmail.com&gt; - Lead developer
+Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
     <property name="wrap_license">True</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
@@ -532,12 +533,6 @@ You should have received a copy of the GNU General Public License along with thi
       </row>
     </data>
   </object>
-  <object class="GtkListStore" id="nameListstore">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
   <object class="GtkMenu" id="nameFavoritesMenu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -553,6 +548,12 @@ You should have received a copy of the GNU General Public License along with thi
         <signal name="activate" handler="_on_name_remove_favorite" swapped="no"/>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="nameListstore">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+    </columns>
   </object>
   <object class="GtkMenu" id="nameShowsMenu">
     <property name="visible">True</property>
