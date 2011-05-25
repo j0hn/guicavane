@@ -16,7 +16,7 @@ class MegaFile(Thread):
     def __init__ (self, url, cachedir):
         Thread.__init__(self)
         self.url = url
-        self.filename = url.rsplit('/', 1)[1]
+        self.filename = url.rsplit('/', 1)[1][3:]
         self.cachedir = cachedir
         self.released = False
         self.running = True
@@ -30,7 +30,7 @@ class MegaFile(Thread):
 
     @property
     def cache_file(self):
-        filename = self.cachedir+'/'+self.filename
+        filename = self.cachedir + os.sep + self.filename
         if os.path.exists(filename+'.mp4'):
             return filename+'.mp4'
         return filename

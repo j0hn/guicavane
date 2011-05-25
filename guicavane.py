@@ -22,30 +22,6 @@ from constants import MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES, MODES, \
                       ICON_FILE_MOVIE, ICON_FOLDER
 
 
-class ErrorDialog(gtk.MessageDialog):
-    """
-    Simple error dialog.
-    """
-
-    def __init__(self, message, parent=None):
-        gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL,
-                                   gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, message)
-        self.run()
-        self.destroy()
-
-
-class WarningDialog(gtk.MessageDialog):
-    """
-    Simple warning dialog.
-    """
-
-    def __init__(self, message, parent=None):
-        gtk.MessageDialog.__init__(self, parent, gtk.DIALOG_MODAL,
-                                  gtk.MESSAGE_WARNING, gtk.BUTTONS_OK, message)
-        self.run()
-        self.destroy()
-
-
 class Guicavane:
     """
     Main class, loads the gui and handles all events.
@@ -59,11 +35,17 @@ class Guicavane:
         # Precondition: must have gui_file
         assert os.path.exists(gui_file)
 
+        # Gtk builder
         self.builder = gtk.Builder()
         self.builder.add_from_file(gui_file)
 
+
         # Config
         self.config = Config(config_file)
+
+        # Attributes
+        self.current_seasson = None
+        self.waiting_time = 45
 
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
@@ -103,7 +85,6 @@ class Guicavane:
             self.pycavane = pycavane.Pycavane()
             if "Login fail" in error.message:
                 print "LOGIN FAIL"
-                # TODO: show warning dialog
             else:
                 print "UNKNOWN ERROR: %s" % error
 
@@ -127,7 +108,7 @@ class Guicavane:
         last_mode = last_mode.lower()
         getattr(self, "set_mode_%s" % last_mode)()
 
-    def freeze(self):  # TODO: parameter to set the status message?
+    def freeze(self, status_message="Loading..."):
         """
         Freezes the gui so the user can't interact with it.
         """
@@ -139,7 +120,7 @@ class Guicavane:
         self.file_viewer.set_sensitive(False)
         self.search_entry.set_sensitive(False)
         self.search_clear.set_sensitive(False)
-        self.set_status_message("Loading...")
+        self.set_status_message(status_message)
 
     def unfreeze(func):
         """
@@ -148,6 +129,10 @@ class Guicavane:
         """
 
         def decorate(self, *args, **kwargs):
+            """
+            Decorated function.
+            """
+
             args = [self] + list(args)  # func is a method so it needs self
             func(*args, **kwargs)
 
@@ -168,7 +153,12 @@ class Guicavane:
         over calls callback with the result.
         """
 
-        self.freeze()
+        status_message = "Loading..."
+        if "status_message" in kwargs:
+            status_message = kwargs["status_message"]
+            del kwargs["status_message"]
+
+        self.freeze(status_message)
         GtkThreadRunner(callback, func, *args, **kwargs)
 
     def set_status_message(self, message):
@@ -216,9 +206,11 @@ class Guicavane:
 
         if mode == MODE_SHOWS or mode == MODE_FAVORITES:
             self.background_task(self.pycavane.seasson_by_show,
-                                 self.show_seassons, selected_text)
+                           self.show_seassons, selected_text,
+                           status_message="Loading show %s..." % selected_text)
         else:
-            pass  # TODO: movies
+            self.background_task(self.pycavane.get_movies,
+                                 self.show_movies, selected_text)
 
     def _on_name_filter_change(self, *args):
         """
@@ -291,7 +283,7 @@ class Guicavane:
         Called when the user click on the download context menu item.
         """
 
-        print "download"
+        print "download", get_selected_text(self.file_viewer)
 
     def _on_search_clear_clicked(self, *args):
         """
@@ -385,6 +377,18 @@ class Guicavane:
             episode_name = "%.2d - %s" % (int(episode_number), episode_name)
             self.file_model.append((ICON_FILE_MOVIE, episode_name))
 
+    @unfreeze
+    def show_movies(self, movies):
+        """
+        Fills the file viewer with the movies.
+        """
+
+        self.file_model.clear()
+
+        for movie in movies:
+            movie_name = movie[1]
+            self.file_model.append((ICON_FILE_MOVIE, movie_name))
+
     def open_seasson(self, seasson_text):
         """
         Fills the file viewer with the episodes from the seasson.
@@ -434,6 +438,7 @@ class Guicavane:
         the file and starts the player.
         """
 
+
         link = self.pycavane.get_direct_links(episode, host="megaupload")
         if link:
             link = link[1]
@@ -441,7 +446,8 @@ class Guicavane:
             raise Exception("Not download source found")
 
         cache_dir = self.config.get_key("cache_dir")
-        filename = cache_dir + os.sep + link.rsplit('/', 1)[1]
+        megafile = MegaFile(link, cache_dir)
+        filename = megafile.cache_file
 
         # Download the subtitle if it exists
         try:
@@ -450,7 +456,6 @@ class Guicavane:
         except:
             self.set_status_message("Not subtitles found")
 
-        megafile = MegaFile(link, cache_dir)
         megafile.start()
 
         self.waiting_time = 45
@@ -458,10 +463,9 @@ class Guicavane:
 
         time.sleep(45)  # Megaupload's 45
 
-        filename = megafile.cache_file
         file_exists = False
         while not file_exists:  # Wait untile the file exists
-            self.set_status_message("A phew seconds left...")
+            self.set_status_message("A few seconds left...")
             file_exists = os.path.exists(filename)
             time.sleep(2)
 
@@ -491,7 +495,8 @@ class Guicavane:
         """
 
         self.name_model.clear()
-        self.background_task(self.pycavane.get_shows, self.show_shows)
+        self.background_task(self.pycavane.get_shows, self.show_shows,
+                             status_message="Obtaining shows list")
 
     def set_mode_movies(self):
         """
@@ -570,7 +575,12 @@ def main():
     gui_file = "gui.glade"
     config_file = os.path.expanduser("~") + os.sep + ".guicavane.conf"
     Guicavane(gui_file, config_file)
-    gtk.gdk.threads_init()
+
+    if sys.platform == 'win32':
+        gobject.threads_init()
+    else:
+        gtk.gdk.threads_init()
+
     gtk.main()
 
 if __name__ == "__main__":
