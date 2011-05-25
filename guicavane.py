@@ -398,7 +398,17 @@ class Guicavane:
                 episode_found = episode
                 break
 
-        self.background_task(self.download_file, lambda x: x, episode_found)
+        self.background_task(self.download_file,
+                             self.close_show, episode_found)
+
+    @unfreeze
+    def close_show(self, *args):
+        """
+        Called when the user closes the player.
+        """
+
+        # Nothing to do yet
+        pass
 
     def open_movie(self, movie_text):
         """
@@ -424,6 +434,7 @@ class Guicavane:
 
         # Download the subtitle if it exists
         try:
+            self.set_status_message("Downloading subtitles...")
             self.pycavane.get_subtitle(episode, filename=filename)
         except:
             self.set_status_message("Not subtitles found")
@@ -439,8 +450,9 @@ class Guicavane:
         filename = megafile.cache_file
         file_exists = False
         while not file_exists:  # Wait untile the file exists
+            self.set_status_message("A phew seconds left...")
             file_exists = os.path.exists(filename)
-            time.sleep(5)
+            time.sleep(2)
 
         self.set_status_message("Now playing: %s" % episode[2])
         player_command = self.config.get_key("player_command")
