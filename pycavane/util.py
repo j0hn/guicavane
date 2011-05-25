@@ -1,13 +1,22 @@
+#!/usr/bin/env python
+# coding: utf-8
+
 import time
 import urllib
 import urllib2
 import cookielib
 import functools
 
+HEADERS = {'User-Agent': 'Mozilla/5.0 (X11; U; Linux x86_64; en-US; '\
+           'rv:1.9.2.10) Gecko/20100928 Firefox/3.6.1'}
+RETRY_TIMES = 5
+
 
 class Singleton(object):
-    '''Not really singleton but close
-    taken from dx https://github.com/dequis/derpbot/blob/master/util.py'''
+    """
+    Not really singleton but close taken from dx
+    https://github.com/dequis/derpbot/blob/master/util.py
+    """
     instance = None
 
     def __init__(self):
@@ -20,16 +29,15 @@ class Singleton(object):
         return cls.instance or cls()
 
 
-headers = {'User-Agent': 'Mozilla/5.0 (X11; U; Linux x86_64; en-US; '\
-                           'rv:1.9.2.10) Gecko/20100928 Firefox/3.6.1'}
-
 def retry(callback):
-    ''' Retry decorator '''
+    """
+    Retry decorator.
+    """
 
     @functools.wraps(callback)
     def deco(*args, **kwargs):
         tried = 0
-        while tried < 10:
+        while tried < RETRY_TIMES:
             try:
                 return callback(*args, **kwargs)
             except Exception, error:
@@ -37,21 +45,24 @@ def retry(callback):
                 time.sleep(1)
         error = 'Can\'t download\nerror: "%s"\n args: %s' % \
                             (error, str(args) + str(kwargs))
-        raise Exception, error
+        raise Exception(error)
     return deco
 
 
 class UrlOpen(object):
-    ''' An url opener with cookies support '''
+    """
+    An url opener with cookies support.
+    """
+
     def __init__(self):
         self.setup_cookies()
 
     @retry
     def __call__(self, url, data=None, filename=None, handle=False):
         if data:
-            request = urllib2.Request(url, urllib.urlencode(data), headers)
+            request = urllib2.Request(url, urllib.urlencode(data), HEADERS)
         else:
-            request = urllib2.Request(url, headers=headers)
+            request = urllib2.Request(url, headers=HEADERS)
 
         rc = self.opener.open(request)
 
@@ -82,7 +93,10 @@ class UrlOpen(object):
         return ret
 
     def setup_cookies(self):
-        ''' Setup cookies in urllib2 '''
+        """
+        Setup cookies in urllib2.
+        """
+
         jar = cookielib.CookieJar()
         handler = urllib2.HTTPCookieProcessor(jar)
         self.opener = urllib2.build_opener(handler)
