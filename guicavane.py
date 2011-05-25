@@ -10,88 +10,14 @@ Author: Gonzalo Garcia (A.K.A j0hn) <j0hn.com.ar@gmail.com>
 import os
 import sys
 import gtk
-import glib
 import time
-import Queue
 import string
-import threading
 
 import pycavane
+from constants import *
 from config import Config
 from megaupload import MegaFile
-
-# Constants
-MODE_SHOWS = "Shows"
-MODE_MOVIES = "Movies"
-MODE_FAVORITES = "Favorites"
-MODES = [MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES]
-# NOTE: MODES must be in the same order as they appear in the combobox
-
-
-# Just a useful function
-def combobox_get_active_text(combobox):
-    """
-    Returns the text of the active item of a gtk combobox.
-    """
-
-    model = combobox.get_model()
-    active = combobox.get_active()
-
-    if active < 0:
-        return None
-
-    return model[active][0]
-
-
-class GtkThreadRunner(threading.Thread):
-    """
-    Run *func* in a thread with *args* and *kwargs* as arguments, when
-    finished call callback with a two item tuple containing a boolean as first
-    item informing if the function returned correctly and the returned value or
-    the exception thrown as second item
-    """
-
-    def __init__(self, callback, func, *args, **kwargs):
-        threading.Thread.__init__(self)
-        self.setDaemon(True)
-
-        self.callback = callback
-        self.func = func
-        self.args = args
-        self.kwargs = kwargs
-
-        self.result = Queue.Queue()
-
-        self.start()
-        glib.timeout_add(500, self.check)
-
-    def run(self):
-        """
-        Main function of the thread, run func with args and kwargs
-        and get the result, call callback with the (True, result)
-
-        if an exception is thrown call callback with (False, exception)
-        """
-
-        try:
-            result = (True, self.func(*self.args, **self.kwargs))
-        except Exception, ex:
-            result = (False, ex)
-
-        self.result.put(result)
-
-    def check(self):
-        """
-        Check if func finished.
-        """
-
-        try:
-            result = self.result.get(False, 0.1)
-        except Queue.Empty:
-            return True
-
-        self.callback(result)
-        return False
+from threadrunner import GtkThreadRunner
 
 
 class ErrorDialog(gtk.MessageDialog):
@@ -194,14 +120,20 @@ class Guicavane:
         Sets the default things.
         """
 
+        self.current_seasson = None
+
         # Get and set the last used mode
         last_mode = self.config.get_key("last_mode")
         if last_mode not in MODES:
             last_mode = MODE_SHOWS
         last_mode = last_mode.lower()
+
+        # Set the combobox in the right mode
+        self.mode_combo.set_active(MODES.index(MODE_FAVORITES))
+
         getattr(self, "set_mode_%s" % last_mode)()
 
-    def freeze_gui(self):
+    def freeze(self):  # TODO: parameter to set the status message?
         """
         Freezes the gui so the user can't interact with it.
         """
@@ -215,38 +147,35 @@ class Guicavane:
         self.file_filter_clear.set_sensitive(False)
         self.set_status_message("Loading...")
 
-    def unfreeze_gui(self, result):
+    def unfreeze(func):
         """
-        Free the gui so the user can interact with it.
-        """
-
-        self.set_status_message("")
-        self.mode_combo.set_sensitive(True)
-        self.name_list.set_sensitive(True)
-        self.name_filter.set_sensitive(True)
-        self.name_filter_clear.set_sensitive(True)
-        self.file_viewer.set_sensitive(True)
-        self.file_filter.set_sensitive(True)
-        self.file_filter_clear.set_sensitive(True)
-
-        if not result[0]:
-            print "Error", result[1]
-            self.set_status_message("Error: %s" % result[1])
-            # TODO: check why this locks the gui
-            # ErrorDialog("An error has ocurred\nDetails: %s" % result[1])
-
-    def background_task(func):
-        """
-        Decorator to start a function in background and not
-        block the interface.
+        Decorator that calls the decorated function and then unfreezes
+        the gui so the user can interact with it.
         """
 
         def decorate(self, *args, **kwargs):
-            self.freeze_gui()
-            GtkThreadRunner(self.unfreeze_gui, func,
-                            *([self] + list(args)), **kwargs)
+            args = [self] + list(args)  # func is a method so it needs self
+            func(*args, **kwargs)
+
+            self.set_status_message("")
+            self.mode_combo.set_sensitive(True)
+            self.name_list.set_sensitive(True)
+            self.name_filter.set_sensitive(True)
+            self.name_filter_clear.set_sensitive(True)
+            self.file_viewer.set_sensitive(True)
+            self.file_filter.set_sensitive(True)
+            self.file_filter_clear.set_sensitive(True)
 
         return decorate
+
+    def background_task(self, func, callback, *args, **kwargs):
+        """
+        Freezes the gui, starts a thread with func and when it's
+        over calls callback with the result.
+        """
+
+        self.freeze()
+        GtkThreadRunner(callback, func, *args, **kwargs)
 
     def set_status_message(self, message):
         """
@@ -281,7 +210,6 @@ class Guicavane:
         # Call the corresponding set_mode method
         getattr(self, "set_mode_%s" % mode)()
 
-    @background_task
     def _on_name_change(self, *args):
         """
         Called when the user selects a movie or a show from the 'name list'.
@@ -291,19 +219,12 @@ class Guicavane:
 
         self.file_model.clear()
         mode = self.get_mode()
+
         if mode == MODE_SHOWS or mode == MODE_FAVORITES:
-            pass
+            self.background_task(self.pycavane.seasson_by_show,
+                                 self.show_seassons, selected_text)
         else:
-            self.file_model.clear()
-
-            file_image = gtk.Image()
-            file_image.set_from_file("images/video_file.png")
-            file_icon = file_image.get_pixbuf()
-
-            letter = selected_text
-
-            for movie in self.pycavane.get_movies(letter):
-                self.file_model.append((file_icon, movie[1]))
+            pass  # TODO: movies
 
     def _on_name_filter_change(self, *args):
         """
@@ -371,13 +292,88 @@ class Guicavane:
         Called when the user double clicks on a file inside the file viewer.
         """
 
-        item_text = self.file_model[path][1]
+        selected_text = self.file_model[path][1]
 
         mode = self.get_mode()
         if mode == MODE_SHOWS or mode == MODE_FAVORITES:
-            self.open_show(item_text)
+            if selected_text.startswith("Temporada"):
+                self.open_seasson(selected_text)
+            else:
+                self.open_show(selected_text)
         elif mode == MODE_MOVIES:
-            self.open_movie(item_text)
+            self.open_movie(selected_text)
+
+    def _on_about_clicked(self, *args):
+        """
+        Opens the about dialog.
+        """
+
+        help_dialog = self.builder.get_object("aboutDialog")
+        help_dialog.run()
+        help_dialog.hide()
+
+    def _on_open_settings(self, *args):
+        player_cmd = self.builder.get_object("playerCommandEntry")
+        cache_dir = self.builder.get_object("cacheDirEntry")
+
+        player_cmd.set_text(self.config.get_key("player_command"))
+        cache_dir.set_text(self.config.get_key("cache_dir"))
+        self.settings_dialog.run()
+        self.settings_dialog.hide()
+
+    def _on_save_settings(self, *args):
+        player_cmd = self.builder.get_object("playerCommandEntry").get_text()
+        cache_dir = self.builder.get_object("cacheDirEntry").get_text()
+
+        self.config.set_key("player_command", player_cmd)
+        self.config.set_key("cache_dir", cache_dir)
+        self.config.save()
+        self.settings_dialog.hide()
+
+    @unfreeze
+    def show_shows(self, shows):
+        """
+        Adds all the shows to the list.
+        """
+
+        self.file_model.clear()
+
+        for show_id, show_name in shows:
+            self.name_model.append([show_name])
+
+    @unfreeze
+    def show_seassons(self, seassons):
+        """
+        Fills the file viewer with the seassons.
+        """
+
+        self.file_model.clear()
+
+        for seasson_id, seasson_name in seassons:
+            self.file_model.append((ICON_FOLDER, seasson_name))
+
+    @unfreeze
+    def show_episodes(self, episodes):
+        """
+        Fills the file viewer with the episodes.
+        """
+
+        self.file_model.clear()
+
+        for episode_id, episode_number, episode_name in episodes:
+            episode_name = "%.2d - %s" % (int(episode_number), episode_name)
+            self.file_model.append((ICON_FILE_MOVIE, episode_name))
+
+
+    def open_seasson(self, seasson_text):
+        """
+        Fills the file viewer with the episodes from the seasson.
+        """
+
+        show = self.get_selected_name()
+        self.current_seasson = seasson_text
+        self.background_task(self.pycavane.episodes_by_season,
+                        self.show_episodes, show, seasson_text)
 
     def open_show(self, episode_text):
         """
@@ -385,8 +381,15 @@ class Guicavane:
         """
 
         selected_episode = episode_text.split(" - ", 1)[1]
+        show = self.get_selected_name()
+        seasson = self.current_seasson
 
-        #self.download_file(episode_found)
+        for episode in self.pycavane.episodes_by_season(show, seasson):
+            if episode[2] == selected_episode :
+                episode_found = episode
+                break
+
+        self.background_task(self.download_file, lambda x: x, episode_found)
 
     def open_movie(self, movie_text):
         """
@@ -395,14 +398,11 @@ class Guicavane:
 
         print "Open %s" % movie_text
 
-    @background_task
     def download_file(self, episode):
         """
         Given an episode, downloads the subtitles then starts downloading
         the file and starts the player.
         """
-
-        self.file_viewer.set_sensitive(False)
 
         link = self.pycavane.get_direct_links(episode, host="megaupload")
         if link:
@@ -449,29 +449,19 @@ class Guicavane:
             self.waiting_time -= 1
             return True
 
-    @background_task
     def set_mode_shows(self, *args):
         """
         Sets the current mode to shows.
         """
 
-        # Set the combobox in case it isn't in the right mode
-        self.mode_combo.set_active(MODES.index(MODE_SHOWS))
-
         self.name_model.clear()
+        self.background_task(self.pycavane.get_shows, self.show_shows)
 
-        shows = self.pycavane.get_shows()
-        for show in shows:
-            #self.name_model.append([show[1]])
-            self.name_model.append((show[1],))
 
     def set_mode_movies(self):
         """
         Sets the current mode to movies.
         """
-
-        # Set the combobox in case it isn't in the right mode
-        self.mode_combo.set_active(MODES.index(MODE_MOVIES))
 
         self.name_model.clear()
 
@@ -483,8 +473,6 @@ class Guicavane:
         Sets the current mode to favorites.
         """
 
-        # Set the combobox in case it isn't in the right mode
-        self.mode_combo.set_active(MODES.index(MODE_FAVORITES))
         self.name_model.clear()
         for favorite in self.config.get_key("favorites"):
             self.name_model.append([favorite])
@@ -496,7 +484,9 @@ class Guicavane:
         The result will be the constant MODE_* (see constants definitions).
         """
 
-        mode_text = combobox_get_active_text(self.mode_combo)
+        model = self.mode_combo.get_model()
+        active = self.mode_combo.get_active()
+        mode_text = model[active][0]
 
         # Poscondition
         assert mode_text in MODES
@@ -533,33 +523,6 @@ class Guicavane:
             return filtered_text in row_text
 
         return False
-
-    def _on_about_clicked(self, *args):
-        """
-        Opens the about dialog.
-        """
-
-        help_dialog = self.builder.get_object("aboutDialog")
-        help_dialog.run()
-        help_dialog.hide()
-
-    def _on_open_settings(self, *args):
-        player_cmd = self.builder.get_object("playerCommandEntry")
-        cache_dir = self.builder.get_object("cacheDirEntry")
-
-        player_cmd.set_text(self.config.get_key("player_command"))
-        cache_dir.set_text(self.config.get_key("cache_dir"))
-        self.settings_dialog.run()
-        self.settings_dialog.hide()
-
-    def _on_save_settings(self, *args):
-        player_cmd = self.builder.get_object("playerCommandEntry").get_text()
-        cache_dir = self.builder.get_object("cacheDirEntry").get_text()
-
-        self.config.set_key("player_command", player_cmd)
-        self.config.set_key("cache_dir", cache_dir)
-        self.config.save()
-        self.settings_dialog.hide()
 
 
 def main():
