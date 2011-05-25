@@ -73,11 +73,11 @@ class Guicavane:
         self.name_filter_clear = self.builder.get_object("nameFilterClear")
         self.name_list = self.builder.get_object("nameList")
         self.name_model = self.name_list.get_model()
-        self.file_filter = self.builder.get_object("fileFilter")
-        self.file_filter_clear = self.builder.get_object("fileFilterClear")
         self.file_viewer = self.builder.get_object("fileViewer")
         self.file_model = self.file_viewer.get_model()
         self.mode_combo = self.builder.get_object("modeCombo")
+        self.search_entry = self.builder.get_object("searchEntry")
+        self.search_clear = self.builder.get_object("searchClear")
 
         # Creating a new filter model to allow the user filter the
         # shows and movies by typing on an entry box
@@ -86,16 +86,8 @@ class Guicavane:
                                                 (self.name_filter, 0))
         self.name_list.set_model(self.name_model_filter)
 
-        self.file_model_filter = self.file_model.filter_new()
-        self.file_model_filter.set_visible_func(generic_visible_func,
-                                                (self.file_filter, 1))
-        self.file_viewer.set_model(self.file_model_filter)
-
         # We leave the magic connection to glade
         self.builder.connect_signals(self)
-
-        # Focusing on the name filter
-        self.name_filter.grab_focus()  # TODO: not working
 
         # Now we show the window
         self.main_window.show_all()
@@ -145,8 +137,8 @@ class Guicavane:
         self.name_filter.set_sensitive(False)
         self.name_filter_clear.set_sensitive(False)
         self.file_viewer.set_sensitive(False)
-        self.file_filter.set_sensitive(False)
-        self.file_filter_clear.set_sensitive(False)
+        self.search_entry.set_sensitive(False)
+        self.search_clear.set_sensitive(False)
         self.set_status_message("Loading...")
 
     def unfreeze(func):
@@ -165,8 +157,8 @@ class Guicavane:
             self.name_filter.set_sensitive(True)
             self.name_filter_clear.set_sensitive(True)
             self.file_viewer.set_sensitive(True)
-            self.file_filter.set_sensitive(True)
-            self.file_filter_clear.set_sensitive(True)
+            self.search_entry.set_sensitive(True)
+            self.search_clear.set_sensitive(True)
 
         return decorate
 
@@ -217,7 +209,7 @@ class Guicavane:
         Called when the user selects a movie or a show from the 'name list'.
         """
 
-        selected_text = self.get_selected_name()
+        selected_text = get_selected_text(self.name_list)
 
         self.file_model.clear()
         mode = self.get_mode()
@@ -247,8 +239,7 @@ class Guicavane:
         Called when the user press any mouse button on the name list.
         """
 
-        if event.button == 3:
-
+        if event.button == 3:  # 3 it's right click
             if self.get_mode() == MODE_FAVORITES:
                 popup_menu = self.builder.get_object("nameFavoritesMenu")
             else:
@@ -261,7 +252,7 @@ class Guicavane:
         Adds the selected show from favorites.
         """
 
-        selected = self.get_selected_name()
+        selected = get_selected_text(self.name_list)
         if selected not in self.config.get_key("favorites"):
             self.config.append_key("favorites", selected)
 
@@ -270,24 +261,44 @@ class Guicavane:
         Removes the selected show from favorites.
         """
 
-        selected = self.get_selected_name()
+        selected = get_selected_text(self.name_list)
         if selected in self.config.get_key("favorites"):
             self.config.remove_key("favorites", selected)
             self.set_mode_favorites()
 
-    def _on_file_filter_change(self, *args):
+    def _on_file_button_press(self, view, event):
         """
-        Called when the textbox to filter files changes.
-        """
-
-        self.file_model_filter.refilter()
-
-    def _on_file_filter_clear_clicked(self, *args):
-        """
-        Clears the file filter input.
+        Called when the user press any mouse button on the file viewer.
         """
 
-        self.file_filter.set_text("")
+        if event.button == 3:
+            popup_menu = self.builder.get_object("fileViewerMenu")
+
+            selected_text = get_selected_text(self.file_viewer, 1)
+            if not selected_text.startswith("Temporada"):
+                popup_menu.popup(None, None, None, event.button, event.time)
+
+    def _on_play_clicked(self, *args):
+        """
+        Called when the user click on the play context menu item.
+        """
+
+        episode_text = get_selected_text(self.file_viewer, 1)
+        self.open_show(episode_text)
+
+    def _on_download_clicked(self, *args):
+        """
+        Called when the user click on the download context menu item.
+        """
+
+        print "download"
+
+    def _on_search_clear_clicked(self, *args):
+        """
+        Clears the search input.
+        """
+
+        self.search_entry.set_text("")
 
     def _on_open_file(self, widget, path, *args):
         """
@@ -379,7 +390,7 @@ class Guicavane:
         Fills the file viewer with the episodes from the seasson.
         """
 
-        show = self.get_selected_name()
+        show = get_selected_text(self.name_list)
         self.current_seasson = seasson_text
         self.background_task(self.pycavane.episodes_by_season,
                         self.show_episodes, show, seasson_text)
@@ -390,7 +401,7 @@ class Guicavane:
         """
 
         selected_episode = episode_text.split(" - ", 1)[1]
-        show = self.get_selected_name()
+        show = get_selected_text(self.name_list)
         seasson = self.current_seasson
 
         for episode in self.pycavane.episodes_by_season(show, seasson):
@@ -517,16 +528,17 @@ class Guicavane:
 
         return mode_text
 
-    def get_selected_name(self):
-        """
-        Returns the string of the selected item on the 'name list'.
-        """
 
-        selection = self.name_list.get_selection()
-        model, iteration = selection.get_selected()
-        selected_text = model.get_value(iteration, 0)
+def get_selected_text(view, text_column=0):
+    """
+    Returns the string of the selected item on the view.
+    """
 
-        return selected_text
+    selection = view.get_selection()
+    model, iteration = selection.get_selected()
+    selected_text = model.get_value(iteration, text_column)
+
+    return selected_text
 
 
 def generic_visible_func(model, iteration, (entry, text_column)):

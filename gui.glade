@@ -59,13 +59,45 @@ You should have received a copy of the GNU General Public License along with thi
       <column type="gchararray"/>
     </columns>
   </object>
+  <object class="GtkMenu" id="fileViewerMenu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="play">
+        <property name="label">gtk-media-play</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_action_appearance">False</property>
+        <property name="use_underline">True</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="_on_play_clicked" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="download">
+        <property name="label" translatable="yes">_Download</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_action_appearance">False</property>
+        <property name="use_underline">True</property>
+        <property name="image">image1</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="_on_download_clicked" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-go-down</property>
+  </object>
+  <object class="GtkImage" id="imageAdd">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-add</property>
     <property name="icon-size">1</property>
   </object>
-  <object class="GtkImage" id="image2">
+  <object class="GtkImage" id="imageRemove">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-remove</property>
@@ -213,7 +245,7 @@ You should have received a copy of the GNU General Public License along with thi
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkLabel" id="fileFilterLabel">
+                  <object class="GtkLabel" id="searchLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Search:</property>
@@ -226,7 +258,7 @@ You should have received a copy of the GNU General Public License along with thi
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="fileFilter">
+                  <object class="GtkEntry" id="searchEntry">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
@@ -235,7 +267,6 @@ You should have received a copy of the GNU General Public License along with thi
                     <property name="secondary_icon_activatable">False</property>
                     <property name="primary_icon_sensitive">True</property>
                     <property name="secondary_icon_sensitive">True</property>
-                    <signal name="changed" handler="_on_file_filter_change" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -244,13 +275,13 @@ You should have received a copy of the GNU General Public License along with thi
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="fileFilterClear">
+                  <object class="GtkButton" id="searchClear">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
                     <property name="relief">none</property>
-                    <signal name="clicked" handler="_on_file_filter_clear_clicked" swapped="no"/>
+                    <signal name="clicked" handler="_on_search_clear_clicked" swapped="no"/>
                     <child>
                       <object class="GtkImage" id="fileFilterClearImage">
                         <property name="visible">True</property>
@@ -320,6 +351,8 @@ You should have received a copy of the GNU General Public License along with thi
                       <object class="GtkEntry" id="nameFilter">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="has_focus">True</property>
+                        <property name="is_focus">True</property>
                         <property name="invisible_char">●</property>
                         <property name="invisible_char_set">True</property>
                         <property name="primary_icon_activatable">False</property>
@@ -360,7 +393,6 @@ You should have received a copy of the GNU General Public License along with thi
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="padding">5</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
@@ -434,6 +466,7 @@ You should have received a copy of the GNU General Public License along with thi
                     <property name="headers_clickable">False</property>
                     <property name="search_column">1</property>
                     <signal name="row-activated" handler="_on_open_file" swapped="no"/>
+                    <signal name="button-release-event" handler="_on_file_button_press" swapped="no"/>
                     <child>
                       <object class="GtkTreeViewColumn" id="fileViewerColumn">
                         <property name="title" translatable="yes">column</property>
@@ -499,6 +532,12 @@ You should have received a copy of the GNU General Public License along with thi
       </row>
     </data>
   </object>
+  <object class="GtkListStore" id="nameListstore">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkMenu" id="nameFavoritesMenu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -508,18 +547,12 @@ You should have received a copy of the GNU General Public License along with thi
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
-        <property name="image">image2</property>
+        <property name="image">imageRemove</property>
         <property name="use_stock">False</property>
         <property name="always_show_image">True</property>
         <signal name="activate" handler="_on_name_remove_favorite" swapped="no"/>
       </object>
     </child>
-  </object>
-  <object class="GtkListStore" id="nameListstore">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-    </columns>
   </object>
   <object class="GtkMenu" id="nameShowsMenu">
     <property name="visible">True</property>
@@ -530,7 +563,7 @@ You should have received a copy of the GNU General Public License along with thi
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
-        <property name="image">image1</property>
+        <property name="image">imageAdd</property>
         <property name="use_stock">False</property>
         <property name="always_show_image">True</property>
         <signal name="activate" handler="_on_name_add_favorite" swapped="no"/>
