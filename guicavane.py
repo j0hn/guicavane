@@ -554,10 +554,6 @@ def main():
     """
     Creates the window and starts gtk main loop.
     """
-    path = os.path.dirname(sys.argv[0])
-    if path:
-        # Allow correctly opening from outside
-        os.chdir(path)
 
     gui_file = "gui.glade"
     config_file = os.path.expanduser("~") + os.sep + ".guicavane.conf"

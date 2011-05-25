@@ -7,8 +7,15 @@ Guicavane constants.
 Module with constants values.
 """
 
+import os
+import sys
 import gtk
 
+
+# Allow correctly opening from outside
+path = os.path.dirname(sys.argv[0])
+if path:
+    os.chdir(path)
 
 # Modes
 MODE_SHOWS = "Shows"
@@ -18,7 +25,6 @@ MODES = [MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES]
 # NOTE: MODES must be in the same order as they appear in the combobox
 
 # Icons
-
 GTK_DEFAULT_THEME = gtk.icon_theme_get_default()
 
 IMAGE_FILE_MOVIE = gtk.Image()
