@@ -443,10 +443,10 @@ class Guicavane:
                 break
 
         self.background_task(self.download_file,
-                             self.close_show, episode_found)
+                             self._on_close_player, episode_found)
 
     @unfreeze
-    def close_show(self, *args):
+    def _on_close_player(self, *args):
         """
         Called when the user closes the player.
         """
@@ -459,16 +459,21 @@ class Guicavane:
         Starts the download of the given movie.
         """
 
-        print "Open %s" % movie_text
+        movie = self.pycavane.movie_by_name(movie_text)
+        self.background_task(self.download_file, self._on_close_player,
+                             movie, is_movie=True)
 
-    def download_file(self, episode):
+    def download_file(self, to_download, is_movie=False):
         """
-        Given an episode, downloads the subtitles then starts downloading
-        the file and starts the player.
+        Given an resource to download (movie or episode), downloads
+        the subtitles, starts downloading the file and starts the player.
+        If the resource it's a movie then is_movie has to be True.
         """
 
 
-        link = self.pycavane.get_direct_links(episode, host="megaupload")
+        link = self.pycavane.get_direct_links(to_download, host="megaupload",
+                                              movie=is_movie)
+
         if link:
             link = link[1]
         else:
@@ -481,7 +486,8 @@ class Guicavane:
         # Download the subtitle if it exists
         try:
             self.set_status_message("Downloading subtitles...")
-            self.pycavane.get_subtitle(episode, filename=filename)
+            self.pycavane.get_subtitle(to_download, filename=filename,
+                                       movie=is_movie)
         except:
             self.set_status_message("Not subtitles found")
 
@@ -498,7 +504,10 @@ class Guicavane:
             file_exists = os.path.exists(filename)
             time.sleep(2)
 
-        self.set_status_message("Now playing: %s" % episode[2])
+        if is_movie:
+            self.set_status_message("Now playing: %s" % to_download[1])
+        else:
+            self.set_status_message("Now playing: %s" % to_download[2])
         player_command = self.config.get_key("player_command")
         os.system(player_command % filename)
         megafile.released = True
