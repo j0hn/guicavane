@@ -9,11 +9,15 @@ A simple module to provide configuration files using json as format.
 
 import os
 import json
+import tempfile
 
+HOME_DIR = os.path.expanduser("~")
+TEMP_DIR = tempfile.gettempdir()
 DEFAULT_VALUES = {"player_command": "vlc %s",
-                  "cache_dir": "/tmp",
+                  "cache_dir": TEMP_DIR,
                   "last_mode": "Shows",
-                  "favorites": []}
+                  "favorites": [],
+                  "last_download_directory": HOME_DIR}
 
 
 def get_default(key):
@@ -67,6 +71,9 @@ class Config:
         """
         If the key is a list, appends the value to the list.
         """
+
+        if not key in self.data:
+            self.data[key] = get_default(key)
 
         assert type(self.data[key]) == list
 

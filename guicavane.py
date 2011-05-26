@@ -279,12 +279,41 @@ class Guicavane:
         else:
             self.open_movie(file_text)
 
-    def _on_download_clicked(self, *args):
+    def _on_download_only_clicked(self, *args):
         """
-        Called when the user click on the download context menu item.
+        Called when the user click on the download only context menu item.
         """
 
-        print "download", get_selected_text(self.file_viewer)
+        self._on_download_clicked(None, True)
+
+    def _on_download_clicked(self, widget, download_only=False):
+        """
+        Called when the user click on the download and play context menu item.
+        """
+
+        chooser = gtk.FileChooserDialog(title="Dowload to...",
+                  parent=self.main_window, action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                  buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                  gtk.STOCK_SAVE, gtk.RESPONSE_OK))
+
+        last_download_dir = self.config.get_key("last_download_directory")
+        chooser.set_current_folder(last_download_dir)
+        response = chooser.run()
+        if response == gtk.RESPONSE_OK:
+
+            save_to = chooser.get_filename()
+            self.config.set_key("last_download_directory", save_to)
+
+            selected_text = get_selected_text(self.file_viewer, 1)
+
+            if self.get_mode() == MODE_MOVIES:
+                self.open_movie(selected_text, file_path=save_to,
+                                download_only=download_only)
+            else:
+                self.open_show(selected_text, file_path=save_to,
+                               download_only=download_only)
+
+        chooser.destroy()
 
     def _on_search_clear_clicked(self, *args):
         """
@@ -417,7 +446,7 @@ class Guicavane:
         self.background_task(self.pycavane.episodes_by_season,
                         self.show_episodes, show, seasson_text)
 
-    def open_show(self, episode_text):
+    def open_show(self, episode_text, file_path=None, download_only=False):
         """
         Starts the download of the given episode.
         """
@@ -431,8 +460,19 @@ class Guicavane:
                 episode_found = episode
                 break
 
-        self.background_task(self.download_file,
-                             self._on_close_player, episode_found)
+        self.background_task(self.download_file, self._on_close_player,
+                             episode_found, file_path=file_path,
+                             download_only=download_only)
+
+    def open_movie(self, movie_text, file_path=None, download_only=False):
+        """
+        Starts the download of the given movie.
+        """
+
+        movie = self.pycavane.movie_by_name(movie_text)
+        self.background_task(self.download_file, self._on_close_player,
+                             movie, is_movie=True, file_path=file_path,
+                             download_only=download_only)
 
     @unfreeze
     def _on_close_player(self, *args):
@@ -443,16 +483,9 @@ class Guicavane:
         # Nothing to do yet
         pass
 
-    def open_movie(self, movie_text):
-        """
-        Starts the download of the given movie.
-        """
 
-        movie = self.pycavane.movie_by_name(movie_text)
-        self.background_task(self.download_file, self._on_close_player,
-                             movie, is_movie=True)
-
-    def download_file(self, to_download, is_movie=False):
+    def download_file(self, to_download, is_movie=False,
+                      file_path=None, download_only=False):
         """
         Given an resource to download (movie or episode), downloads
         the subtitles, starts downloading the file and starts the player.
@@ -467,7 +500,11 @@ class Guicavane:
         else:
             raise Exception("Not download source found")
 
-        cache_dir = self.config.get_key("cache_dir")
+        if file_path:
+            cache_dir = file_path
+        else:
+            cache_dir = self.config.get_key("cache_dir")
+
         megafile = MegaFile(link, cache_dir)
         filename = megafile.cache_file
 
@@ -492,13 +529,23 @@ class Guicavane:
             file_exists = os.path.exists(filename)
             time.sleep(2)
 
-        if is_movie:
-            self.set_status_message("Now playing: %s" % to_download[1])
+        if download_only:
+            status_message = "Downloading: %s"
         else:
-            self.set_status_message("Now playing: %s" % to_download[2])
-        player_command = self.config.get_key("player_command")
-        os.system(player_command % filename)
-        megafile.released = True
+            status_message = "Now playing: %s"
+
+        if is_movie:
+            self.set_status_message(status_message % to_download[1])
+        else:
+            self.set_status_message(status_message % to_download[2])
+
+        if download_only:
+            while megafile.running:
+                time.sleep(5)
+        else:
+            player_command = self.config.get_key("player_command")
+            os.system(player_command % filename)
+            megafile.released = True
 
     def update_waiting_message(self):
         """
@@ -532,6 +579,7 @@ class Guicavane:
         """
 
         self.name_model.clear()
+        self.search_entry.grab_focus()
         self.sidebar.hide()
 
     def set_mode_favorites(self):
