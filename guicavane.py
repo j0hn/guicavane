@@ -39,7 +39,6 @@ class Guicavane:
         self.builder = gtk.Builder()
         self.builder.add_from_file(gui_file)
 
-
         # Config
         self.config = Config(config_file)
 
@@ -200,21 +199,16 @@ class Guicavane:
 
     def _on_name_change(self, *args):
         """
-        Called when the user selects a movie or a show from the 'name list'.
+        Called when the user selects a show from the 'name list'.
         """
 
         selected_text = get_selected_text(self.name_list)
 
         self.file_model.clear()
-        mode = self.get_mode()
 
-        if mode == MODE_SHOWS or mode == MODE_FAVORITES:
-            self.background_task(self.pycavane.seasson_by_show,
-                           self.show_seassons, selected_text,
-                           status_message="Loading show %s..." % selected_text)
-        else:
-            self.background_task(self.pycavane.get_movies,
-                                 self.show_movies, selected_text)
+        self.background_task(self.pycavane.seasson_by_show,
+                       self.show_seassons, selected_text,
+                       status_message="Loading show %s..." % selected_text)
 
     def _on_name_filter_change(self, *args):
         """
@@ -399,18 +393,6 @@ class Guicavane:
             self.file_model.append((ICON_FILE_MOVIE, episode_name))
 
     @unfreeze
-    def show_movies(self, movies):
-        """
-        Fills the file viewer with the movies.
-        """
-
-        self.file_model.clear()
-
-        for movie in movies:
-            movie_name = movie[1]
-            self.file_model.append((ICON_FILE_MOVIE, movie_name))
-
-    @unfreeze
     def show_search(self, results):
         """
         Fills the file viewer with the movies from the search results.
@@ -477,7 +459,6 @@ class Guicavane:
         If the resource it's a movie then is_movie has to be True.
         """
 
-
         link = self.pycavane.get_direct_links(to_download, host="megaupload",
                                               movie=is_movie)
 
@@ -540,6 +521,7 @@ class Guicavane:
         """
 
         self.sidebar.show()
+        self.search_entry.set_text("")
         self.name_model.clear()
         self.background_task(self.pycavane.get_shows, self.show_shows,
                              status_message="Obtaining shows list")
@@ -558,6 +540,7 @@ class Guicavane:
         """
 
         self.sidebar.show()
+        self.search_entry.set_text("")
         self.name_model.clear()
         for favorite in self.config.get_key("favorites"):
             self.name_model.append([favorite])
