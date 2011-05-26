@@ -7,8 +7,12 @@ import urllib2
 import cookielib
 import functools
 
-HEADERS = {'User-Agent': 'Mozilla/5.0 (X11; U; Linux x86_64; en-US; '\
-           'rv:1.9.2.10) Gecko/20100928 Firefox/3.6.1'}
+HEADERS = {
+    'User-Agent': 'User-Agent:Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.1 '
+                  '(KHTML, like Gecko) Chrome/13.0.772.0 Safari/535.1',
+    'Referer': 'http://www.cuevana.tv/',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;'}
+
 RETRY_TIMES = 5
 
 

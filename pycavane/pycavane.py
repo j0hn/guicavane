@@ -14,6 +14,7 @@ import re
 from util import UrlOpen
 from memo import Memoized
 
+
 HOST = 'http://www.cuevana.tv'
 
 MOVIES_URL = HOST + '/peliculas/lista/letra=%s&page=%s'
@@ -28,6 +29,8 @@ SOURCE_GET = HOST + '/player/source_get'
 
 SUB_URL_MOVIE = HOST + '/files/sub/%s_%s.srt'
 SUB_URL_SHOW = HOST + '/files/s/sub/%s_%s.srt'
+
+SEARCH_URL = HOST + '/buscar/?q=%s&cat=titulo'
 
 
 SERIES_RE = re.compile('serieslist.push\(\{id:([0-9]*),nombre:"(.*?)"\}\);')
@@ -47,8 +50,10 @@ FNAME_RE = re.compile('font-size:22px; font-weight:bold;">(.*?)</font><br>')
 
 SOURCE_RE = re.compile("goSource\('([a-zA-Z0-9]*?)','([a-zA-Z]*?)'\)")
 
-# Setup a function with cookies support
-URL_OPEN = UrlOpen()
+SEARCH_RE = re.compile('<div class=\'tit\'><a href=\'(.*?)\'>' \
+                       '(.*?) \(.*\)</a></div>')
+
+URL_OPEN = UrlOpen()  # Setup a function with cookies support
 
 
 class Pycavane(object):
@@ -67,7 +72,7 @@ class Pycavane(object):
 
         if username:
             data = {'usuario': username, 'password': password,
-                            'ingresar': True, 'reordame': 'si'}
+                    'ingresar': True, 'recordarme': 'si'}
             ret = URL_OPEN('http://www.cuevana.tv/login_get.php', data=data)
             if username not in ret:
                 raise Exception('Login fail, check username and password')
@@ -198,3 +203,26 @@ class Pycavane(object):
         else:
             url = SUB_URL_SHOW
         return URL_OPEN(url % (episode[0], lang), filename=filename)
+
+    @Memoized
+    def search_title(self, query):
+        """
+        Returns a list with a tuple (result_id, result_name, result_is_movie)
+        with the results of the search.
+        """
+
+        result = []
+
+        query = query.replace(" ", "+")
+        page_data = URL_OPEN(SEARCH_URL % query)
+        results = SEARCH_RE.findall(page_data)
+
+        for i in results:
+            url = i[0].split("/")
+            result_is_movie = url[1] == "peliculas"
+            result_id = url[2]
+            result_name = i[1]
+
+            result.append((result_id, result_name, result_is_movie))
+
+        return result

@@ -292,6 +292,20 @@ class Guicavane:
 
         self.search_entry.set_text("")
 
+    def _on_search_activate(self, *args):
+        """
+        Called when the user does a search.
+        """
+
+        # Sets the correct mode
+        self.set_mode_movies()
+        self.mode_combo.set_active(MODES.index(MODE_MOVIES))
+
+        query = self.search_entry.get_text()
+        self.background_task(self.pycavane.search_title,
+                    self.show_search, query,
+                    status_message="Searching movies with title %s..." % query)
+
     def _on_open_file(self, widget, path, *args):
         """
         Called when the user double clicks on a file inside the file viewer.
@@ -388,6 +402,21 @@ class Guicavane:
         for movie in movies:
             movie_name = movie[1]
             self.file_model.append((ICON_FILE_MOVIE, movie_name))
+
+    @unfreeze
+    def show_search(self, results):
+        """
+        Fills the file viewer with the movies from the search results.
+        """
+
+        self.file_model.clear()
+
+        if not results:
+            return
+
+        for _, result_name, is_movie in results:
+            if is_movie:
+                self.file_model.append((ICON_FILE_MOVIE, result_name))
 
     def open_seasson(self, seasson_text):
         """
