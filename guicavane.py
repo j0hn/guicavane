@@ -59,7 +59,9 @@ class Guicavane:
         self.file_model = self.file_viewer.get_model()
         self.mode_combo = self.builder.get_object("modeCombo")
         self.search_entry = self.builder.get_object("searchEntry")
+        self.search_button = self.builder.get_object("searchButton")
         self.search_clear = self.builder.get_object("searchClear")
+        self.sidebar = self.builder.get_object("sidebarVbox")
 
         # Creating a new filter model to allow the user filter the
         # shows and movies by typing on an entry box
@@ -120,6 +122,7 @@ class Guicavane:
         self.file_viewer.set_sensitive(False)
         self.search_entry.set_sensitive(False)
         self.search_clear.set_sensitive(False)
+        self.search_button.set_sensitive(False)
         self.set_status_message(status_message)
 
     def unfreeze(func):
@@ -144,6 +147,7 @@ class Guicavane:
             self.file_viewer.set_sensitive(True)
             self.search_entry.set_sensitive(True)
             self.search_clear.set_sensitive(True)
+            self.search_button.set_sensitive(True)
 
         return decorate
 
@@ -275,8 +279,11 @@ class Guicavane:
         Called when the user click on the play context menu item.
         """
 
-        episode_text = get_selected_text(self.file_viewer, 1)
-        self.open_show(episode_text)
+        file_text = get_selected_text(self.file_viewer, 1)
+        if episode_text.counts(" - "):  # It's an episode. I know this is ugly
+            self.open_show(file_text)
+        else:
+            self.open_movie(file_text)
 
     def _on_download_clicked(self, *args):
         """
@@ -532,6 +539,7 @@ class Guicavane:
         Sets the current mode to shows.
         """
 
+        self.sidebar.show()
         self.name_model.clear()
         self.background_task(self.pycavane.get_shows, self.show_shows,
                              status_message="Obtaining shows list")
@@ -542,15 +550,14 @@ class Guicavane:
         """
 
         self.name_model.clear()
-
-        for letter in string.uppercase:
-            self.name_model.append([letter])
+        self.sidebar.hide()
 
     def set_mode_favorites(self):
         """
         Sets the current mode to favorites.
         """
 
+        self.sidebar.show()
         self.name_model.clear()
         for favorite in self.config.get_key("favorites"):
             self.name_model.append([favorite])
