@@ -27,6 +27,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</property>
     <property name="authors">j0hn &lt;j0hn.com.ar@gmail.com&gt; - Lead developer
 Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
+    <property name="logo">images/logo_big.png</property>
     <property name="wrap_license">True</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
@@ -59,6 +60,23 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
       <!-- column-name name -->
       <column type="gchararray"/>
     </columns>
+  </object>
+  <object class="GtkListStore" id="modeListstore">
+    <columns>
+      <!-- column-name label -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Shows</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Movies</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Favorites</col>
+      </row>
+    </data>
   </object>
   <object class="GtkMenu" id="fileViewerMenu">
     <property name="visible">True</property>
@@ -558,23 +576,6 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkListStore" id="modeListstore">
-    <columns>
-      <!-- column-name label -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Shows</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Movies</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Favorites</col>
-      </row>
-    </data>
   </object>
   <object class="GtkMenu" id="nameFavoritesMenu">
     <property name="visible">True</property>
