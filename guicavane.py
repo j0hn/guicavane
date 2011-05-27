@@ -458,13 +458,18 @@ class Guicavane:
         """
 
         self.file_model.clear()
+        marks = self.config.get_key("marks")
 
         if not results:
             return
 
         for _, result_name, is_movie in results:
             if is_movie:
-                self.file_model.append((ICON_FILE_MOVIE, result_name))
+                icon = ICON_FILE_MOVIE
+                if result_name in marks:
+                    icon = ICON_FILE_MOVIE_MARK
+
+                self.file_model.append((icon, result_name))
 
     def open_seasson(self, seasson_text):
         """
