@@ -61,23 +61,6 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkListStore" id="modeListstore">
-    <columns>
-      <!-- column-name label -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Shows</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Movies</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Favorites</col>
-      </row>
-    </data>
-  </object>
   <object class="GtkMenu" id="fileViewerMenu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -116,6 +99,30 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
         <signal name="activate" handler="_on_download_only_clicked" swapped="no"/>
       </object>
     </child>
+    <child>
+      <object class="GtkImageMenuItem" id="mark">
+        <property name="label" translatable="yes">_Mark</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_action_appearance">False</property>
+        <property name="use_underline">True</property>
+        <property name="image">image3</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="_on_mark_clicked" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="unmark">
+        <property name="label" translatable="yes">_Unmark</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_action_appearance">False</property>
+        <property name="use_underline">True</property>
+        <property name="image">image4</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="_on_unmark_clicked" swapped="no"/>
+      </object>
+    </child>
   </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
@@ -128,6 +135,17 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-harddisk</property>
     <property name="icon-size">1</property>
+  </object>
+  <object class="GtkImage" id="image3">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">images/mark.png</property>
+    <property name="icon-size">1</property>
+  </object>
+  <object class="GtkImage" id="image4">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">images/unmark.png</property>
   </object>
   <object class="GtkImage" id="imageAdd">
     <property name="visible">True</property>
@@ -577,6 +595,23 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
       </object>
     </child>
   </object>
+  <object class="GtkListStore" id="modeListstore">
+    <columns>
+      <!-- column-name label -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Shows</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Movies</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Favorites</col>
+      </row>
+    </data>
+  </object>
   <object class="GtkMenu" id="nameFavoritesMenu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -717,25 +752,6 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="cacheDirEntry">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">•</property>
-                <property name="invisible_char_set">True</property>
-                <property name="primary_icon_activatable">False</property>
-                <property name="secondary_icon_activatable">False</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
-                <signal name="activate" handler="_on_save_settings" swapped="no"/>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">1</property>
-                <property name="bottom_attach">2</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkVBox" id="playerCommandLabelVbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -775,6 +791,22 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
                   </packing>
                 </child>
               </object>
+            </child>
+            <child>
+              <object class="GtkFileChooserButton" id="cachedirButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="action">select-folder</property>
+                <property name="preview_widget_active">False</property>
+                <property name="use_preview_label">False</property>
+                <property name="title" translatable="yes">Select A Folder</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">1</property>
+                <property name="bottom_attach">2</property>
+              </packing>
             </child>
           </object>
           <packing>

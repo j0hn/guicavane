@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-guicavane: graphical user interface for the website cuevana.tv
+Guicavane: graphical user interface for the website cuevana.tv
 
 Uses gtk toolkit to provide the graphical interface of the website
 Author: Gonzalo Garcia (A.K.A j0hn) <j0hn.com.ar@gmail.com>
@@ -19,8 +19,7 @@ import pycavane
 from config import Config
 from megaupload import MegaFile
 from threadrunner import GtkThreadRunner
-from constants import MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES, MODES, \
-                      ICON_FILE_MOVIE, ICON_FOLDER
+from constants import *
 
 
 class Guicavane:
@@ -67,7 +66,7 @@ class Guicavane:
         # shows and movies by typing on an entry box
         self.name_model_filter = self.name_model.filter_new()
         self.name_model_filter.set_visible_func(generic_visible_func,
-                                                (self.name_filter, 0))
+                                          (self.name_filter, NAME_COLUMN_TEXT))
         self.name_list.set_model(self.name_model_filter)
 
         # We leave the magic connection to glade
@@ -80,15 +79,8 @@ class Guicavane:
         cache_dir = self.config.get_key("cache_dir")
         if cache_dir[-1] == os.sep:
             cache_dir = cache_dir[:-1]
-        try:
-            self.pycavane = pycavane.Pycavane("guicavane", "guicavane",
-                                              cache_dir=cache_dir)
-        except Exception, error:
-            self.pycavane = pycavane.Pycavane()
-            if "Login fail" in error.message:
-                print "LOGIN FAIL"
-            else:
-                print "UNKNOWN ERROR: %s" % error
+
+        self.pycavane = pycavane.Pycavane(cache_dir=cache_dir)
 
         self.setup()
 
@@ -203,7 +195,7 @@ class Guicavane:
         Called when the user selects a show from the 'name list'.
         """
 
-        selected_text = get_selected_text(self.name_list)
+        selected_text = get_selected_text(self.name_list, NAME_COLUMN_TEXT)
 
         self.file_model.clear()
 
@@ -243,7 +235,7 @@ class Guicavane:
         Adds the selected show from favorites.
         """
 
-        selected = get_selected_text(self.name_list)
+        selected = get_selected_text(self.name_list, NAME_COLUMN_TEXT)
         if selected not in self.config.get_key("favorites"):
             self.config.append_key("favorites", selected)
 
@@ -252,7 +244,7 @@ class Guicavane:
         Removes the selected show from favorites.
         """
 
-        selected = get_selected_text(self.name_list)
+        selected = get_selected_text(self.name_list, NAME_COLUMN_TEXT)
         if selected in self.config.get_key("favorites"):
             self.config.remove_key("favorites", selected)
             self.set_mode_favorites()
@@ -265,7 +257,8 @@ class Guicavane:
         if event.button == 3:
             popup_menu = self.builder.get_object("fileViewerMenu")
 
-            selected_text = get_selected_text(self.file_viewer, 1)
+            selected_text = get_selected_text(self.file_viewer,
+                                              FILE_VIEW_COLUMN_TEXT)
             if not selected_text.startswith("Temporada"):
                 popup_menu.popup(None, None, None, event.button, event.time)
 
@@ -274,11 +267,12 @@ class Guicavane:
         Called when the user click on the play context menu item.
         """
 
-        file_text = get_selected_text(self.file_viewer, 1)
-        if file_text.count(" - "):  # It's an episode. I know this is ugly
-            self.open_show(file_text)
+        selected_text = get_selected_text(self.file_viewer,
+                                          FILE_VIEW_COLUMN_TEXT)
+        if selected_text.count(" - "):  # It's an episode. I know this is ugly
+            self.open_show(selected_text)
         else:
-            self.open_movie(file_text)
+            self.open_movie(selected_text)
 
     def _on_download_only_clicked(self, *args):
         """
@@ -305,7 +299,8 @@ class Guicavane:
             save_to = chooser.get_filename()
             self.config.set_key("last_download_directory", save_to)
 
-            selected_text = get_selected_text(self.file_viewer, 1)
+            selected_text = get_selected_text(self.file_viewer,
+                                              FILE_VIEW_COLUMN_TEXT)
 
             if self.get_mode() == MODE_MOVIES:
                 self.open_movie(selected_text, file_path=save_to,
@@ -315,6 +310,33 @@ class Guicavane:
                                download_only=download_only)
 
         chooser.destroy()
+
+    def _on_mark_clicked(self, *args):
+        """
+        Called when the user clicks on Mark item in the context menu.
+        """
+
+        selection = self.file_viewer.get_selection()
+        model, iteration = selection.get_selected()
+        selected_text = model.get_value(iteration, FILE_VIEW_COLUMN_TEXT)
+        model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE_MARK)
+
+        self.config.append_key("marks", selected_text)
+
+    def _on_unmark_clicked(self, *args):
+        """
+        Called when the user clicks on Mark item in the context menu.
+        """
+
+        marks = self.config.get_key("marks")
+
+        selection = self.file_viewer.get_selection()
+        model, iteration = selection.get_selected()
+        selected_text = model.get_value(iteration, FILE_VIEW_COLUMN_TEXT)
+
+        if selected_text in marks:
+            model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE)
+            self.config.remove_key("marks", selected_text)
 
     def _on_search_clear_clicked(self, *args):
         """
@@ -368,10 +390,10 @@ class Guicavane:
         """
 
         player_cmd = self.builder.get_object("playerCommandEntry")
-        cache_dir = self.builder.get_object("cacheDirEntry")
+        cache_dir_button = self.builder.get_object("cachedirButton")
+        cache_dir_button.set_filename(self.config.get_key("cache_dir"))
 
         player_cmd.set_text(self.config.get_key("player_command"))
-        cache_dir.set_text(self.config.get_key("cache_dir"))
         self.settings_dialog.run()
         self.settings_dialog.hide()
 
@@ -381,7 +403,8 @@ class Guicavane:
         """
 
         player_cmd = self.builder.get_object("playerCommandEntry").get_text()
-        cache_dir = self.builder.get_object("cacheDirEntry").get_text()
+        cache_dir_button = self.builder.get_object("cachedirButton")
+        cache_dir = cache_dir_button.get_filename()
 
         self.config.set_key("player_command", player_cmd)
         self.config.set_key("cache_dir", cache_dir)
@@ -417,10 +440,16 @@ class Guicavane:
         """
 
         self.file_model.clear()
+        marks = self.config.get_key("marks")
 
         for _, episode_number, episode_name in episodes:
             episode_name = "%.2d - %s" % (int(episode_number), episode_name)
-            self.file_model.append((ICON_FILE_MOVIE, episode_name))
+
+            icon = ICON_FILE_MOVIE
+            if episode_name in marks:
+                icon = ICON_FILE_MOVIE_MARK
+
+            self.file_model.append((icon, episode_name))
 
     @unfreeze
     def show_search(self, results):
@@ -483,7 +512,6 @@ class Guicavane:
 
         # Nothing to do yet
         pass
-
 
     def download_file(self, to_download, is_movie=False,
                       file_path=None, download_only=False):

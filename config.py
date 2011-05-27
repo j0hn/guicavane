@@ -17,7 +17,8 @@ DEFAULT_VALUES = {"player_command": "vlc %s",
                   "cache_dir": TEMP_DIR,
                   "last_mode": "Shows",
                   "favorites": [],
-                  "last_download_directory": HOME_DIR}
+                  "last_download_directory": HOME_DIR,
+                  "marks": []}
 
 
 def get_default(key):
@@ -30,7 +31,7 @@ def get_default(key):
 
 class Config:
     """
-    Configuration manager.
+    Configuration manager. Uses json as config format.
     """
 
     def __init__(self, config_file):
