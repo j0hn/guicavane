@@ -1,5 +1,6 @@
 #!/usr/bin/evn python
 # coding: utf-8
+
 """
 guicavane: graphical user interface for the website cuevana.tv
 
@@ -274,7 +275,7 @@ class Guicavane:
         """
 
         file_text = get_selected_text(self.file_viewer, 1)
-        if episode_text.counts(" - "):  # It's an episode. I know this is ugly
+        if file_text.count(" - "):  # It's an episode. I know this is ugly
             self.open_show(file_text)
         else:
             self.open_movie(file_text)

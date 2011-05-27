@@ -1,3 +1,12 @@
+#!/usr/bin/evn python
+# coding: utf-8
+
+"""
+Megaupload.
+
+Module that provides a thread to download megaupload files.
+"""
+
 import os
 import re
 import time
@@ -7,13 +16,17 @@ import shutil
 from pycavane.util import UrlOpen
 
 
-megalink_re = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')
+MEGALINK_RE = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')
 
-url_open = UrlOpen()
+URL_OPEN = UrlOpen()
 
 
 class MegaFile(Thread):
-    def __init__ (self, url, cachedir):
+    """
+    Thread that downloads a megaupload file.
+    """
+
+    def __init__(self, url, cachedir):
         Thread.__init__(self)
         self.url = url
         self.filename = url.rsplit('/', 1)[1][3:]
@@ -22,7 +35,11 @@ class MegaFile(Thread):
         self.running = True
 
     def get_megalink(self, link):
-        megalink = megalink_re.findall(url_open(link))
+        """
+        Returns the real file link after waiting the 45 seconds.
+        """
+
+        megalink = MEGALINK_RE.findall(URL_OPEN(link))
         if megalink:
             time.sleep(45)
             return megalink[0]
@@ -30,23 +47,35 @@ class MegaFile(Thread):
 
     @property
     def cache_file(self):
+        """
+        Returns the cache file path.
+        """
+
         filename = self.cachedir + os.sep + self.filename
-        if os.path.exists(filename+'.mp4'):
-            return filename+'.mp4'
+        if os.path.exists(filename + '.mp4'):
+            return filename + '.mp4'
         return filename
 
     @property
     def size(self):
+        """
+        Returns the size of the downloaded file at the moment.
+        """
+
         size = 0
         if os.path.exists(self.cache_file):
             size = os.path.getsize(self.cache_file)
         return size
 
     def run(self):
+        """
+        Starts the thread so starts the downloading.
+        """
+
         if not os.path.exists(self.cache_file):
             url = self.get_megalink(self.url)
-            handle = url_open(url, handle=True)
-            fd = open(self.cache_file, 'w')
+            handle = URL_OPEN(url, handle=True)
+            fd = open(self.cache_file, 'wb')
 
             while True:
                 if self.released:
@@ -56,7 +85,7 @@ class MegaFile(Thread):
                     break
                 data = handle.read(1024)
                 if not data:
-                    shutil.move(self.cache_file, self.cache_file+'.mp4')
+                    shutil.move(self.cache_file, self.cache_file + '.mp4')
                     fd.close()
                     break
                 fd.write(data)
