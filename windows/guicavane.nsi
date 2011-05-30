@@ -16,7 +16,7 @@ InstallDirRegKey HKLM "Software\Guicavane" "Install_Dir"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "header.bmp"
 
-!define MUI_ICON "../images/logo2.ico"
+!define MUI_ICON "../images/logo.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
 
 ;Interface Settings

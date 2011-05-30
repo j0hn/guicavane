@@ -545,7 +545,8 @@ class Guicavane:
         # Download the subtitle if it exists
         try:
             self.set_status_message("Downloading subtitles...")
-            self.pycavane.get_subtitle(to_download, filename=filename,
+            subs_filename = filename.split(".mp4", 1)[0]
+            self.pycavane.get_subtitle(to_download, filename=subs_filename,
                                        movie=is_movie)
         except:
             self.set_status_message("Not subtitles found")
