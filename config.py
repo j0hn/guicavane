@@ -40,9 +40,9 @@ class Config:
         self.data = {}
 
         if not os.path.exists(self.config_file):
-            with open(self.config_file, "w") as filehandler:
-                filehandler.write(json.dumps(DEFAULT_VALUES) + "\n")
-                return
+            self.data = DEFAULT_VALUES
+            self.save()
+            return
 
         with open(self.config_file) as filehandler:
             data = filehandler.read()

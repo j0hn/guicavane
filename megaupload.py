@@ -51,10 +51,7 @@ class MegaFile(Thread):
         Returns the cache file path.
         """
 
-        filename = self.cachedir + os.sep + self.filename
-        if os.path.exists(filename + '.mp4'):
-            return filename + '.mp4'
-        return filename
+        return self.cachedir + os.sep + self.filename + ".mp4"
 
     @property
     def size(self):
@@ -85,7 +82,6 @@ class MegaFile(Thread):
                     break
                 data = handle.read(1024)
                 if not data:
-                    shutil.move(self.cache_file, self.cache_file + '.mp4')
                     fd.close()
                     break
                 fd.write(data)
