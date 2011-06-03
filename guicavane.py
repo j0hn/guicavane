@@ -443,7 +443,11 @@ class Guicavane:
         marks = self.config.get_key("marks")
 
         for _, episode_number, episode_name in episodes:
-            episode_name = "%.2d - %s" % (int(episode_number), episode_name)
+            try:
+                episode_name = "%.2d - %s" % (int(episode_number), episode_name)
+            except ValueError:
+                episode_name = "%s - %s" % (episode_number, episode_name)
+
 
             icon = ICON_FILE_MOVIE
             if episode_name in marks:
