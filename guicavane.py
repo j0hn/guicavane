@@ -45,6 +45,7 @@ class Guicavane:
         # Attributes
         self.current_seasson = None
         self.current_movies = {}
+        self.download_error = False
         self.waiting_time = 45
 
         # Getting the used widgets
@@ -129,20 +130,29 @@ class Guicavane:
             Decorated function.
             """
 
+            self._unfreeze()
+
             args = [self] + list(args)  # func is a method so it needs self
             func(*args, **kwargs)
 
-            self.set_status_message("")
-            self.mode_combo.set_sensitive(True)
-            self.name_list.set_sensitive(True)
-            self.name_filter.set_sensitive(True)
-            self.name_filter_clear.set_sensitive(True)
-            self.file_viewer.set_sensitive(True)
-            self.search_entry.set_sensitive(True)
-            self.search_clear.set_sensitive(True)
-            self.search_button.set_sensitive(True)
 
         return decorate
+
+    def _unfreeze(self):
+        """
+        Sets the widgets to be usable.
+        Usually this function shouldn't be called directly but using the
+        decorator @unfreeze but is not completly wrong to use it.
+        """
+        self.set_status_message("")
+        self.mode_combo.set_sensitive(True)
+        self.name_list.set_sensitive(True)
+        self.name_filter.set_sensitive(True)
+        self.name_filter_clear.set_sensitive(True)
+        self.file_viewer.set_sensitive(True)
+        self.search_entry.set_sensitive(True)
+        self.search_clear.set_sensitive(True)
+        self.search_button.set_sensitive(True)
 
     def background_task(self, func, callback, *args, **kwargs):
         """
@@ -511,7 +521,7 @@ class Guicavane:
         Starts the download of the given movie.
         """
 
-        movie = self.current_movies[movie_text]
+        movie = (self.current_movies[movie_text], movie_text)
         self.background_task(self.download_file, self._on_close_player,
                              movie, is_movie=True, file_path=file_path,
                              download_only=download_only)
@@ -546,7 +556,7 @@ class Guicavane:
         else:
             cache_dir = self.config.get_key("cache_dir")
 
-        megafile = MegaFile(link, cache_dir)
+        megafile = MegaFile(link, cache_dir, self._on_download_error)
         filename = megafile.cache_file
 
         # Download the subtitle if it exists
@@ -566,10 +576,15 @@ class Guicavane:
         time.sleep(45)  # Megaupload's 45
 
         file_exists = False
-        while not file_exists:  # Wait untile the file exists
+
+        # Wait until the file exists
+        while not file_exists and not self.download_error:
             self.set_status_message("A few seconds left...")
             file_exists = os.path.exists(filename)
             time.sleep(2)
+
+        if self.download_error:
+            return
 
         if download_only:
             status_message = "Downloading: %s"
@@ -603,6 +618,15 @@ class Guicavane:
                                    (self.waiting_time, loading_dots))
             self.waiting_time -= 1
             return True
+
+    def _on_download_error(self, error):
+        """
+        Called if the megaupload file has an error.
+        """
+
+        self._unfreeze()
+        self.set_status_message("Download error: Limit Exceeded")
+        self.download_error = True
 
     def set_mode_shows(self, *args):
         """
