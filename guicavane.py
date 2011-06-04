@@ -44,6 +44,7 @@ class Guicavane:
 
         # Attributes
         self.current_seasson = None
+        self.current_movies = {}
         self.waiting_time = 45
 
         # Getting the used widgets
@@ -355,6 +356,7 @@ class Guicavane:
         self.mode_combo.set_active(MODES.index(MODE_MOVIES))
 
         query = self.search_entry.get_text()
+        self.current_movies = {}
         self.background_task(self.pycavane.search_title,
                     self.show_search, query,
                     status_message="Searching movies with title %s..." % query)
@@ -467,12 +469,13 @@ class Guicavane:
         if not results:
             return
 
-        for _, result_name, is_movie in results:
+        for result_id, result_name, is_movie in results:
             if is_movie:
                 icon = ICON_FILE_MOVIE
                 if result_name in marks:
                     icon = ICON_FILE_MOVIE_MARK
 
+                self.current_movies[result_name] = result_id
                 self.file_model.append((icon, result_name))
 
     def open_seasson(self, seasson_text):
@@ -508,7 +511,7 @@ class Guicavane:
         Starts the download of the given movie.
         """
 
-        movie = self.pycavane.movie_by_name(movie_text)
+        movie = self.current_movies[movie_text]
         self.background_task(self.download_file, self._on_close_player,
                              movie, is_movie=True, file_path=file_path,
                              download_only=download_only)
