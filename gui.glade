@@ -530,41 +530,64 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
               </packing>
             </child>
             <child>
-              <object class="GtkScrolledWindow" id="fileScroll">
+              <object class="GtkVBox" id="fileViewerVbox">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="border_width">5</property>
-                <property name="hscrollbar_policy">automatic</property>
-                <property name="vscrollbar_policy">automatic</property>
-                <property name="shadow_type">etched-out</property>
+                <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkTreeView" id="fileViewer">
+                  <object class="GtkLabel" id="pathLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="xalign">0</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="fileScroll">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="model">fileStore</property>
-                    <property name="headers_visible">False</property>
-                    <property name="headers_clickable">False</property>
-                    <property name="search_column">1</property>
-                    <signal name="row-activated" handler="_on_open_file" swapped="no"/>
-                    <signal name="button-release-event" handler="_on_file_button_press" swapped="no"/>
+                    <property name="border_width">5</property>
+                    <property name="hscrollbar_policy">automatic</property>
+                    <property name="vscrollbar_policy">automatic</property>
+                    <property name="shadow_type">etched-out</property>
                     <child>
-                      <object class="GtkTreeViewColumn" id="fileViewerColumn">
-                        <property name="title" translatable="yes">column</property>
+                      <object class="GtkTreeView" id="fileViewer">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">fileStore</property>
+                        <property name="headers_visible">False</property>
+                        <property name="headers_clickable">False</property>
+                        <property name="search_column">1</property>
+                        <signal name="row-activated" handler="_on_open_file" swapped="no"/>
+                        <signal name="button-release-event" handler="_on_file_button_press" swapped="no"/>
                         <child>
-                          <object class="GtkCellRendererPixbuf" id="fileViewerRendererText"/>
-                          <attributes>
-                            <attribute name="pixbuf">0</attribute>
-                          </attributes>
-                        </child>
-                        <child>
-                          <object class="GtkCellRendererText" id="fileViewerRendererTex"/>
-                          <attributes>
-                            <attribute name="text">1</attribute>
-                          </attributes>
+                          <object class="GtkTreeViewColumn" id="fileViewerColumn">
+                            <property name="title" translatable="yes">column</property>
+                            <child>
+                              <object class="GtkCellRendererPixbuf" id="fileViewerRendererText"/>
+                              <attributes>
+                                <attribute name="pixbuf">0</attribute>
+                              </attributes>
+                            </child>
+                            <child>
+                              <object class="GtkCellRendererText" id="fileViewerRendererTex"/>
+                              <attributes>
+                                <attribute name="text">1</attribute>
+                              </attributes>
+                            </child>
+                          </object>
                         </child>
                       </object>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
                 </child>
               </object>
               <packing>

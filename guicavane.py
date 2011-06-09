@@ -43,6 +43,7 @@ class Guicavane:
         self.config = Config(config_file)
 
         # Attributes
+        self.current_show = None
         self.current_seasson = None
         self.current_movies = {}
         self.download_error = False
@@ -63,6 +64,7 @@ class Guicavane:
         self.search_button = self.builder.get_object("searchButton")
         self.search_clear = self.builder.get_object("searchClear")
         self.sidebar = self.builder.get_object("sidebarVbox")
+        self.path_label = self.builder.get_object("pathLabel")
 
         # Creating a new filter model to allow the user filter the
         # shows and movies by typing on an entry box
@@ -207,6 +209,9 @@ class Guicavane:
         """
 
         selected_text = get_selected_text(self.name_list, NAME_COLUMN_TEXT)
+        self.current_show = selected_text
+
+        self.path_label.set_text(self.current_show)
 
         self.file_model.clear()
 
@@ -454,6 +459,8 @@ class Guicavane:
         self.file_model.clear()
         marks = self.config.get_key("marks")
 
+        self.file_model.append((ICON_FOLDER, ".."))
+
         for _, episode_number, episode_name in episodes:
             try:
                 episode_name = "%.2d - %s" % (int(episode_number), episode_name)
@@ -493,8 +500,11 @@ class Guicavane:
         Fills the file viewer with the episodes from the seasson.
         """
 
-        show = get_selected_text(self.name_list)
+        show = self.current_show
         self.current_seasson = seasson_text
+
+        self.path_label.set_text(show + " / " + self.current_seasson)
+
         self.background_task(self.pycavane.episodes_by_season,
                         self.show_episodes, show, seasson_text)
 
@@ -503,8 +513,13 @@ class Guicavane:
         Starts the download of the given episode.
         """
 
+        if episode_text == "..":
+            self.background_task(self.pycavane.seasson_by_show,
+                           self.show_seassons, self.current_show)
+            return
+
         selected_episode = episode_text.split(" - ", 1)[1]
-        show = get_selected_text(self.name_list)
+        show = self.current_show
         seasson = self.current_seasson
 
         for episode in self.pycavane.episodes_by_season(show, seasson):
@@ -635,6 +650,7 @@ class Guicavane:
 
         self.sidebar.show()
         self.search_entry.set_text("")
+        self.path_label.set_text("")
         self.name_model.clear()
         self.background_task(self.pycavane.get_shows, self.show_shows,
                              status_message="Obtaining shows list")
@@ -647,6 +663,7 @@ class Guicavane:
         self.name_model.clear()
         self.search_entry.grab_focus()
         self.sidebar.hide()
+        self.path_label.set_text("")
 
     def set_mode_favorites(self):
         """
@@ -655,6 +672,7 @@ class Guicavane:
 
         self.sidebar.show()
         self.search_entry.set_text("")
+        self.path_label.set_text("")
         self.name_model.clear()
         for favorite in self.config.get_key("favorites"):
             self.name_model.append([favorite])
