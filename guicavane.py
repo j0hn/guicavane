@@ -475,7 +475,7 @@ class Guicavane:
             self.file_model.append((icon, episode_name))
 
     @unfreeze
-    def show_search(self, results):
+    def show_search(self, search_result):
         """
         Fills the file viewer with the movies from the search results.
         """
@@ -483,10 +483,15 @@ class Guicavane:
         self.file_model.clear()
         marks = self.config.get_key("marks")
 
-        if not results:
+        search_list, maybe_meant = search_result
+
+        if maybe_meant:
+            self.set_status_message("Maybe you meant: %s" % maybe_meant)
+
+        if not search_list:
             return
 
-        for result_id, result_name, is_movie in results:
+        for result_id, result_name, is_movie in search_list:
             if is_movie:
                 icon = ICON_FILE_MOVIE
                 if result_name in marks:
