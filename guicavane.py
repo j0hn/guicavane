@@ -76,6 +76,16 @@ class Guicavane:
         # We leave the magic connection to glade
         self.builder.connect_signals(self)
 
+        # Keyboard shortcuts
+        accel_group = gtk.AccelGroup()
+        key, modifier = gtk.accelerator_parse("<Ctrl>W")
+        accel_group.connect_group(key, modifier, gtk.ACCEL_VISIBLE,
+                                  lambda a, b, c, d: gtk.main_quit())
+        key, modifier = gtk.accelerator_parse("<Ctrl>Q")
+        accel_group.connect_group(key, modifier, gtk.ACCEL_VISIBLE,
+                                  lambda a, b, c, d: gtk.main_quit())
+        self.main_window.add_accel_group(accel_group)
+
         # Now we show the window
         self.main_window.show_all()
 
