@@ -82,7 +82,7 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
         <property name="use_underline">True</property>
-        <property name="image">image2</property>
+        <property name="image">imageHardDisk</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="_on_download_clicked" swapped="no"/>
       </object>
@@ -94,9 +94,19 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
         <property name="use_underline">True</property>
-        <property name="image">image1</property>
+        <property name="image">imageSaveAs</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="_on_download_only_clicked" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="Information">
+        <property name="label">gtk-info</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_action_appearance">False</property>
+        <property name="use_stock">True</property>
+        <signal name="activate" handler="_on_info_clicked" swapped="no"/>
       </object>
     </child>
     <child>
@@ -106,7 +116,7 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
         <property name="use_underline">True</property>
-        <property name="image">image3</property>
+        <property name="image">imageMark</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="_on_mark_clicked" swapped="no"/>
       </object>
@@ -118,34 +128,11 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
         <property name="use_underline">True</property>
-        <property name="image">image4</property>
+        <property name="image">imageUnmark</property>
         <property name="use_stock">False</property>
         <signal name="activate" handler="_on_unmark_clicked" swapped="no"/>
       </object>
     </child>
-  </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-save-as</property>
-    <property name="icon-size">1</property>
-  </object>
-  <object class="GtkImage" id="image2">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-harddisk</property>
-    <property name="icon-size">1</property>
-  </object>
-  <object class="GtkImage" id="image3">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">images/mark.png</property>
-    <property name="icon-size">1</property>
-  </object>
-  <object class="GtkImage" id="image4">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">images/unmark.png</property>
   </object>
   <object class="GtkImage" id="imageAdd">
     <property name="visible">True</property>
@@ -153,11 +140,132 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
     <property name="stock">gtk-add</property>
     <property name="icon-size">1</property>
   </object>
+  <object class="GtkImage" id="imageHardDisk">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-harddisk</property>
+    <property name="icon-size">1</property>
+  </object>
+  <object class="GtkImage" id="imageMark">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">images/mark.png</property>
+    <property name="icon-size">1</property>
+  </object>
   <object class="GtkImage" id="imageRemove">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="stock">gtk-remove</property>
     <property name="icon-size">1</property>
+  </object>
+  <object class="GtkImage" id="imageSaveAs">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-save-as</property>
+    <property name="icon-size">1</property>
+  </object>
+  <object class="GtkImage" id="imageUnmark">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">images/unmark.png</property>
+  </object>
+  <object class="GtkWindow" id="infoWindow">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Information</property>
+    <property name="resizable">False</property>
+    <property name="window_position">center</property>
+    <property name="icon">images/logo.png</property>
+    <signal name="delete-event" handler="_on_info_window_close" swapped="no"/>
+    <child>
+      <object class="GtkHBox" id="mainHbox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="border_width">15</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkImage" id="infoImage">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="stock">gtk-missing-image</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkVBox" id="infoVbox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel" id="infoTitle">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="infoLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="yalign">0</property>
+                <property name="wrap">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHBox" id="buttonHbox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <object class="GtkButton" id="closeButton">
+                    <property name="label">gtk-close</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_action_appearance">False</property>
+                    <property name="use_stock">True</property>
+                    <signal name="clicked" handler="_on_info_window_close" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
   </object>
   <object class="GtkWindow" id="mainWindow">
     <property name="can_focus">False</property>

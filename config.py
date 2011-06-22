@@ -13,12 +13,22 @@ import tempfile
 
 HOME_DIR = os.path.expanduser("~")
 TEMP_DIR = tempfile.gettempdir()
+CONFIG_DIR = HOME_DIR + os.sep + ".config" + os.sep + "guicavane"
+IMAGES_DIR = CONFIG_DIR + os.sep + "images"
+CONFIG_FILE = CONFIG_DIR + os.sep + "guicavane.conf"
 DEFAULT_VALUES = {"player_command": "vlc %s",
                   "cache_dir": TEMP_DIR,
                   "last_mode": "Shows",
                   "favorites": [],
                   "last_download_directory": HOME_DIR,
-                  "marks": []}
+                  "marks": [],
+                  "images_dir": IMAGES_DIR}
+
+if not os.path.exists(CONFIG_DIR):
+    os.makedirs(CONFIG_DIR)
+
+if not os.path.exists(IMAGES_DIR):
+    os.makedirs(IMAGES_DIR)
 
 
 def get_default(key):
@@ -34,8 +44,8 @@ class Config:
     Configuration manager. Uses json as config format.
     """
 
-    def __init__(self, config_file):
-        self.config_file = config_file
+    def __init__(self):
+        self.config_file = CONFIG_FILE
 
         self.data = {}
 

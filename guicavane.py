@@ -14,6 +14,7 @@ import gtk
 import time
 import string
 import gobject
+import urllib
 
 import pycavane
 from config import Config
@@ -27,7 +28,7 @@ class Guicavane:
     Main class, loads the gui and handles all events.
     """
 
-    def __init__(self, gui_file, config_file):
+    def __init__(self, gui_file):
         """
         Creates the main window based on the glade file `gui_file`.
         """
@@ -40,7 +41,7 @@ class Guicavane:
         self.builder.add_from_file(gui_file)
 
         # Config
-        self.config = Config(config_file)
+        self.config = Config()
 
         # Attributes
         self.current_show = None
@@ -65,6 +66,10 @@ class Guicavane:
         self.search_clear = self.builder.get_object("searchClear")
         self.sidebar = self.builder.get_object("sidebarVbox")
         self.path_label = self.builder.get_object("pathLabel")
+        self.info_window = self.builder.get_object("infoWindow")
+        self.info_title = self.builder.get_object("infoTitle")
+        self.info_label = self.builder.get_object("infoLabel")
+        self.info_image = self.builder.get_object("infoImage")
 
         # Creating a new filter model to allow the user filter the
         # shows and movies by typing on an entry box
@@ -438,6 +443,99 @@ class Guicavane:
         self.config.save()
         self.settings_dialog.hide()
 
+    def _on_info_clicked(self, *args):
+        """
+        Called when click on the context menu info item.
+        """
+
+        selected_text = get_selected_text(self.file_viewer,
+                                          FILE_VIEW_COLUMN_TEXT)
+
+        if selected_text.startswith("Temporada"):
+            return
+
+        try:
+            selected_episode = selected_text.split(" - ", 1)[1]
+        except IndexError:
+            return
+
+        show = self.current_show
+        seasson = self.current_seasson
+
+        episode_found = None
+        for episode in self.pycavane.episodes_by_season(show, seasson):
+            if episode[2] == selected_episode:
+                episode_found = episode
+                break
+
+        if not episode_found:
+            return
+
+        self.background_task(self.pycavane.get_episode_info,
+                        self.open_info_window, episode_found)
+
+    def _on_info_window_close(self, *args):
+        """
+        Called when the info window is closed.
+        """
+
+        self.info_window.hide()
+
+    @unfreeze
+    def open_info_window(self, info):
+        """
+        Opens the info window and loads the info.
+        """
+
+        title = "%s: %s" % (self.current_show, info[1])
+        desc = info[2]
+        image_link = info[0]
+
+        self.background_task(self.download_show_image, self.set_info_image,
+                             image_link)
+
+        self.info_title.set_label(title)
+        self.info_label.set_label(desc)
+        self.info_window.show()
+
+    def download_show_image(self, link):
+        """
+        Downloads the show image from `link`.
+        """
+
+
+        images_dir = self.config.get_key("images_dir")
+        show = self.current_show.lower()
+        show_file = show.replace(" ", "_") + ".jpg"
+        image_path = images_dir + os.sep + show_file
+
+        if not os.path.exists(image_path):
+            url_open = urllib.urlopen(link)
+            img = open(image_path, "wb")
+            img.write(url_open.read())
+            img.close()
+            url_open.close()
+
+        return image_path
+
+    @unfreeze
+    def set_info_image(self, image_path):
+        """
+        Sets the image of the current episode.
+        """
+
+        pixbuf = gtk.gdk.pixbuf_new_from_file(image_path)
+        case = gtk.gdk.pixbuf_new_from_file("images/case.png")
+
+        width = pixbuf.props.width
+        height = pixbuf.props.height
+        case.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+        case.composite(pixbuf, 0, 0, width, height, 0, 0, 1.0, 1.0,
+                       gtk.gdk.INTERP_HYPER, 255)
+
+        self.info_image.set_from_pixbuf(pixbuf)
+
+
     @unfreeze
     def show_shows(self, shows):
         """
@@ -748,8 +846,7 @@ def main():
     """
 
     gui_file = "gui.glade"
-    config_file = os.path.expanduser("~") + os.sep + ".guicavane.conf"
-    Guicavane(gui_file, config_file)
+    Guicavane(gui_file)
 
     if sys.platform == 'win32':
         gobject.threads_init()
