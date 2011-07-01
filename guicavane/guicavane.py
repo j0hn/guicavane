@@ -28,17 +28,14 @@ class Guicavane:
     Main class, loads the gui and handles all events.
     """
 
-    def __init__(self, gui_file):
+    def __init__(self):
         """
-        Creates the main window based on the glade file `gui_file`.
+        Creates the main window.
         """
-
-        # Precondition: must have gui_file
-        assert os.path.exists(gui_file)
 
         # Gtk builder
         self.builder = gtk.Builder()
-        self.builder.add_from_file(gui_file)
+        self.builder.add_from_file(GUI_FILE)
 
         # Config
         self.config = Config()
@@ -126,15 +123,7 @@ class Guicavane:
         Freezes the gui so the user can't interact with it.
         """
 
-        self.mode_combo.set_sensitive(False)
-        self.name_list.set_sensitive(False)
-        self.name_filter.set_sensitive(False)
-        self.name_filter_clear.set_sensitive(False)
-        self.file_viewer.set_sensitive(False)
-        self.search_entry.set_sensitive(False)
-        self.search_clear.set_sensitive(False)
-        self.search_button.set_sensitive(False)
-        self.set_status_message(status_message)
+        self.main_window.set_sensitive(False)
 
     def unfreeze(func):
         """
@@ -147,7 +136,7 @@ class Guicavane:
             Decorated function.
             """
 
-            self._unfreeze()
+            self.main_window.set_sensitive(True)
 
             args = [self] + list(args)  # func is a method so it needs self
             func(*args, **kwargs)
@@ -155,21 +144,13 @@ class Guicavane:
 
         return decorate
 
-    def _unfreeze(self):
+    def set_status_message(self, message):
         """
-        Sets the widgets to be usable.
-        Usually this function shouldn't be called directly but using the
-        decorator @unfreeze but is not completly wrong to use it.
+        Sets the message shown in the statusbar.
         """
-        self.set_status_message("")
-        self.mode_combo.set_sensitive(True)
-        self.name_list.set_sensitive(True)
-        self.name_filter.set_sensitive(True)
-        self.name_filter_clear.set_sensitive(True)
-        self.file_viewer.set_sensitive(True)
-        self.search_entry.set_sensitive(True)
-        self.search_clear.set_sensitive(True)
-        self.search_button.set_sensitive(True)
+
+        context_id = self.statusbar.get_context_id("Messages")
+        self.statusbar.push(context_id, message)
 
     def background_task(self, func, callback, *args, **kwargs):
         """
@@ -184,14 +165,6 @@ class Guicavane:
 
         self.freeze(status_message)
         GtkThreadRunner(callback, func, *args, **kwargs)
-
-    def set_status_message(self, message):
-        """
-        Sets the message shown in the statusbar.
-        """
-
-        context_id = self.statusbar.get_context_id("Messages")
-        self.statusbar.push(context_id, message)
 
     def _on_destroy(self, *args):
         """
@@ -838,22 +811,3 @@ def generic_visible_func(model, iteration, (entry, text_column)):
         return filtered_text in row_text
 
     return False
-
-
-def main():
-    """
-    Creates the window and starts gtk main loop.
-    """
-
-    gui_file = "gui.glade"
-    Guicavane(gui_file)
-
-    if sys.platform == 'win32':
-        gobject.threads_init()
-    else:
-        gtk.gdk.threads_init()
-
-    gtk.main()
-
-if __name__ == "__main__":
-    main()

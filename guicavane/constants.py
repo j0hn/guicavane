@@ -11,11 +11,12 @@ import os
 import sys
 import gtk
 
+# Directory separator
+SEP = os.sep
 
 # Allow correctly opening from outside
-path = os.path.dirname(sys.argv[0])
-if path:
-    os.chdir(path)
+MAIN_DIR = os.path.dirname(__file__)
+GUI_FILE = MAIN_DIR + SEP + "gui" + SEP + "main.glade"
 
 # Modes
 MODE_SHOWS = "Shows"
