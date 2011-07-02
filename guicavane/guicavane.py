@@ -124,6 +124,38 @@ class Guicavane:
 
         self.main_window.set_sensitive(False)
 
+    def freeze(self, status_message="Loading..."):
+        """
+        Freezes the gui so the user can't interact with it.
+        """
+
+        self.mode_combo.set_sensitive(False)
+        self.name_list.set_sensitive(False)
+        self.name_filter.set_sensitive(False)
+        self.name_filter_clear.set_sensitive(False)
+        self.file_viewer.set_sensitive(False)
+        self.search_entry.set_sensitive(False)
+        self.search_clear.set_sensitive(False)
+        self.search_button.set_sensitive(False)
+        self.set_status_message(status_message)
+
+    def _unfreeze(self):
+        """
+        Sets the widgets to be usable.
+        Usually this function shouldn't be called directly but using the
+        decorator @unfreeze but is not completly wrong to use it.
+        """
+
+        self.set_status_message("")
+        self.mode_combo.set_sensitive(True)
+        self.name_list.set_sensitive(True)
+        self.name_filter.set_sensitive(True)
+        self.name_filter_clear.set_sensitive(True)
+        self.file_viewer.set_sensitive(True)
+        self.search_entry.set_sensitive(True)
+        self.search_clear.set_sensitive(True)
+        self.search_button.set_sensitive(True)
+
     def unfreeze(func):
         """
         Decorator that calls the decorated function and then unfreezes
@@ -131,15 +163,10 @@ class Guicavane:
         """
 
         def decorate(self, *args, **kwargs):
-            """
-            Decorated function.
-            """
-
-            self.main_window.set_sensitive(True)
+            self._unfreeze()
 
             args = [self] + list(args)  # func is a method so it needs self
             func(*args, **kwargs)
-
 
         return decorate
 
