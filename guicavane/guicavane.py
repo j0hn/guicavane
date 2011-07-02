@@ -45,7 +45,6 @@ class Guicavane:
         self.current_seasson = None
         self.current_movies = {}
         self.download_error = False
-        self.waiting_time = 45
 
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
@@ -671,10 +670,11 @@ class Guicavane:
 
         megafile.start()
 
-        self.waiting_time = 45
-        gobject.timeout_add_seconds(1, self.update_waiting_message)
-
-        time.sleep(45)  # Megaupload's 45
+        for i in xrange(45, 0, -1):
+            loading_dots = "." * (3 - i % 4)
+            self.set_status_message("Please wait %d seconds%s" %
+                                   (i, loading_dots))
+            time.sleep(1)
 
         file_exists = False
 
@@ -701,6 +701,7 @@ class Guicavane:
             while megafile.running:
                 time.sleep(5)
         else:
+            time.sleep(5)  # Just to be sure it downloads some content
             player_command = self.config.get_key("player_command")
             os.system(player_command % filename)
             megafile.released = True
