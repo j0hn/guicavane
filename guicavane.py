@@ -289,7 +289,8 @@ class Guicavane:
 
             selected_text = get_selected_text(self.file_viewer,
                                               FILE_VIEW_COLUMN_TEXT)
-            if not selected_text.startswith("Temporada"):
+            if not selected_text.startswith("Temporada") and \
+               not selected_text == "..":
                 popup_menu.popup(None, None, None, event.button, event.time)
 
     def _on_play_clicked(self, *args):
