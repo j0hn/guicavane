@@ -73,6 +73,7 @@ class Player(object):
 
                 fraction = downloaded/size
                 self.gui.statusbar_progress.set_fraction(fraction)
+                self.gui.statusbar_progress.set_text("%.2f%%" % (fraction * 100))
 
             self.gui.statusbar_progress.hide()
         else:
