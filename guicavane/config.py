@@ -8,6 +8,7 @@ A simple module to provide configuration files using json as format.
 """
 
 import os
+import sys
 import json
 import tempfile
 
@@ -16,13 +17,21 @@ TEMP_DIR = tempfile.gettempdir()
 CONFIG_DIR = HOME_DIR + os.sep + ".config" + os.sep + "guicavane"
 IMAGES_DIR = CONFIG_DIR + os.sep + "images"
 CONFIG_FILE = CONFIG_DIR + os.sep + "guicavane.conf"
-DEFAULT_VALUES = {"player_command": "vlc %s",
+
+if sys.platform == "win32":
+    VLC_COMMAND = '"' + os.path.join(os.environ["ProgramFiles"],
+                                     "VideoLAN", "VLC", "vlc.exe") + "'"
+else:
+    VLC_COMMAND = "vlc"
+
+DEFAULT_VALUES = {"player_command": VLC_COMMAND + " %s",
                   "cache_dir": TEMP_DIR,
                   "last_mode": "Shows",
                   "favorites": [],
                   "last_download_directory": HOME_DIR,
                   "marks": [],
-                  "images_dir": IMAGES_DIR}
+                  "images_dir": IMAGES_DIR,
+                  "automatic_marks": False}
 
 if not os.path.exists(CONFIG_DIR):
     os.makedirs(CONFIG_DIR)
@@ -106,8 +115,8 @@ class Config:
         the empty values with default ones.
         """
 
-        for key in self.data:
-            if not self.data[key]:
+        for key in DEFAULT_VALUES:
+            if key not in self.data or not self.data[key]:
                 self.data[key] = get_default(key)
 
         with open(self.config_file, "w") as filehandler:
