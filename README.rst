@@ -11,6 +11,9 @@ For the backend uses a library made by Roger Duran, pycavane.
 
 To download the source and start enjoying Guicavana run:
 
+Linux Users
+-----------
+
 ::
 
     $ git clone git@github.com:j0hn/guicavane.git
@@ -18,4 +21,18 @@ To download the source and start enjoying Guicavana run:
     $ git submodule update
     $ # ???
     $ # profit
-    $ python guicavane.py
+    $ python main.py
+
+
+Windows Users
+-------------
+
+You can download the windows installer from the Download button
+on the github page and install it as usual.
+Make sure you have VLC installed and verify the path on guicavane
+preferences so it points to vlc.exe. It's important that the path
+to vlc.exe is quoted, so the preferences looks like this (or similar):
+
+::
+
+    "C:\Program files\Video LAN\VLC\vlc.exe" %s
