@@ -119,7 +119,7 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
         <property name="use_underline">True</property>
         <property name="image">imageMark</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="_on_mark_clicked" swapped="no"/>
+        <signal name="activate" handler="mark_selected" swapped="no"/>
       </object>
     </child>
     <child>
@@ -131,7 +131,7 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
         <property name="use_underline">True</property>
         <property name="image">imageUnmark</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="_on_unmark_clicked" swapped="no"/>
+        <signal name="activate" handler="unmark_selected" swapped="no"/>
       </object>
     </child>
   </object>

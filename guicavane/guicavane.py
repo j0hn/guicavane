@@ -17,9 +17,9 @@ import gobject
 import urllib
 
 import pycavane
+from player import Player
 from config import Config
 from settings import Settings
-from megaupload import MegaFile
 from threadrunner import GtkThreadRunner
 from constants import *
 
@@ -37,6 +37,7 @@ class Guicavane:
         # Gtk builder
         self.builder = gtk.Builder()
         self.builder.add_from_file(MAIN_GUI_FILE)
+        self.builder.connect_signals(self)
 
         # Config
         self.config = Config()
@@ -44,11 +45,19 @@ class Guicavane:
         # Settings window
         self.settings = Settings(self.config)
 
+        # Loading the API
+        cache_dir = self.config.get_key("cache_dir")
+        if cache_dir[-1] == os.sep:
+            cache_dir = cache_dir[:-1]
+        self.pycavane = pycavane.Pycavane(cache_dir=cache_dir)
+
+        # Load the player
+        self.player = Player(self, self.config, self.on_player_error)
+
         # Attributes
         self.current_show = None
         self.current_seasson = None
         self.current_movies = {}
-        self.download_error = False
 
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
@@ -77,9 +86,6 @@ class Guicavane:
                                           (self.name_filter, NAME_COLUMN_TEXT))
         self.name_list.set_model(self.name_model_filter)
 
-        # We leave the magic connection to glade
-        self.builder.connect_signals(self)
-
         # Keyboard shortcuts
         accel_group = gtk.AccelGroup()
         key, modifier = gtk.accelerator_parse("<Ctrl>W")
@@ -93,13 +99,7 @@ class Guicavane:
         # Now we show the window
         self.main_window.show_all()
 
-        # Loading the API
-        cache_dir = self.config.get_key("cache_dir")
-        if cache_dir[-1] == os.sep:
-            cache_dir = cache_dir[:-1]
-
-        self.pycavane = pycavane.Pycavane(cache_dir=cache_dir)
-
+        # Setup the basic stuff
         self.setup()
 
     def setup(self):
@@ -119,13 +119,6 @@ class Guicavane:
 
         last_mode = last_mode.lower()
         getattr(self, "set_mode_%s" % last_mode)()
-
-    def freeze(self, status_message="Loading..."):
-        """
-        Freezes the gui so the user can't interact with it.
-        """
-
-        self.main_window.set_sensitive(False)
 
     def freeze(self, status_message="Loading..."):
         """
@@ -229,12 +222,10 @@ class Guicavane:
         self.current_show = selected_text
 
         self.path_label.set_text(self.current_show)
-
         self.file_model.clear()
 
-        self.background_task(self.pycavane.seasson_by_show,
-                       self.show_seassons, selected_text,
-                       status_message="Loading show %s..." % selected_text)
+        self.background_task(self.pycavane.seasson_by_show, self.show_seassons,
+            selected_text, status_message="Loading show %s..." % selected_text)
 
     def _on_name_filter_change(self, *args):
         """
@@ -346,7 +337,7 @@ class Guicavane:
 
         chooser.destroy()
 
-    def _on_mark_clicked(self, *args):
+    def mark_selected(self, *args):
         """
         Called when the user clicks on Mark item in the context menu.
         """
@@ -359,7 +350,7 @@ class Guicavane:
         if selected_text not in self.config.get_key("marks"):
             self.config.append_key("marks", selected_text)
 
-    def _on_unmark_clicked(self, *args):
+    def unmark_selected(self, *args):
         """
         Called when the user clicks on Mark item in the context menu.
         """
@@ -622,7 +613,7 @@ class Guicavane:
                 episode_found = episode
                 break
 
-        self.background_task(self.download_file, self._on_close_player,
+        self.background_task(self.player.play, self.on_player_finish,
                              episode_found, file_path=file_path,
                              download_only=download_only)
 
@@ -632,101 +623,25 @@ class Guicavane:
         """
 
         movie = (self.current_movies[movie_text], movie_text)
-        self.background_task(self.download_file, self._on_close_player,
+        self.background_task(self.player.play, self.on_player_finish,
                              movie, is_movie=True, file_path=file_path,
                              download_only=download_only)
 
     @unfreeze
-    def _on_close_player(self, *args):
+    def on_player_finish(self, error):
         """
         Called when the user closes the player.
         """
 
-        # Nothing to do yet
-        pass
+        print error
 
-    def download_file(self, to_download, is_movie=False,
-                      file_path=None, download_only=False):
+    def on_player_error(self, error):
         """
-        Given an resource to download (movie or episode), downloads
-        the subtitles, starts downloading the file and starts the player.
-        If the resource it's a movie then is_movie has to be True.
-        """
-
-        link = self.pycavane.get_direct_links(to_download, host="megaupload",
-                                              movie=is_movie)
-
-        if link:
-            link = link[1]
-        else:
-            raise Exception("Not download source found")
-
-        if file_path:
-            cache_dir = file_path
-        else:
-            cache_dir = self.config.get_key("cache_dir")
-
-        megafile = MegaFile(link, cache_dir, self._on_download_error)
-        filename = megafile.cache_file
-
-        # Download the subtitle if it exists
-        try:
-            self.set_status_message("Downloading subtitles...")
-            subs_filename = filename.split(".mp4", 1)[0]
-            self.pycavane.get_subtitle(to_download, filename=subs_filename,
-                                       movie=is_movie)
-        except:
-            self.set_status_message("Not subtitles found")
-
-        megafile.start()
-
-        for i in xrange(45, 1, -1):
-            loading_dots = "." * (3 - i % 4)
-            self.set_status_message("Please wait %d seconds%s" %
-                                   (i, loading_dots))
-            time.sleep(1)
-
-        file_exists = False
-
-        # Wait until the file exists
-        while not file_exists and not self.download_error:
-            self.set_status_message("A few seconds left...")
-            file_exists = os.path.exists(filename)
-            time.sleep(2)
-
-        if self.download_error:
-            return
-
-        if download_only:
-            status_message = "Downloading: %s"
-        else:
-            status_message = "Now playing: %s"
-
-        if is_movie:
-            self.set_status_message(status_message % to_download[1])
-        else:
-            self.set_status_message(status_message % to_download[2])
-
-        if download_only:
-            while megafile.running:
-                time.sleep(5)
-        else:
-            time.sleep(5)  # Just to be sure it downloads some content
-            player_command = self.config.get_key("player_command")
-            os.system(player_command % filename)
-            megafile.released = True
-
-        if self.config.get_key("automatic_marks"):
-            self._on_mark_clicked()
-
-    def _on_download_error(self, error):
-        """
-        Called if the megaupload file has an error.
+        Called if the player has an error.
         """
 
         self._unfreeze()
         self.set_status_message("Download error: Limit Exceeded")
-        self.download_error = True
 
     def set_mode_shows(self, *args):
         """
