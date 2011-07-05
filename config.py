@@ -30,7 +30,8 @@ DEFAULT_VALUES = {"player_command": VLC_COMMAND + " %s",
                   "favorites": [],
                   "last_download_directory": HOME_DIR,
                   "marks": [],
-                  "images_dir": IMAGES_DIR}
+                  "images_dir": IMAGES_DIR,
+                  "automatic_marks": False}
 
 if not os.path.exists(CONFIG_DIR):
     os.makedirs(CONFIG_DIR)
@@ -114,8 +115,8 @@ class Config:
         the empty values with default ones.
         """
 
-        for key in self.data:
-            if not self.data[key]:
+        for key in DEFAULT_VALUES:
+            if key not in self.data or not self.data[key]:
                 self.data[key] = get_default(key)
 
         with open(self.config_file, "w") as filehandler:

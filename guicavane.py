@@ -151,7 +151,6 @@ class Guicavane:
             args = [self] + list(args)  # func is a method so it needs self
             func(*args, **kwargs)
 
-
         return decorate
 
     def _unfreeze(self):
@@ -318,7 +317,8 @@ class Guicavane:
         """
 
         chooser = gtk.FileChooserDialog(title="Dowload to...",
-                  parent=self.main_window, action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                  parent=self.main_window,
+                  action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                   buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
                   gtk.STOCK_SAVE, gtk.RESPONSE_OK))
 
@@ -352,7 +352,8 @@ class Guicavane:
         selected_text = model.get_value(iteration, FILE_VIEW_COLUMN_TEXT)
         model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE_MARK)
 
-        self.config.append_key("marks", selected_text)
+        if selected_text not in self.config.get_key("marks"):
+            self.config.append_key("marks", selected_text)
 
     def _on_unmark_clicked(self, *args):
         """
@@ -424,6 +425,8 @@ class Guicavane:
         player_cmd = self.builder.get_object("playerCommandEntry")
         cache_dir_button = self.builder.get_object("cachedirButton")
         cache_dir_button.set_filename(self.config.get_key("cache_dir"))
+        automatic_marks_button = self.builder.get_object("automaticMarks")
+        automatic_marks_button.set_active(self.config.get_key("automatic_marks"))
 
         player_cmd.set_text(self.config.get_key("player_command"))
         self.settings_dialog.run()
@@ -436,10 +439,12 @@ class Guicavane:
 
         player_cmd = self.builder.get_object("playerCommandEntry").get_text()
         cache_dir_button = self.builder.get_object("cachedirButton")
+        automatic_marks = self.builder.get_object("automaticMarks").get_active()
         cache_dir = cache_dir_button.get_filename()
 
         self.config.set_key("player_command", player_cmd)
         self.config.set_key("cache_dir", cache_dir)
+        self.config.set_key("automatic_marks", automatic_marks)
         self.config.save()
         self.settings_dialog.hide()
 
@@ -503,7 +508,6 @@ class Guicavane:
         Downloads the show image from `link`.
         """
 
-
         images_dir = self.config.get_key("images_dir")
         show = self.current_show.lower()
         show_file = show.replace(" ", "_") + ".jpg"
@@ -534,7 +538,6 @@ class Guicavane:
                        gtk.gdk.INTERP_HYPER, 255)
 
         self.info_image.set_from_pixbuf(pixbuf)
-
 
     @unfreeze
     def show_shows(self, shows):
@@ -574,7 +577,6 @@ class Guicavane:
                 episode_name = "%.2d - %s" % (int(episode_number), episode_name)
             except ValueError:
                 episode_name = "%s - %s" % (episode_number, episode_name)
-
 
             icon = ICON_FILE_MOVIE
             if episode_name in marks:
@@ -698,12 +700,11 @@ class Guicavane:
 
         megafile.start()
 
-        for i in xrange(40, 1, -1):
+        for i in xrange(45, 1, -1):
             loading_dots = "." * (3 - i % 4)
             self.set_status_message("Please wait %d seconds%s" %
                                    (i, loading_dots))
             time.sleep(1)
-
 
         file_exists = False
 
@@ -734,6 +735,9 @@ class Guicavane:
             player_command = self.config.get_key("player_command")
             os.system(player_command % filename)
             megafile.released = True
+
+        if self.config.get_key("automatic_marks"):
+            self._on_mark_clicked()
 
     def _on_download_error(self, error):
         """
