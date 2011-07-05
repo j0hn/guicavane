@@ -18,6 +18,7 @@ import urllib
 
 import pycavane
 from config import Config
+from settings import Settings
 from megaupload import MegaFile
 from threadrunner import GtkThreadRunner
 from constants import *
@@ -35,10 +36,13 @@ class Guicavane:
 
         # Gtk builder
         self.builder = gtk.Builder()
-        self.builder.add_from_file(GUI_FILE)
+        self.builder.add_from_file(MAIN_GUI_FILE)
 
         # Config
         self.config = Config()
+
+        # Settings window
+        self.settings = Settings(self.config)
 
         # Attributes
         self.current_show = None
@@ -48,7 +52,6 @@ class Guicavane:
 
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
-        self.settings_dialog = self.builder.get_object("settingsDialog")
         self.statusbar = self.builder.get_object("statusbar")
         self.name_filter = self.builder.get_object("nameFilter")
         self.name_filter_clear = self.builder.get_object("nameFilterClear")
@@ -423,31 +426,7 @@ class Guicavane:
         Called when the user opens the preferences from the menu.
         """
 
-        player_cmd = self.builder.get_object("playerCommandEntry")
-        cache_dir_button = self.builder.get_object("cachedirButton")
-        cache_dir_button.set_filename(self.config.get_key("cache_dir"))
-        automatic_marks_button = self.builder.get_object("automaticMarks")
-        automatic_marks_button.set_active(self.config.get_key("automatic_marks"))
-
-        player_cmd.set_text(self.config.get_key("player_command"))
-        self.settings_dialog.run()
-        self.settings_dialog.hide()
-
-    def _on_save_settings(self, *args):
-        """
-        Saves the settings to the disk.
-        """
-
-        player_cmd = self.builder.get_object("playerCommandEntry").get_text()
-        cache_dir_button = self.builder.get_object("cachedirButton")
-        automatic_marks = self.builder.get_object("automaticMarks").get_active()
-        cache_dir = cache_dir_button.get_filename()
-
-        self.config.set_key("player_command", player_cmd)
-        self.config.set_key("cache_dir", cache_dir)
-        self.config.set_key("automatic_marks", automatic_marks)
-        self.config.save()
-        self.settings_dialog.hide()
+        self.settings.show()
 
     def _on_info_clicked(self, *args):
         """
