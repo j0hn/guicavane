@@ -18,8 +18,8 @@ class Player(object):
         self.pycavane = self.gui.pycavane
         self.error_callback = error_callback
 
-    def play(self, title, is_movie=False, file_path=None, download_only=False):
-        link = self.pycavane.get_direct_links(title, host="megaupload", movie=is_movie)
+    def play(self, to_download, is_movie=False, file_path=None, download_only=False):
+        link = self.pycavane.get_direct_links(to_download, host="megaupload", movie=is_movie)
 
         if link:
             link = link[1]
@@ -32,16 +32,16 @@ class Player(object):
             cache_dir = self.config.get_key("cache_dir")
 
         if is_movie:
-            title = title[1]
+            title = to_download[1]
         else:
-            title = title[2]
+            title = to_download[2]
 
         # Create the megaupload instance
         megafile = MegaFile(link, cache_dir, self.error_callback)
         filename = megafile.cache_file
 
         # Download the subtitles
-        self.download_subtitles(title, filename, is_movie)
+        self.download_subtitles(to_download, filename, is_movie)
 
         # Start the file download
         megafile.start()
@@ -62,10 +62,19 @@ class Player(object):
         # Play or Download
         if download_only:
             self.gui.set_status_message("Downloading: %s" % title)
+            self.gui.statusbar_progress.show()
 
             # Wait till finish downloading
             while megafile.running:
-                time.sleep(5)
+                time.sleep(1)
+
+                downloaded = float(megafile.downloaded_size)
+                size = float(megafile.size)
+
+                fraction = downloaded/size
+                self.gui.statusbar_progress.set_fraction(fraction)
+
+            self.gui.statusbar_progress.hide()
         else:
             self.gui.set_status_message("Now playing: %s" % title)
 
@@ -80,7 +89,7 @@ class Player(object):
         if self.config.get_key("automatic_marks"):
             self.gui.mark_selected()
 
-    def download_subtitles(self, title, filename, is_movie):
+    def download_subtitles(self, to_download, filename, is_movie):
         """
         Download the subtitle if it exists.
         """
@@ -89,6 +98,8 @@ class Player(object):
         subs_filename = filename.split(".mp4", 1)[0]
 
         try:
-            self.pycavane.get_subtitle(title, filename=subs_filename, movie=is_movie)
-        except:
+            self.pycavane.get_subtitle(to_download, filename=subs_filename, movie=is_movie)
+        except Exception, e:
+            print "HERE"
+            print e
             self.gui.set_status_message("Not subtitles found")

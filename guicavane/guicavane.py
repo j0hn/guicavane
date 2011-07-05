@@ -61,7 +61,8 @@ class Guicavane:
 
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
-        self.statusbar = self.builder.get_object("statusbar")
+        self.statusbar_label = self.builder.get_object("statusbarLabel")
+        self.statusbar_progress = self.builder.get_object("statusbarProgress")
         self.name_filter = self.builder.get_object("nameFilter")
         self.name_filter_clear = self.builder.get_object("nameFilterClear")
         self.name_list = self.builder.get_object("nameList")
@@ -171,8 +172,7 @@ class Guicavane:
         Sets the message shown in the statusbar.
         """
 
-        context_id = self.statusbar.get_context_id("Messages")
-        self.statusbar.push(context_id, message)
+        self.statusbar_label.set_label(message)
 
     def background_task(self, func, callback, *args, **kwargs):
         """

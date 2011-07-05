@@ -17,6 +17,7 @@ from pycavane.util import UrlOpen
 
 
 MEGALINK_RE = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')
+FILE_SIZE_RE = re.compile("<strong>.+?</strong> (.+?) MB<br />")
 
 URL_OPEN = UrlOpen()
 
@@ -34,13 +35,17 @@ class MegaFile(Thread):
         self.errback = errback
         self.released = False
         self.running = True
+        self.size = 0
 
     def get_megalink(self, link):
         """
         Returns the real file link after waiting the 45 seconds.
         """
 
-        megalink = MEGALINK_RE.findall(URL_OPEN(link))
+        page_data = URL_OPEN(link)
+        megalink = MEGALINK_RE.findall(page_data)
+        self.size = FILE_SIZE_RE.search(page_data).group(1)
+
         if megalink:
             time.sleep(45)
             return megalink[0]
@@ -55,7 +60,7 @@ class MegaFile(Thread):
         return self.cachedir + os.sep + self.filename + ".mp4"
 
     @property
-    def size(self):
+    def downloaded_size(self):
         """
         Returns the size of the downloaded file at the moment.
         """
@@ -63,6 +68,7 @@ class MegaFile(Thread):
         size = 0
         if os.path.exists(self.cache_file):
             size = os.path.getsize(self.cache_file)
+            size = size / 1024.0 / 1024.0  # In MB
         return size
 
     def run(self):
