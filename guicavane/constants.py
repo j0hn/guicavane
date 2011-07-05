@@ -17,6 +17,9 @@ SEP = os.sep
 # Directories
 MAIN_DIR = os.path.dirname(__file__)
 GUI_DIR = MAIN_DIR + SEP + "gui"
+IMAGES_DIR = MAIN_DIR.rsplit("/", 1)[0] + SEP + "images"
+
+# Gui Files
 MAIN_GUI_FILE = GUI_DIR + SEP + "main.glade"
 SETTINGS_GUI_FILE = GUI_DIR + SEP + "settings.glade"
 
@@ -34,13 +37,13 @@ NAME_COLUMN_TEXT = 0
 
 # Icons
 IMAGE_FOLDER = gtk.Image()
-IMAGE_FOLDER.set_from_file("images/folder.png")
+IMAGE_FOLDER.set_from_file(IMAGES_DIR + SEP + "folder.png")
 ICON_FOLDER = IMAGE_FOLDER.get_pixbuf()
 
 IMAGE_FILE_MOVIE = gtk.Image()
-IMAGE_FILE_MOVIE.set_from_file("images/video_file.png")
+IMAGE_FILE_MOVIE.set_from_file(IMAGES_DIR + SEP + "video_file.png")
 ICON_FILE_MOVIE = IMAGE_FILE_MOVIE.get_pixbuf()
 
 IMAGE_FILE_MOVIE_MARK = gtk.Image()
-IMAGE_FILE_MOVIE_MARK.set_from_file("images/video_file_mark.png")
+IMAGE_FILE_MOVIE_MARK.set_from_file(IMAGES_DIR + SEP + "video_file_mark.png")
 ICON_FILE_MOVIE_MARK = IMAGE_FILE_MOVIE_MARK.get_pixbuf()
