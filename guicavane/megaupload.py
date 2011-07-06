@@ -17,7 +17,7 @@ from pycavane.util import UrlOpen
 
 
 MEGALINK_RE = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')
-FILE_SIZE_RE = re.compile("<strong>.+?</strong> (.+?) MB<br />")
+FILE_SIZE_RE = re.compile("<strong>(File size:|Tamaño del archivo:)</strong> (.+?) MB<br />")
 
 URL_OPEN = UrlOpen()
 
@@ -44,7 +44,7 @@ class MegaFile(Thread):
 
         page_data = URL_OPEN(link)
         megalink = MEGALINK_RE.findall(page_data)
-        self.size = FILE_SIZE_RE.search(page_data).group(1)
+        self.size = FILE_SIZE_RE.search(page_data).group(2)
 
         if megalink:
             time.sleep(45)
