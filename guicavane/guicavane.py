@@ -438,11 +438,8 @@ class Guicavane:
         show = self.current_show
         seasson = self.current_seasson
 
-        episode_found = None
-        for episode in self.pycavane.episodes_by_season(show, seasson):
-            if episode[2] == selected_episode:
-                episode_found = episode
-                break
+        episode_found = self.pycavane.episode_by_name(selected_episode,
+                                                      show, seasson)
 
         if not episode_found:
             return
@@ -608,10 +605,8 @@ class Guicavane:
         show = self.current_show
         seasson = self.current_seasson
 
-        for episode in self.pycavane.episodes_by_season(show, seasson):
-            if episode[2] == selected_episode:
-                episode_found = episode
-                break
+        episode_found = self.pycavane.episode_by_name(selected_text,
+                                                      show, seasson)
 
         self.background_task(self.player.play, self.on_player_finish,
                              episode_found, file_path=file_path,
