@@ -15,9 +15,14 @@ import gtk
 SEP = os.sep
 
 # Directories
-MAIN_DIR = os.path.dirname(__file__)
+if sys.platform == "win32":
+    MAIN_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
+    IMAGES_DIR = MAIN_DIR + SEP + "images"
+else:
+    MAIN_DIR = os.path.dirname(__file__)
+    IMAGES_DIR = MAIN_DIR.rsplit(SEP, 1)[0] + SEP + "images"
+
 GUI_DIR = MAIN_DIR + SEP + "gui"
-IMAGES_DIR = MAIN_DIR.rsplit("/", 1)[0] + SEP + "images"
 
 # Gui Files
 MAIN_GUI_FILE = GUI_DIR + SEP + "main.glade"
@@ -34,6 +39,7 @@ MODES = [MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES]
 FILE_VIEW_COLUMN_PIXBUF = 0
 FILE_VIEW_COLUMN_TEXT = 1
 NAME_COLUMN_TEXT = 0
+
 
 # Icons
 IMAGE_FOLDER = gtk.Image()
