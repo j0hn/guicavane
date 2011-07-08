@@ -11,6 +11,10 @@ For the backend uses a library made by Roger Duran, pycavane.
 
 To download the source and start enjoying Guicavana run:
 
+Current Version
+---------------
+1.0.1
+
 Linux Users
 -----------
 
