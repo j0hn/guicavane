@@ -19,12 +19,12 @@ IMAGES_DIR = CONFIG_DIR + os.sep + "images"
 CONFIG_FILE = CONFIG_DIR + os.sep + "guicavane.conf"
 
 if sys.platform == "win32":
-    VLC_COMMAND = '"' + os.path.join(os.environ["ProgramFiles"],
+    VLC_LOCATION = '"' + os.path.join(os.environ["ProgramFiles"],
                                      "VideoLAN", "VLC", "vlc.exe") + "'"
 else:
-    VLC_COMMAND = "vlc"
+    VLC_LOCATION = "/usr/bin/vlc"
 
-DEFAULT_VALUES = {"player_command": VLC_COMMAND + " %s",
+DEFAULT_VALUES = {"player_location": VLC_LOCATION,
                   "cache_dir": TEMP_DIR,
                   "last_mode": "Shows",
                   "favorites": [],
@@ -58,18 +58,18 @@ class Config:
 
         self.data = {}
 
-        if not os.path.exists(self.config_file):
-            self.data = DEFAULT_VALUES
-            self.save()
-            return
+        if os.path.exists(self.config_file):
+            with open(self.config_file) as filehandler:
+                data = filehandler.read()
 
-        with open(self.config_file) as filehandler:
-            data = filehandler.read()
-            if data == [] or data:
                 try:
                     self.data = json.loads(data)
                 except ValueError:
                     self.data = DEFAULT_VALUES
+        else:
+            self.data = DEFAULT_VALUES
+
+        self.save()
 
     def get_key(self, key):
         """
@@ -116,9 +116,9 @@ class Config:
         """
 
         for key in DEFAULT_VALUES:
-            if key not in self.data or not self.data[key]:
+            if key not in self.data:
                 self.data[key] = get_default(key)
 
         with open(self.config_file, "w") as filehandler:
-            filehandler.write(json.dumps(self.data,
-                                         sort_keys=True, indent=4) + "\n")
+            json_data = json.dumps(self.data, sort_keys=True, indent=4)
+            filehandler.write(json_data + "\n")

@@ -9,11 +9,8 @@ Author: Gonzalo Garcia (A.K.A j0hn) <j0hn.com.ar@gmail.com>
 """
 
 import os
-import sys
 import gtk
-import time
 import string
-import gobject
 import urllib
 
 import pycavane
@@ -629,7 +626,8 @@ class Guicavane:
         Called when the user closes the player.
         """
 
-        print error
+        if error:
+            print "An error has ocurred on playing the file: %s" % error
 
     def on_player_error(self, error):
         """

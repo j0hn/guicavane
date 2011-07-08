@@ -29,7 +29,7 @@ class Settings(object):
 
         # Widgets
         self.main_dialog = self.builder.get_object("settingsDialog")
-        self.player_cmd_entry = self.builder.get_object("playerCommandEntry")
+        self.player_button = self.builder.get_object("playerLocationButton")
         self.cache_dir_button = self.builder.get_object("cachedirButton")
         self.automatic_marks_button = self.builder.get_object("automaticMarks")
 
@@ -39,12 +39,12 @@ class Settings(object):
         """
 
         # Get the config values
-        player_cmd = self.config.get_key("player_command")
+        player_location = self.config.get_key("player_location")
         cache_dir = self.config.get_key("cache_dir")
         automatic_marks = self.config.get_key("automatic_marks")
 
         # Set the values
-        self.player_cmd_entry.set_text(player_cmd)
+        self.player_button.set_filename(player_location)
         self.cache_dir_button.set_filename(cache_dir)
         self.automatic_marks_button.set_active(automatic_marks)
 
@@ -58,12 +58,12 @@ class Settings(object):
         """
 
         # Get the values
-        player_cmd = self.player_cmd_entry.get_text()
+        player_location = self.player_button.get_filename()
         cache_dir = self.cache_dir_button.get_filename()
         automatic_marks = self.automatic_marks_button.get_active()
 
         # Save the new values to the config
-        self.config.set_key("player_command", player_cmd)
+        self.config.set_key("player_location", player_location)
         self.config.set_key("cache_dir", cache_dir)
         self.config.set_key("automatic_marks", automatic_marks)
         self.config.save()
