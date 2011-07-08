@@ -53,3 +53,5 @@ ICON_FILE_MOVIE = IMAGE_FILE_MOVIE.get_pixbuf()
 IMAGE_FILE_MOVIE_MARK = gtk.Image()
 IMAGE_FILE_MOVIE_MARK.set_from_file(IMAGES_DIR + SEP + "video_file_mark.png")
 ICON_FILE_MOVIE_MARK = IMAGE_FILE_MOVIE_MARK.get_pixbuf()
+
+CASE_IMAGE_PATH = "images/case.png"

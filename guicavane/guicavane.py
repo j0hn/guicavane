@@ -497,11 +497,12 @@ class Guicavane:
         """
 
         pixbuf = gtk.gdk.pixbuf_new_from_file(image_path)
-        case = gtk.gdk.pixbuf_new_from_file("images/case.png")
+        case = gtk.gdk.pixbuf_new_from_file(CASE_IMAGE_PATH)
 
         width = pixbuf.props.width
         height = pixbuf.props.height
-        case.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
+
+        case = case.scale_simple(width, height, gtk.gdk.INTERP_BILINEAR)
         case.composite(pixbuf, 0, 0, width, height, 0, 0, 1.0, 1.0,
                        gtk.gdk.INTERP_HYPER, 255)
 
