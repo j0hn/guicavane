@@ -82,8 +82,8 @@ class Player(object):
             # Wait some more just to be sure it downloads some content
             time.sleep(5)
 
-            player_command = self.config.get_key("player_command")
-            os.system(player_command % filename)
+            player_location = self.config.get_key("player_location")
+            os.system("%s %s" % (player_location, filename))
             megafile.released = True
 
         # Automatic mark
@@ -101,6 +101,4 @@ class Player(object):
         try:
             self.pycavane.get_subtitle(to_download, filename=subs_filename, movie=is_movie)
         except Exception, e:
-            print "HERE"
-            print e
             self.gui.set_status_message("Not subtitles found")
