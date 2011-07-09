@@ -81,9 +81,8 @@ class Player(object):
         self.gui.statusbar_progress.set_fraction(0.0)
         self.gui.statusbar_progress.show()
 
-        # 1000 Because fraction goes from 0.0 to 1.0
         cached_percentage = self.config.get_key("cached_percentage")
-        cached_percentage = cached_percentage/1000.0
+        cached_percentage = cached_percentage / 100.0
 
         player_location = self.config.get_key("player_location")
         size = float(megafile.size)

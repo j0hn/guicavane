@@ -34,7 +34,7 @@ class Settings(object):
         self.automatic_marks_button = self.builder.get_object("automaticMarks")
         self.cached_percentage = self.builder.get_object("cachePercentage")
 
-        for i in range(0, 100, 5):
+        for i in range(0, 100, 10):
             self.cached_percentage.add_mark(i, gtk.POS_TOP, "")
 
     def show(self):
