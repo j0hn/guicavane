@@ -85,9 +85,6 @@ class Player(object):
         cached_percentage = self.config.get_key("cached_percentage")
         cached_percentage = cached_percentage/1000.0
 
-        print cached_percentage
-        return
-
         player_location = self.config.get_key("player_location")
         size = float(megafile.size)
         stop = False
