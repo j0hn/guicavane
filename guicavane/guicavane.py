@@ -115,6 +115,7 @@ class Guicavane:
         # Set the combobox in the right mode
         self.mode_combo.set_active(MODES.index(last_mode))
 
+
         last_mode = last_mode.lower()
         getattr(self, "set_mode_%s" % last_mode)()
 
@@ -645,6 +646,7 @@ class Guicavane:
 
         self.sidebar.show()
         self.search_entry.set_text("")
+        self.name_filter.set_text("")
         self.path_label.set_text("")
         self.name_model.clear()
         self.background_task(self.pycavane.get_shows, self.show_shows,
@@ -659,6 +661,7 @@ class Guicavane:
         self.search_entry.grab_focus()
         self.sidebar.hide()
         self.path_label.set_text("")
+        self.name_filter.set_text("")
 
     def set_mode_favorites(self):
         """
@@ -668,6 +671,7 @@ class Guicavane:
         self.sidebar.show()
         self.search_entry.set_text("")
         self.path_label.set_text("")
+        self.name_filter.set_text("")
         self.name_model.clear()
         for favorite in self.config.get_key("favorites"):
             self.name_model.append([favorite])
