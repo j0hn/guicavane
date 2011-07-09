@@ -2,6 +2,11 @@
 <interface>
   <requires lib="gtk+" version="2.24"/>
   <!-- interface-naming-policy project-wide -->
+  <object class="GtkAdjustment" id="cachePercentageScale">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkDialog" id="settingsDialog">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -26,6 +31,7 @@
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Location of the executable file that will be fired to show the video.</property>
                 <property name="xalign">0</property>
                 <property name="label" translatable="yes">Player location:</property>
                 <attributes>
@@ -69,6 +75,7 @@
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Directory where the files will be downloaded temporarily</property>
                 <property name="xalign">0</property>
                 <property name="label" translatable="yes">Cache directory:</property>
                 <attributes>
@@ -105,22 +112,41 @@
           </packing>
         </child>
         <child>
-          <object class="GtkCheckButton" id="automaticMarks">
+          <object class="GtkHBox" id="cachePercentageHbox">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="use_action_appearance">False</property>
-            <property name="draw_indicator">True</property>
+            <property name="can_focus">False</property>
             <child>
-              <object class="GtkLabel" id="automaticMarksLabel">
+              <object class="GtkLabel" id="cachePercentageLabel">
+                <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Percentage of the video to be downloaded before start the player</property>
                 <property name="xalign">0</property>
-                <property name="label" translatable="yes">Automatic Marks</property>
+                <property name="label" translatable="yes">Cache Percentage:</property>
                 <attributes>
                   <attribute name="weight" value="bold"/>
                 </attributes>
               </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHScale" id="cachePercentage">
+                <property name="width_request">200</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="adjustment">cachePercentageScale</property>
+                <property name="round_digits">0</property>
+                <property name="digits">0</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
             </child>
           </object>
           <packing>
@@ -174,7 +200,30 @@
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkCheckButton" id="automaticMarks">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="tooltip_text" translatable="yes">Automatically mark videos after watching them</property>
+            <property name="use_action_appearance">False</property>
+            <property name="draw_indicator">True</property>
+            <child>
+              <object class="GtkLabel" id="automaticMarksLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="label" translatable="yes">Automatic Marks</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">5</property>
+          </packing>
         </child>
       </object>
     </child>

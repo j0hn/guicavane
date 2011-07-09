@@ -627,7 +627,8 @@ class Guicavane:
         """
 
         if error:
-            print "An error has ocurred on playing the file: %s" % error
+            message = "An error has ocurred on playing the file: %s" % error
+            self.set_status_message(message)
 
     def on_player_error(self, error):
         """

@@ -19,8 +19,7 @@ IMAGES_DIR = CONFIG_DIR + os.sep + "images"
 CONFIG_FILE = CONFIG_DIR + os.sep + "guicavane.conf"
 
 if sys.platform == "win32":
-    VLC_LOCATION = '"' + os.path.join(os.environ["ProgramFiles"],
-                                     "VideoLAN", "VLC", "vlc.exe") + "'"
+    VLC_LOCATION = os.path.join(os.environ["ProgramFiles"], "VideoLAN", "VLC", "vlc.exe")
 else:
     VLC_LOCATION = "/usr/bin/vlc"
 
@@ -31,7 +30,8 @@ DEFAULT_VALUES = {"player_location": VLC_LOCATION,
                   "last_download_directory": HOME_DIR,
                   "marks": [],
                   "images_dir": IMAGES_DIR,
-                  "automatic_marks": False}
+                  "automatic_marks": False,
+                  "cached_percentage": 5}
 
 if not os.path.exists(CONFIG_DIR):
     os.makedirs(CONFIG_DIR)
