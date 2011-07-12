@@ -57,11 +57,12 @@ class Player(object):
         megafile.start()
 
         # Wait the megaupload 45 seconds
-        for i in xrange(45, 1, -1):
-            loading_dots = "." * (3 - i % 4)
-            self.gui.set_status_message("Please wait %d seconds%s" % \
-                                        (i, loading_dots))
-            time.sleep(1)
+        if not megafile.downloaded:
+            for i in xrange(45, 1, -1):
+                loading_dots = "." * (3 - i % 4)
+                self.gui.set_status_message("Please wait %d seconds%s" % \
+                                            (i, loading_dots))
+                time.sleep(1)
 
         # Wait until the file exists
         file_exists = False
@@ -76,10 +77,9 @@ class Player(object):
         else:
             self.gui.set_status_message("Now playing: %s" % title)
 
-
         # Show the progress bar
-        self.gui.statusbar_progress.set_fraction(0.0)
-        self.gui.statusbar_progress.show()
+        # self.gui.statusbar_progress.set_fraction(0.0)
+        # self.gui.statusbar_progress.show()
 
         cached_percentage = self.config.get_key("cached_percentage")
         cached_percentage = cached_percentage / 100.0
@@ -88,11 +88,12 @@ class Player(object):
         size = float(megafile.size)
         stop = False
         running = False
-        while not stop and megafile.running:
+        while not stop and megafile.downloaded:
             time.sleep(0.7)
 
             downloaded = float(megafile.downloaded_size)
             fraction = downloaded / size
+            print fraction
 
             if not download_only:
                 if not running and fraction > cached_percentage:
@@ -102,11 +103,11 @@ class Player(object):
                 if running and process.poll() != None:
                     stop = True
 
-            self.gui.statusbar_progress.set_fraction(fraction)
-            self.gui.statusbar_progress.set_text("%.2f%%" % \
-                                                 (fraction * 100))
+            # self.gui.statusbar_progress.set_fraction(fraction)
+            # self.gui.statusbar_progress.set_text("%.2f%%" % \
+            #                                      (fraction * 100))
 
-        self.gui.statusbar_progress.hide()
+        # self.gui.statusbar_progress.hide()
 
         # Automatic mark
         if self.config.get_key("automatic_marks"):

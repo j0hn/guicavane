@@ -627,9 +627,7 @@ class Guicavane:
         Called when the user closes the player.
         """
 
-        if error:
-            message = "An error has ocurred on playing the file: %s" % error
-            self.set_status_message(message)
+        pass
 
     def on_player_error(self, error):
         """
