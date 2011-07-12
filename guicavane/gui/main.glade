@@ -134,6 +134,18 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
         <signal name="activate" handler="unmark_selected" swapped="no"/>
       </object>
     </child>
+    <child>
+      <object class="GtkImageMenuItem" id="open_in_cuevana">
+        <property name="label" translatable="yes">Open in Cuevana</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_action_appearance">False</property>
+        <property name="use_underline">True</property>
+        <property name="image">imageCuevana</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="open_in_cuevana" swapped="no"/>
+      </object>
+    </child>
   </object>
   <object class="GtkImage" id="imageAdd">
     <property name="visible">True</property>
@@ -169,6 +181,11 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="pixbuf">../../images/unmark.png</property>
+  </object>
+  <object class="GtkImage" id="imageCuevana">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">../../images/cuevana.png</property>
   </object>
   <object class="GtkWindow" id="infoWindow">
     <property name="can_focus">False</property>

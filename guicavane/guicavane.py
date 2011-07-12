@@ -15,13 +15,15 @@ import time
 import string
 import gobject
 import urllib
+import webbrowser
+from unicodedata import normalize
 
 import pycavane
+from constants import *
 from player import Player
 from config import Config
 from settings import Settings
 from threadrunner import GtkThreadRunner
-from constants import *
 
 
 class Guicavane:
@@ -364,6 +366,65 @@ class Guicavane:
         if selected_text in marks:
             model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE)
             self.config.remove_key("marks", selected_text)
+
+    def normalize_string(self, str):
+        """
+        Take a string and return a cleaned string ready to use for cuevana
+        """
+        repl_list = [(' ', '-'),
+                     ('.', ''),
+                     ('\'',''),
+                     ('?', ''),
+                     ('$', ''),
+                     ('#', ''),
+                     ('*', ''),
+                     ('!', ''),
+                     (':', '')]
+
+        uni_str = unicode(str, 'utf-8')
+        clean_str = normalize('NFKD',uni_str).encode('ASCII', 'ignore').lower()
+
+        for combo in repl_list:
+            clean_str = clean_str.replace(combo[0], combo[1])
+
+        return clean_str
+
+    def open_in_cuevana(self, *args):
+        """
+        Open selected episode or movie on cuevana website.
+        """
+
+        selected_text = get_selected_text(self.file_viewer,
+                                          FILE_VIEW_COLUMN_TEXT)
+
+
+        if selected_text.count(" - "): #It's a serie
+            link = "http://www.cuevana.tv/series/%s/%s/%s/"
+            show = self.current_show
+            season = self.current_seasson
+
+            try:
+                selected_episode = selected_text.split(" - ", 1)[1]
+            except IndexError:
+                return
+
+            data = self.pycavane.episode_by_name(selected_episode,
+                                                 show, season)
+            assert data != None
+
+            show = self.normalize_string(show)
+            episode = self.normalize_string(data[2])
+
+            webbrowser.open(link % (data[0], show, episode))
+        else:
+            link = "http://www.cuevana.tv/peliculas/%s/%s/"
+            data = self.pycavane.movie_by_name(selected_text)
+
+            print data[1]
+            movie = self.normalize_string(data[1])
+
+            print movie
+            webbrowser.open(link % (data[0], movie))
 
     def _on_search_clear_clicked(self, *args):
         """
