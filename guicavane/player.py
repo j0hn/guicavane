@@ -7,6 +7,7 @@ Player. Handles the download and starts the player.
 
 import os
 import time
+import gobject
 import subprocess
 from megaupload import MegaFile
 
@@ -78,8 +79,11 @@ class Player(object):
             self.gui.set_status_message("Now playing: %s" % title)
 
         # Show the progress bar
-        # self.gui.statusbar_progress.set_fraction(0.0)
-        # self.gui.statusbar_progress.show()
+        def show_statusbar():
+            self.gui.statusbar_progress.set_fraction(0.0)
+            self.gui.statusbar_progress.show()
+
+        gobject.idle_add(show_statusbar)
 
         cached_percentage = self.config.get_key("cached_percentage")
         cached_percentage = cached_percentage / 100.0
@@ -88,12 +92,12 @@ class Player(object):
         size = float(megafile.size)
         stop = False
         running = False
-        while not stop and megafile.downloaded:
+        while not stop:
             time.sleep(0.7)
 
             downloaded = float(megafile.downloaded_size)
+
             fraction = downloaded / size
-            print fraction
 
             if not download_only:
                 if not running and fraction > cached_percentage:
@@ -103,11 +107,10 @@ class Player(object):
                 if running and process.poll() != None:
                     stop = True
 
-            # self.gui.statusbar_progress.set_fraction(fraction)
-            # self.gui.statusbar_progress.set_text("%.2f%%" % \
-            #                                      (fraction * 100))
+            gobject.idle_add(self.gui.statusbar_progress.set_fraction, fraction)
+            gobject.idle_add(self.gui.statusbar_progress.set_text, "%.2f%%" % (fraction * 100))
 
-        # self.gui.statusbar_progress.hide()
+        gobject.idle_add(self.gui.statusbar_progress.hide)
 
         # Automatic mark
         if self.config.get_key("automatic_marks"):

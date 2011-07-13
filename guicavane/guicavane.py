@@ -365,28 +365,6 @@ class Guicavane:
             model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE)
             self.config.remove_key("marks", selected_text)
 
-    def normalize_string(self, str):
-        """
-        Take a string and return a cleaned string ready to use for cuevana
-        """
-        repl_list = [(' ', '-'),
-                     ('.', ''),
-                     ('\'',''),
-                     ('?', ''),
-                     ('$', ''),
-                     ('#', ''),
-                     ('*', ''),
-                     ('!', ''),
-                     (':', '')]
-
-        uni_str = unicode(str, 'utf-8')
-        clean_str = normalize('NFKD',uni_str).encode('ASCII', 'ignore').lower()
-
-        for combo in repl_list:
-            clean_str = clean_str.replace(combo[0], combo[1])
-
-        return clean_str
-
     def open_in_cuevana(self, *args):
         """
         Open selected episode or movie on cuevana website.
@@ -410,8 +388,8 @@ class Guicavane:
                                                  show, season)
             assert data != None
 
-            show = self.normalize_string(show)
-            episode = self.normalize_string(data[2])
+            show = normalize_string(show)
+            episode = normalize_string(data[2])
 
             webbrowser.open(link % (data[0], show, episode))
         else:
@@ -419,7 +397,7 @@ class Guicavane:
             data = self.pycavane.movie_by_name(selected_text)
 
             print data[1]
-            movie = self.normalize_string(data[1])
+            movie = normalize_string(data[1])
 
             print movie
             webbrowser.open(link % (data[0], movie))
@@ -688,6 +666,7 @@ class Guicavane:
         Called when the user closes the player.
         """
 
+        print error
         pass
 
     def on_player_error(self, error):
@@ -783,3 +762,27 @@ def generic_visible_func(model, iteration, (entry, text_column)):
         return filtered_text in row_text
 
     return False
+
+
+def normalize_string(string):
+    """
+    Take a string and return a cleaned string ready to use for cuevana
+    """
+    repl_list = [(' ', '-'),
+                 ('.', ''),
+                 ('\'',''),
+                 ('?', ''),
+                 ('$', ''),
+                 ('#', ''),
+                 ('*', ''),
+                 ('!', ''),
+                 (':', '')]
+
+    uni_str = unicode(string, 'utf-8')
+    clean_str = normalize('NFKD',uni_str).encode('ASCII', 'ignore').lower()
+
+    for combo in repl_list:
+        clean_str = clean_str.replace(combo[0], combo[1])
+
+    return clean_str
+
