@@ -2,10 +2,7 @@
 # coding: utf-8
 
 """
-Guicavane: graphical user interface for the website cuevana.tv
-
-Uses gtk toolkit to provide the graphical interface of the website
-Author: Gonzalo Garcia (A.K.A j0hn) <j0hn.com.ar@gmail.com>
+Gui Handler. Module that takes care of the interface events.
 """
 
 import os
@@ -23,7 +20,7 @@ from settings import Settings
 from threadrunner import GtkThreadRunner
 
 
-class Guicavane:
+class GUIHandler:
     """
     Main class, loads the gui and handles all events.
     """
@@ -193,8 +190,7 @@ class Guicavane:
         Called when the window closes.
         """
 
-        # Save the config to disk
-        self.config.save()
+        self.save_config()
 
         # We kill gtk
         gtk.main_quit()
@@ -336,6 +332,13 @@ class Guicavane:
                                download_only=download_only)
 
         chooser.destroy()
+
+    def save_config(self):
+        """
+        Saves the config to disk.
+        """
+
+        self.config.save()
 
     def mark_selected(self, *args):
         """
