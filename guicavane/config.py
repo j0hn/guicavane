@@ -31,7 +31,8 @@ DEFAULT_VALUES = {"player_location": VLC_LOCATION,
                   "marks": [],
                   "images_dir": IMAGES_DIR,
                   "automatic_marks": False,
-                  "cached_percentage": 3}
+                  "cached_percentage": 3,
+                  "player_arguments": ""}
 
 if not os.path.exists(CONFIG_DIR):
     os.makedirs(CONFIG_DIR)
