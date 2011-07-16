@@ -33,6 +33,7 @@ class Settings(object):
         self.cache_dir_button = self.builder.get_object("cachedirButton")
         self.automatic_marks_button = self.builder.get_object("automaticMarks")
         self.cached_percentage = self.builder.get_object("cachePercentage")
+        self.player_arguments = self.builder.get_object("playerArgumentsEntry")
 
         for i in range(0, 100, 10):
             self.cached_percentage.add_mark(i, gtk.POS_TOP, "")
@@ -47,12 +48,14 @@ class Settings(object):
         cache_dir = self.config.get_key("cache_dir")
         automatic_marks = self.config.get_key("automatic_marks")
         cached_percentage = self.config.get_key("cached_percentage")
+        player_arguments = self.config.get_key("player_arguments")
 
         # Set the values
         self.player_button.set_filename(player_location)
         self.cache_dir_button.set_filename(cache_dir)
         self.automatic_marks_button.set_active(automatic_marks)
         self.cached_percentage.set_value(cached_percentage)
+        self.player_arguments.set_text(player_arguments)
 
         # Show the dialog and hide on close
         self.main_dialog.run()
@@ -68,12 +71,14 @@ class Settings(object):
         cache_dir = self.cache_dir_button.get_filename()
         automatic_marks = self.automatic_marks_button.get_active()
         cached_percentage = self.cached_percentage.get_value()
+        player_arguments = self.player_arguments.get_text()
 
         # Save the new values to the config
         self.config.set_key("player_location", player_location)
         self.config.set_key("cache_dir", cache_dir)
         self.config.set_key("automatic_marks", automatic_marks)
         self.config.set_key("cached_percentage", cached_percentage)
+        self.config.set_key("player_arguments", player_arguments)
         self.config.save()
 
         # Hide the dialog

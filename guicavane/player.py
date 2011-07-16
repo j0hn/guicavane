@@ -89,6 +89,8 @@ class Player(object):
         cached_percentage = cached_percentage / 100.0
 
         player_location = self.config.get_key("player_location")
+        player_args = self.config.get_key("player_arguments").split()
+
         size = float(megafile.size)
         stop = False
         running = False
@@ -101,7 +103,8 @@ class Player(object):
 
             if not download_only:
                 if not running and fraction > cached_percentage:
-                    process = subprocess.Popen([player_location, filename])
+                    player_cmd = [player_location] + player_args + [filename]
+                    process = subprocess.Popen(player_cmd)
                     running = True
 
                 if running and process.poll() != None:
@@ -123,11 +126,12 @@ class Player(object):
         Download the subtitle if it exists.
         """
 
+
         self.gui.set_status_message("Downloading subtitles...")
         subs_filename = filename.split(".mp4", 1)[0]
 
         try:
             self.pycavane.get_subtitle(to_download, filename=subs_filename,
                                        movie=is_movie)
-        except Exception:
+        except Exception as exc:
             self.gui.set_status_message("Not subtitles found")
