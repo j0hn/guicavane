@@ -8,6 +8,7 @@
     <property name="page_increment">10</property>
   </object>
   <object class="GtkDialog" id="settingsDialog">
+    <property name="width_request">500</property>
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Settings</property>
@@ -76,6 +77,7 @@
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">Arguments to be passed to the player. Optional.</property>
                 <property name="xalign">0</property>
                 <property name="label" translatable="yes">Player arguments:</property>
                 <attributes>
@@ -180,12 +182,38 @@
               </packing>
             </child>
             <child>
-              <object class="GtkHScale" id="cachePercentage">
+              <object class="GtkVBox" id="cacheVbox">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="adjustment">cachePercentageScale</property>
-                <property name="round_digits">0</property>
-                <property name="digits">0</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkHScale" id="cachePercentage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="adjustment">cachePercentageScale</property>
+                    <property name="round_digits">0</property>
+                    <property name="digits">0</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="cacheOnMovies">
+                    <property name="label" translatable="yes">enable on movies</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="use_action_appearance">False</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">True</property>

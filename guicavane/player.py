@@ -61,22 +61,22 @@ class Player(object):
         if not megafile.downloaded:
             for i in xrange(45, 1, -1):
                 loading_dots = "." * (3 - i % 4)
-                self.gui.set_status_message("Please wait %d seconds%s" % \
-                                            (i, loading_dots))
+                self.set_status_message("Please wait %d seconds%s" % \
+                                    (i, loading_dots))
                 time.sleep(1)
 
         # Wait until the file exists
         file_exists = False
         while not file_exists:
-            self.gui.set_status_message("A few seconds left...")
+            self.set_status_message("A few seconds left...")
             file_exists = os.path.exists(filename)
             time.sleep(1)
 
         # Play or Download
         if download_only:
-            self.gui.set_status_message("Downloading: %s" % title)
+            self.set_status_message("Downloading: %s" % title)
         else:
-            self.gui.set_status_message("Now playing: %s" % title)
+            self.set_status_message("Now playing: %s" % title)
 
         # Show the progress bar
         def show_statusbar():
@@ -85,8 +85,12 @@ class Player(object):
 
         gobject.idle_add(show_statusbar)
 
+        cache_on_movies = self.config.get_key("cached_percentage_on_movies")
         cached_percentage = self.config.get_key("cached_percentage")
         cached_percentage = cached_percentage / 100.0
+
+        if is_movie and not cache_on_movies:
+            cached_percentage = 0.008
 
         player_location = self.config.get_key("player_location")
         player_args = self.config.get_key("player_arguments").split()
@@ -111,7 +115,8 @@ class Player(object):
                     stop = True
 
             gobject.idle_add(self.gui.statusbar_progress.set_fraction, fraction)
-            gobject.idle_add(self.gui.statusbar_progress.set_text, "%.2f%%" % (fraction * 100))
+            gobject.idle_add(self.gui.statusbar_progress.set_text,
+                             "%.2f%%" % (fraction * 100))
 
         gobject.idle_add(self.gui.statusbar_progress.hide)
 
@@ -127,11 +132,14 @@ class Player(object):
         """
 
 
-        self.gui.set_status_message("Downloading subtitles...")
+        self.set_status_message("Downloading subtitles...")
         subs_filename = filename.split(".mp4", 1)[0]
 
         try:
             self.pycavane.get_subtitle(to_download, filename=subs_filename,
                                        movie=is_movie)
         except Exception as exc:
-            self.gui.set_status_message("Not subtitles found")
+            self.set_status_message("Not subtitles found")
+
+    def set_status_message(self, message):
+        gobject.idle_add(self.gui.set_status_message, message)
