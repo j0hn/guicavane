@@ -14,12 +14,13 @@ import tempfile
 
 HOME_DIR = os.path.expanduser("~")
 TEMP_DIR = tempfile.gettempdir()
-CONFIG_DIR = HOME_DIR + os.sep + ".config" + os.sep + "guicavane"
-IMAGES_DIR = CONFIG_DIR + os.sep + "images"
-CONFIG_FILE = CONFIG_DIR + os.sep + "guicavane.conf"
+CONFIG_DIR = os.path.join(HOME_DIR, ".config", "guicavane")
+IMAGES_DIR = os.path.join(CONFIG_DIR, "images")
+CONFIG_FILE = os.path.join(CONFIG_DIR, "guicavane.conf")
 
 if sys.platform == "win32":
-    VLC_LOCATION = os.path.join(os.environ["ProgramFiles"], "VideoLAN", "VLC", "vlc.exe")
+    VLC_LOCATION = os.path.join(os.environ["ProgramFiles"],
+                                "VideoLAN", "VLC", "vlc.exe")
 else:
     VLC_LOCATION = "/usr/bin/vlc"
 

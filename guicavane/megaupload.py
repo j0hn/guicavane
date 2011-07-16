@@ -12,7 +12,6 @@ import re
 import time
 from threading import Thread
 
-import shutil
 from pycavane.util import UrlOpen
 
 

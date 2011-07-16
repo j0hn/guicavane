@@ -24,7 +24,8 @@ class Player(object):
         self.pycavane = self.gui.pycavane
         self.error_callback = error_callback
 
-    def play(self, to_download, is_movie=False, file_path=None, download_only=False):
+    def play(self, to_download, is_movie=False,
+             file_path=None, download_only=False):
         """
         Starts the playing of `to_download`.
         """
@@ -131,14 +132,13 @@ class Player(object):
         Download the subtitle if it exists.
         """
 
-
         self.set_status_message("Downloading subtitles...")
         subs_filename = filename.split(".mp4", 1)[0]
 
         try:
             self.pycavane.get_subtitle(to_download, filename=subs_filename,
                                        movie=is_movie)
-        except Exception as exc:
+        except Exception:
             self.set_status_message("Not subtitles found")
 
     def set_status_message(self, message):

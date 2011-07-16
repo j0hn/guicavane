@@ -7,7 +7,6 @@ Gui Handler. Module that takes care of the interface events.
 
 import os
 import gtk
-import string
 import urllib
 import webbrowser
 from unicodedata import normalize
@@ -113,7 +112,6 @@ class GUIHandler:
 
         # Set the combobox in the right mode
         self.mode_combo.set_active(MODES.index(last_mode))
-
 
         last_mode = last_mode.lower()
         getattr(self, "set_mode_%s" % last_mode)()
@@ -376,8 +374,7 @@ class GUIHandler:
         selected_text = get_selected_text(self.file_viewer,
                                           FILE_VIEW_COLUMN_TEXT)
 
-
-        if selected_text.count(" - "): #It's a serie
+        if selected_text.count(" - "):  # It's a serie
             link = "http://www.cuevana.tv/series/%s/%s/%s/"
             show = self.current_show
             season = self.current_seasson
@@ -771,21 +768,20 @@ def normalize_string(string):
     """
     Take a string and return a cleaned string ready to use for cuevana
     """
-    repl_list = [(' ', '-'),
-                 ('.', ''),
-                 ('\'',''),
-                 ('?', ''),
-                 ('$', ''),
-                 ('#', ''),
-                 ('*', ''),
-                 ('!', ''),
-                 (':', '')]
+    repl_list = [(" ", "-"),
+                 (".", ""),
+                 ("'", ""),
+                 ("?", ""),
+                 ("$", ""),
+                 ("#", ""),
+                 ("*", ""),
+                 ("!", ""),
+                 (":", "")]
 
-    uni_str = unicode(string, 'utf-8')
-    clean_str = normalize('NFKD',uni_str).encode('ASCII', 'ignore').lower()
+    uni_str = unicode(string, "utf-8")
+    clean_str = normalize("NFKD", uni_str).encode("ASCII", "ignore").lower()
 
     for combo in repl_list:
         clean_str = clean_str.replace(combo[0], combo[1])
 
     return clean_str
-
