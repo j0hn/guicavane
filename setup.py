@@ -19,7 +19,7 @@ outdata_con['dest_base'] = "guicavane_debug"
 opts = {
     'py2exe': {
         'packages': 'encodings, gtk, guicavane',
-        'includes': 'cairo, pangocairo, pango, atk, gobject, os, urllib, urllib2, cookielib, pycavane, guicavane, gio',
+        'includes': 'cairo, pangocairo, pango, atk, gobject, os, urllib, urllib2, cookielib, pycavane, guicavane, gio, unicodedata, webbrowser',
         'excludes': ["pywin", "pywin.debugger", "pywin.debugger.dbgcon",
             "pywin.dialogs", "pywin.dialogs.list", "Tkconstants", "Tkinter", "tcl",
             "doctest", "macpath", "pdb", "ftplib", "win32wnet", "getopt",],
