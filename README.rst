@@ -33,10 +33,5 @@ Windows Users
 
 You can download the windows installer from the Download button
 on the github page and install it as usual.
-Make sure you have VLC installed and verify the path on guicavane
-preferences so it points to vlc.exe. It's important that the path
-to vlc.exe is quoted, so the preferences looks like this (or similar):
-
-::
-
-    "C:\Program files\Video LAN\VLC\vlc.exe" %s
+Make sure to configure guicavane to use your favorite player from
+the settings dialog.
