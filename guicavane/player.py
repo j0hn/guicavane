@@ -114,6 +114,9 @@ class Player(object):
 
                 if running and process.poll() != None:
                     stop = True
+            else:
+                if fraction > 1:
+                    stop = True
 
             gobject.idle_add(self.gui.statusbar_progress.set_fraction, fraction)
             gobject.idle_add(self.gui.statusbar_progress.set_text,
