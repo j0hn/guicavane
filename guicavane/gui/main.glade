@@ -153,6 +153,11 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
     <property name="stock">gtk-add</property>
     <property name="icon-size">1</property>
   </object>
+  <object class="GtkImage" id="imageCuevana">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">../../images/cuevana.png</property>
+  </object>
   <object class="GtkImage" id="imageHardDisk">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -181,11 +186,6 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="pixbuf">../../images/unmark.png</property>
-  </object>
-  <object class="GtkImage" id="imageCuevana">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="pixbuf">../../images/cuevana.png</property>
   </object>
   <object class="GtkWindow" id="infoWindow">
     <property name="can_focus">False</property>
@@ -620,9 +620,11 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
                             <property name="can_focus">True</property>
                             <property name="model">nameListstore</property>
                             <property name="headers_visible">False</property>
+                            <property name="enable_search">False</property>
                             <property name="search_column">0</property>
                             <signal name="button-press-event" handler="_on_name_button_press" swapped="no"/>
                             <signal name="row-activated" handler="_on_name_change" swapped="no"/>
+                            <signal name="key-press-event" handler="_on_name_key_press" swapped="no"/>
                             <child>
                               <object class="GtkTreeViewColumn" id="name">
                                 <property name="title">name</property>

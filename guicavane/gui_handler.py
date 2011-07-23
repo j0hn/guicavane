@@ -331,6 +331,20 @@ class GUIHandler:
 
         chooser.destroy()
 
+    def _on_name_key_press(self, treeview, event):
+        """
+        Called when the users presses a key on the name filter list.
+        """
+
+        acceptedchars = map(chr, range(97, 123)) + map(chr, range(65, 91)) \
+                        + ['0','1','2','3','4','5','6','7','8','9']
+
+        key = gtk.gdk.keyval_name(event.keyval)
+        if key in acceptedchars:
+            self.name_filter.set_text(key)
+            self.name_filter.grab_focus()
+            self.name_filter.set_position(len(self.name_filter.get_text()))
+
     def save_config(self):
         """
         Saves the config to disk.
