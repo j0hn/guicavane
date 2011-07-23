@@ -26,10 +26,10 @@ class MegaFile(Thread):
     Thread that downloads a megaupload file.
     """
 
-    def __init__(self, url, cachedir, errback):
+    def __init__(self, url, cachedir, errback=None, filename=None):
         Thread.__init__(self)
         self.url = url
-        self.filename = url.rsplit('/', 1)[1][3:]
+        self.filename = filename if filename else url.rsplit('/', 1)[1][3:]
         self.cachedir = cachedir
         self.errback = errback
         self.running = True
@@ -80,10 +80,12 @@ class MegaFile(Thread):
 
         if not self.downloaded:
             url = self.get_megalink(self.url)
+
             try:
                 handle = URL_OPEN(url, handle=True)
             except Exception, error:
-                self.errback(error)
+                if errback:
+                    self.errback(error)
                 return
 
             fd = open(self.cache_file, "wb")

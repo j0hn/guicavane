@@ -34,7 +34,8 @@ DEFAULT_VALUES = {"player_location": VLC_LOCATION,
                   "automatic_marks": False,
                   "cached_percentage": 3,
                   "player_arguments": "",
-                  "cached_percentage_on_movies": False}
+                  "cached_percentage_on_movies": False,
+                  "filename_template": "<show> S<episode>E<season> - <name>"}
 
 if not os.path.exists(CONFIG_DIR):
     os.makedirs(CONFIG_DIR)

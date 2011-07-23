@@ -49,11 +49,12 @@ class Player(object):
             title = to_download[2]
 
         # Create the megaupload instance
-        megafile = MegaFile(link, cache_dir, self.error_callback)
-        filename = megafile.cache_file
+        filename = self.get_filename(to_download, is_movie)
+        megafile = MegaFile(link, cache_dir, self.error_callback, filename)
+        filepath = megafile.cache_file
 
         # Download the subtitles
-        self.download_subtitles(to_download, filename, is_movie)
+        self.download_subtitles(to_download, filepath, is_movie)
 
         # Start the file download
         megafile.start()
@@ -70,7 +71,7 @@ class Player(object):
         file_exists = False
         while not file_exists:
             self.set_status_message("A few seconds left...")
-            file_exists = os.path.exists(filename)
+            file_exists = os.path.exists(filepath)
             time.sleep(1)
 
         # Play or Download
@@ -108,7 +109,7 @@ class Player(object):
 
             if not download_only:
                 if not running and fraction > cached_percentage:
-                    player_cmd = [player_location] + player_args + [filename]
+                    player_cmd = [player_location] + player_args + [filepath]
                     process = subprocess.Popen(player_cmd)
                     running = True
 
@@ -130,19 +131,37 @@ class Player(object):
 
         megafile.released = True
 
-    def download_subtitles(self, to_download, filename, is_movie):
+    def download_subtitles(self, to_download, filepath, is_movie):
         """
         Download the subtitle if it exists.
         """
 
         self.set_status_message("Downloading subtitles...")
-        subs_filename = filename.split(".mp4", 1)[0]
+        subs_filepath = filepath.split(".mp4", 1)[0]
 
         try:
-            self.pycavane.get_subtitle(to_download, filename=subs_filename,
+            self.pycavane.get_subtitle(to_download, filename=subs_filepath,
                                        movie=is_movie)
         except Exception:
             self.set_status_message("Not subtitles found")
 
     def set_status_message(self, message):
         gobject.idle_add(self.gui.set_status_message, message)
+
+    def get_filename(self, to_download, is_movie):
+        if is_movie:
+            result = to_download[1]
+        else:
+            season_number = self.gui.current_seasson.split()[-1]
+            show_name = self.gui.current_show
+            name = to_download[2]
+            episode_number = to_download[1]
+
+            result = self.config.get_key("filename_template")
+            result = result.replace("<show>", show_name)
+            result = result.replace("<season>", "%.2d" % int(season_number))
+            result = result.replace("<episode>", "%.2d" % int(episode_number))
+            result = result.replace("<name>", name)
+
+        result = result.replace(os.sep, "_")
+        return result

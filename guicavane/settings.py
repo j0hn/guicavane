@@ -35,6 +35,7 @@ class Settings(object):
         self.automatic_marks_button = self.builder.get_object("automaticMarks")
         self.cached_percentage = self.builder.get_object("cachePercentage")
         self.cache_on_movies = self.builder.get_object("cacheOnMovies")
+        self.filename_template = self.builder.get_object("filenameTemplate")
 
         for i in range(0, 100, 10):
             self.cached_percentage.add_mark(i, gtk.POS_TOP, "")
@@ -51,6 +52,7 @@ class Settings(object):
         automatic_marks = self.config.get_key("automatic_marks")
         cached_percentage = self.config.get_key("cached_percentage")
         cache_on_movies = self.config.get_key("cached_percentage_on_movies")
+        filename_template = self.config.get_key("filename_template")
 
         # Set the values
         self.player_button.set_filename(player_location)
@@ -59,6 +61,7 @@ class Settings(object):
         self.automatic_marks_button.set_active(automatic_marks)
         self.cached_percentage.set_value(cached_percentage)
         self.cache_on_movies.set_active(cache_on_movies)
+        self.filename_template.set_text(filename_template)
 
         # Show the dialog and hide on close
         self.main_dialog.run()
@@ -76,6 +79,7 @@ class Settings(object):
         automatic_marks = self.automatic_marks_button.get_active()
         cached_percentage = self.cached_percentage.get_value()
         cache_on_movies = self.cache_on_movies.get_active()
+        filename_template = self.filename_template.get_text()
 
         # Save the new values to the config
         self.config.set_key("player_location", player_location)
@@ -84,6 +88,7 @@ class Settings(object):
         self.config.set_key("cached_percentage", cached_percentage)
         self.config.set_key("player_arguments", player_arguments)
         self.config.set_key("cached_percentage_on_movies", cache_on_movies)
+        self.config.set_key("filename_template", filename_template)
         self.config.save()
 
         # Hide the dialog
