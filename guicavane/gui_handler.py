@@ -14,7 +14,7 @@ from unicodedata import normalize
 import pycavane
 from constants import *
 from player import Player
-from config import Config
+from config import Config, Marks
 from settings import Settings
 from threadrunner import GtkThreadRunner
 
@@ -34,8 +34,9 @@ class GUIHandler:
         self.builder.add_from_file(MAIN_GUI_FILE)
         self.builder.connect_signals(self)
 
-        # Config
+        # Config and Marks
         self.config = Config()
+        self.marks = Marks()
 
         # Settings window
         self.settings = Settings(self.config)
@@ -362,15 +363,14 @@ class GUIHandler:
         selected_text = model.get_value(iteration, FILE_VIEW_COLUMN_TEXT)
         model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE_MARK)
 
-        if selected_text not in self.config.get_key("marks"):
-            self.config.append_key("marks", selected_text)
+        self.marks.add(selected_text)
 
     def unmark_selected(self, *args):
         """
         Called when the user clicks on Mark item in the context menu.
         """
 
-        marks = self.config.get_key("marks")
+        marks = self.marks.get_all()
 
         selection = self.file_viewer.get_selection()
         model, iteration = selection.get_selected()
@@ -378,7 +378,7 @@ class GUIHandler:
 
         if selected_text in marks:
             model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE)
-            self.config.remove_key("marks", selected_text)
+            self.marks.remove(selected_text)
 
     def open_in_cuevana(self, *args):
         """
@@ -588,7 +588,7 @@ class GUIHandler:
         """
 
         self.file_model.clear()
-        marks = self.config.get_key("marks")
+        marks = self.marks.get_all()
 
         self.file_model.append((ICON_FOLDER, ".."))
 
@@ -611,7 +611,7 @@ class GUIHandler:
         """
 
         self.file_model.clear()
-        marks = self.config.get_key("marks")
+        marks = self.marks.get_all()
 
         search_list, maybe_meant = search_result
 
