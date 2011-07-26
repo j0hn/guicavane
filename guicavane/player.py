@@ -104,7 +104,10 @@ class Player(object):
 
             fraction = downloaded / size
 
-            if not download_only:
+            if download_only:
+                if fraction > 1:
+                    stop = True
+            else:
                 if not running and fraction > cached_percentage:
                     player_cmd = [player_location] + player_args + [filepath]
                     process = subprocess.Popen(player_cmd)
@@ -112,21 +115,30 @@ class Player(object):
 
                 if running and process.poll() != None:
                     stop = True
+
+            if speed_avarage <= 0:
+                remaining_time = 0
             else:
-                if fraction > 1:
-                    stop = True
+                remaining_time = ((size - downloaded) / speed_avarage) / 60
+
+            if remaining_time > 1:  # if it's more than a minute
+                remaining_message = "%d minutes left" % remaining_time
+            else:
+                if (remaining_time * 60) > 10:
+                    remaining_message = "%d seconds left" % (remaining_time * 60)
+                else:
+                    remaining_message = "a few seconds left"
 
             if download_only:
-                self.set_status_message("Downloading: %s - %.2f minutes left" % \
-                    (title, ((size - downloaded) / speed_avarage) / 60))
+                self.set_status_message("Downloading: %s - %s" % \
+                    (title, remaining_message))
             else:
-                self.set_status_message("Now playing: %s - %.2f minutes left" % \
-                    (title, ((size - downloaded) / speed_avarage) / 60))
+                self.set_status_message("Now playing: %s - %s" % \
+                    (title, remaining_message))
 
             gobject.idle_add(self.gui.statusbar_progress.set_fraction, fraction)
             gobject.idle_add(self.gui.statusbar_progress.set_text,
                 "%.2f%% (%.2fKB/s)" % (fraction * 100, speed_avarage))
-
 
         gobject.idle_add(self.gui.statusbar_progress.hide)
 
@@ -172,6 +184,5 @@ class Player(object):
         return result
 
     def show_statusbar(self):
-            self.gui.statusbar_progress.set_fraction(0.0)
-            self.gui.statusbar_progress.show()
-
+        self.gui.statusbar_progress.set_fraction(0.0)
+        self.gui.statusbar_progress.show()
