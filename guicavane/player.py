@@ -60,12 +60,11 @@ class Player(object):
         megafile.start()
 
         # Wait the megaupload 45 seconds
-        if not megafile.downloaded:
-            for i in xrange(45, 1, -1):
-                loading_dots = "." * (3 - i % 4)
-                self.set_status_message("Please wait %d seconds%s" % \
-                                    (i, loading_dots))
-                time.sleep(1)
+        for i in xrange(45, 1, -1):
+            loading_dots = "." * (3 - i % 4)
+            self.set_status_message("Please wait %d seconds%s" % \
+                                (i, loading_dots))
+            time.sleep(1)
 
         # Wait until the file exists
         file_exists = False
@@ -74,18 +73,8 @@ class Player(object):
             file_exists = os.path.exists(filepath)
             time.sleep(1)
 
-        # Play or Download
-        if download_only:
-            self.set_status_message("Downloading: %s" % title)
-        else:
-            self.set_status_message("Now playing: %s" % title)
-
         # Show the progress bar
-        def show_statusbar():
-            self.gui.statusbar_progress.set_fraction(0.0)
-            self.gui.statusbar_progress.show()
-
-        gobject.idle_add(show_statusbar)
+        gobject.idle_add(self.show_statusbar)
 
         cache_on_movies = self.config.get_key("cached_percentage_on_movies")
         cached_percentage = self.config.get_key("cached_percentage")
@@ -97,13 +86,21 @@ class Player(object):
         player_location = self.config.get_key("player_location")
         player_args = self.config.get_key("player_arguments").split()
 
-        size = float(megafile.size)
+        size = megafile.size * 1024.0  # In KB
         stop = False
         running = False
+        speed_list = []
+        last_downloaded = 0
         while not stop:
-            time.sleep(0.7)
+            time.sleep(1)
 
-            downloaded = float(megafile.downloaded_size)
+            downloaded = megafile.downloaded_size * 1024.0  # In KB
+            speed_list.append(downloaded - last_downloaded)
+            offset = len(speed_list) - 30 if len(speed_list) > 30 else 0
+            speed_list = speed_list[offset:]
+
+            speed_avarage = sum(speed_list) / len(speed_list)
+            last_downloaded = downloaded
 
             fraction = downloaded / size
 
@@ -119,9 +116,17 @@ class Player(object):
                 if fraction > 1:
                     stop = True
 
+            if download_only:
+                self.set_status_message("Downloading: %s - %.2f minutes left" % \
+                    (title, ((size - downloaded) / speed_avarage) / 60))
+            else:
+                self.set_status_message("Now playing: %s - %.2f minutes left" % \
+                    (title, ((size - downloaded) / speed_avarage) / 60))
+
             gobject.idle_add(self.gui.statusbar_progress.set_fraction, fraction)
             gobject.idle_add(self.gui.statusbar_progress.set_text,
-                             "%.2f%%" % (fraction * 100))
+                "%.2f%% (%.2fKB/s)" % (fraction * 100, speed_avarage))
+
 
         gobject.idle_add(self.gui.statusbar_progress.hide)
 
@@ -165,3 +170,8 @@ class Player(object):
 
         result = result.replace(os.sep, "_")
         return result
+
+    def show_statusbar(self):
+            self.gui.statusbar_progress.set_fraction(0.0)
+            self.gui.statusbar_progress.show()
+

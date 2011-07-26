@@ -33,7 +33,6 @@ class MegaFile(Thread):
         self.cachedir = cachedir
         self.errback = errback
         self.running = True
-        self.downloaded = False
         self.size = 0
 
     def get_megalink(self, link):
@@ -41,9 +40,15 @@ class MegaFile(Thread):
         Returns the real file link after waiting the 45 seconds.
         """
 
-        page_data = URL_OPEN(link)
+        try:
+            page_data = URL_OPEN(link)
+        except Exception, error:
+            if self.errback:
+                self.errback(error)
+            return
+
         megalink = MEGALINK_RE.findall(page_data)
-        self.size = FILE_SIZE_RE.search(page_data).group(2)
+        self.size = float(FILE_SIZE_RE.search(page_data).group(2))
 
         if megalink:
             time.sleep(45)
@@ -76,28 +81,25 @@ class MegaFile(Thread):
         Starts the thread so starts the downloading.
         """
 
-        self.downloaded = os.path.exists(self.cache_file)
+        url = self.get_megalink(self.url)
 
-        if not self.downloaded:
-            url = self.get_megalink(self.url)
+        try:
+            handle = URL_OPEN(url, handle=True)
+        except Exception, error:
+            if self.errback:
+                self.errback(error)
+            return
 
-            try:
-                handle = URL_OPEN(url, handle=True)
-            except Exception, error:
-                if errback:
-                    self.errback(error)
-                return
+        fd = open(self.cache_file, "wb")
 
-            fd = open(self.cache_file, "wb")
+        while True:
+            data = handle.read(1024)
 
-            while True:
-                data = handle.read(1024)
+            if not data:
+                fd.close()
+                break
 
-                if not data:
-                    fd.close()
-                    break
-
-                fd.write(data)
-                fd.flush()
+            fd.write(data)
+            fd.flush()
 
         self.running = False
