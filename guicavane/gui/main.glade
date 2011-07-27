@@ -750,7 +750,7 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
             </child>
             <child>
               <object class="GtkProgressBar" id="statusbarProgress">
-                <property name="width_request">180</property>
+                <property name="width_request">200</property>
                 <property name="can_focus">False</property>
                 <property name="no_show_all">True</property>
               </object>
