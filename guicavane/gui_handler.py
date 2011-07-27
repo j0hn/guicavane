@@ -58,7 +58,9 @@ class GUIHandler:
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
         self.statusbar_label = self.builder.get_object("statusbarLabel")
-        self.statusbar_progress = self.builder.get_object("statusbarProgress")
+        self.progress_box = self.builder.get_object("progressBox")
+        self.progress = self.builder.get_object("progress")
+        self.progress_label = self.builder.get_object("progressLabel")
         self.name_filter = self.builder.get_object("nameFilter")
         self.name_filter_clear = self.builder.get_object("nameFilterClear")
         self.name_list = self.builder.get_object("nameList")

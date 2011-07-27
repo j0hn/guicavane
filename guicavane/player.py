@@ -73,8 +73,13 @@ class Player(object):
             file_exists = os.path.exists(filepath)
             time.sleep(1)
 
+        if download_only:
+            self.set_status_message("Downloading: %s" % title)
+        else:
+            self.set_status_message("Now playing: %s" % title)
+
         # Show the progress bar
-        gobject.idle_add(self.show_statusbar)
+        gobject.idle_add(self.show_progress)
 
         cache_on_movies = self.config.get_key("cached_percentage_on_movies")
         cached_percentage = self.config.get_key("cached_percentage")
@@ -122,27 +127,29 @@ class Player(object):
                 remaining_time = ((size - downloaded) / speed_avarage) / 60
 
             if remaining_time > 1:  # if it's more than a minute
-                remaining_message = "(%d minutes left)" % remaining_time
+                if remaining_time == 1:
+                    remaining_message = "%d minute left" % remaining_time
+                else:
+                    remaining_message = "%d minutes left" % remaining_time
             else:
                 if (remaining_time * 60) > 10:
-                    remaining_message = "(%d seconds left)" % (remaining_time * 60)
+                    remaining_message = "%d seconds left" % (remaining_time * 60)
                 elif remaining_time != 0:
-                    remaining_message = "(a few seconds left)"
+                    remaining_message = "a few seconds left"
                 else:
                     remaining_message = ""
 
-            if download_only:
-                self.set_status_message("Downloading: %s %s" % \
-                    (title, remaining_message))
+            if fraction < 1:
+                gobject.idle_add(self.gui.progress_label.set_text,
+                    "%.2fKB/s - %s" % (speed_avarage, remaining_message))
             else:
-                self.set_status_message("Now playing: %s %s" % \
-                    (title, remaining_message))
+                gobject.idle_add(self.gui.progress_label.set_text, "")
 
-            gobject.idle_add(self.gui.statusbar_progress.set_fraction, fraction)
-            gobject.idle_add(self.gui.statusbar_progress.set_text,
-                "%.2f%% (%.2fKB/s)" % (fraction * 100, speed_avarage))
+            gobject.idle_add(self.gui.progress.set_fraction, fraction)
+            gobject.idle_add(self.gui.progress.set_text,
+                             "%.2f%%" % (fraction * 100))
 
-        gobject.idle_add(self.gui.statusbar_progress.hide)
+        gobject.idle_add(self.gui.progress_box.hide)
 
         # Automatic mark
         if self.config.get_key("automatic_marks"):
@@ -185,6 +192,6 @@ class Player(object):
         result = result.replace(os.sep, "_")
         return result
 
-    def show_statusbar(self):
-        self.gui.statusbar_progress.set_fraction(0.0)
-        self.gui.statusbar_progress.show()
+    def show_progress(self):
+        self.gui.progress_box.show()
+        self.gui.progress.set_fraction(0.0)
