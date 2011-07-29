@@ -517,6 +517,9 @@ class GUIHandler:
         desc = info[2]
         image_link = info[0]
 
+        empty_case = gtk.gdk.pixbuf_new_from_file(IMAGE_CASE_EMPTY)
+        self.info_image.set_from_pixbuf(empty_case)
+
         self.background_task(self.download_show_image, self.set_info_image,
                              image_link)
 
@@ -550,7 +553,7 @@ class GUIHandler:
         """
 
         pixbuf = gtk.gdk.pixbuf_new_from_file(image_path)
-        case = gtk.gdk.pixbuf_new_from_file(CASE_IMAGE_PATH)
+        case = gtk.gdk.pixbuf_new_from_file(IMAGE_CASE)
 
         width = pixbuf.props.width
         height = pixbuf.props.height
