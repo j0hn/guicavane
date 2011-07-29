@@ -186,7 +186,10 @@ class Player(object):
             result = self.config.get_key("filename_template")
             result = result.replace("<show>", show_name)
             result = result.replace("<season>", "%.2d" % int(season_number))
-            result = result.replace("<episode>", "%.2d" % int(episode_number))
+            try:
+                result = result.replace("<episode>", "%.2d" % int(episode_number))
+            except:
+                result = result.replace("<episode>", "%s" % str(episode_number))
             result = result.replace("<name>", name)
 
         result = result.replace(os.sep, "_")
