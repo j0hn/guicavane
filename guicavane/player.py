@@ -110,7 +110,7 @@ class Player(object):
             fraction = downloaded / size
 
             if download_only:
-                if fraction > 1:
+                if fraction >= 1:
                     stop = True
             else:
                 if not running and fraction > cached_percentage:
@@ -126,7 +126,7 @@ class Player(object):
             else:
                 remaining_time = ((size - downloaded) / speed_avarage) / 60
 
-            if remaining_time > 1:  # if it's more than a minute
+            if remaining_time >= 1:  # if it's more than a minute
                 if remaining_time == 1:
                     remaining_message = "%d minute left" % remaining_time
                 else:
