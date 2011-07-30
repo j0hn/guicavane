@@ -17,7 +17,6 @@ try:
 except ImportError:
     import pickle
 
-
 HOME_DIR = os.path.expanduser("~")
 TEMP_DIR = tempfile.gettempdir()
 CONFIG_DIR = os.path.join(HOME_DIR, ".guicavane")
@@ -38,7 +37,7 @@ DEFAULT_VALUES = {"player_location": VLC_LOCATION,
                   "last_download_directory": HOME_DIR,
                   "images_dir": IMAGES_DIR,
                   "automatic_marks": False,
-                  "cached_percentage": 3,
+                  "cached_percentage": 2,
                   "player_arguments": "",
                   "cached_percentage_on_movies": False,
                   "filename_template": "<show> S<season>E<episode> - <name>"}
