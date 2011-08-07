@@ -13,7 +13,7 @@ import time
 from threading import Thread
 
 import shutil
-from pycavane.util import UrlOpen
+from util import UrlOpen
 
 
 MEGALINK_RE = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')
@@ -76,21 +76,22 @@ class MegaFile(Thread):
         Starts the thread so starts the downloading.
         """
 
-        if not os.path.exists(self.cache_file):
-            url = self.get_megalink(self.url)
+        url = self.get_megalink(self.url)
+
+        if self.downloaded_size < self.size:
+            offset = int(self.downloaded_size * 1024 * 1024) # In Bytes
+            if offset > 0:
+                URL_OPEN.add_headers({"Range": "bytes=%s-" % offset})
             try:
                 handle = URL_OPEN(url, handle=True)
             except Exception, error:
                 self.errback(error)
                 return
 
-            fd = open(self.cache_file, 'wb')
+            fd = open(self.cache_file, 'ab')
 
             while True:
                 if self.released:
-                    # Remove file from cache if released
-                    # before finish the download
-                    os.remove(self.cache_file)
                     break
                 data = handle.read(1024)
                 if not data:
