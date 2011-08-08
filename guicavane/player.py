@@ -110,7 +110,7 @@ class Player(object):
             fraction = downloaded / size
 
             if download_only:
-                if fraction >= 1:
+                if round(fraction, 2) >= 1:
                     stop = True
             else:
                 if not running and fraction > cached_percentage:
