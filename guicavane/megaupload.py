@@ -83,23 +83,29 @@ class MegaFile(Thread):
 
         url = self.get_megalink(self.url)
 
-        try:
-            handle = URL_OPEN(url, handle=True)
-        except Exception, error:
-            if self.errback:
-                self.errback(error)
-            return
+        if self.downloaded_size < self.size:
+            offset = int(self.downloaded_size * 1024 * 1024)  # In Bytes
 
-        fd = open(self.cache_file, "wb")
+            if offset > 0:
+                URL_OPEN.add_headers({"Range": "bytes=%s-" % offset})
 
-        while True:
-            data = handle.read(1024)
+            try:
+                handle = URL_OPEN(url, handle=True)
+            except Exception, error:
+                if self.errback:
+                    self.errback(error)
+                return
 
-            if not data:
-                fd.close()
-                break
+            fd = open(self.cache_file, "ab")
 
-            fd.write(data)
-            fd.flush()
+            while True:
+                data = handle.read(1024)
+
+                if not data:
+                    fd.close()
+                    break
+
+                fd.write(data)
+                fd.flush()
 
         self.running = False
