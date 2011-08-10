@@ -99,9 +99,6 @@ class MegaFile(Thread):
             fd = open(self.cache_file, 'ab')
 
             while True:
-                if self.released:
-                    break
-
                 data = handle.read(1024)
 
                 if not data:
