@@ -11,9 +11,11 @@ For the backend uses a library made by Roger Duran, pycavane.
 
 To download the source and start enjoying Guicavana run:
 
-Current Version
----------------
-1.0.1
+Requires
+--------
+* Python
+* Gtk
+* PyGtk (Ubuntu package python-gtk2-dev)
 
 Linux Users
 -----------
@@ -27,16 +29,24 @@ Linux Users
     $ # profit
     $ python main.py
 
-
 Windows Users
 -------------
 
 You can download the windows installer from the Download button
 on the github page and install it as usual.
-Make sure you have VLC installed and verify the path on guicavane
-preferences so it points to vlc.exe. It's important that the path
-to vlc.exe is quoted, so the preferences looks like this (or similar):
+Make sure to configure guicavane to use your favorite player from
+the settings dialog.
 
-::
+Current Version
+---------------
+1.1.0
 
-    "C:\Program files\Video LAN\VLC\vlc.exe" %s
+Features List
+-------------
+
+* Streaming movies and shows
+* Downloading movies and shows
+* Favorite's shows list
+* Cuztomizable player
+* Cuztomizable file name
+* Automatic marking of watched shows

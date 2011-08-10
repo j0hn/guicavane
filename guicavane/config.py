@@ -12,26 +12,35 @@ import sys
 import json
 import tempfile
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 HOME_DIR = os.path.expanduser("~")
 TEMP_DIR = tempfile.gettempdir()
-CONFIG_DIR = HOME_DIR + os.sep + ".config" + os.sep + "guicavane"
-IMAGES_DIR = CONFIG_DIR + os.sep + "images"
-CONFIG_FILE = CONFIG_DIR + os.sep + "guicavane.conf"
+CONFIG_DIR = os.path.join(HOME_DIR, ".guicavane")
+IMAGES_DIR = os.path.join(CONFIG_DIR, "images")
+CONFIG_FILE = os.path.join(CONFIG_DIR, "guicavane.conf")
+MARKS_FILE = os.path.join(CONFIG_DIR, "marks.dat")
 
 if sys.platform == "win32":
-    VLC_COMMAND = '"' + os.path.join(os.environ["ProgramFiles"],
-                                     "VideoLAN", "VLC", "vlc.exe") + "'"
+    VLC_LOCATION = os.path.join(os.environ["ProgramFiles"],
+                                "VideoLAN", "VLC", "vlc.exe")
 else:
-    VLC_COMMAND = "vlc"
+    VLC_LOCATION = "/usr/bin/vlc"
 
-DEFAULT_VALUES = {"player_command": VLC_COMMAND + " %s",
+DEFAULT_VALUES = {"player_location": VLC_LOCATION,
                   "cache_dir": TEMP_DIR,
                   "last_mode": "Shows",
                   "favorites": [],
                   "last_download_directory": HOME_DIR,
-                  "marks": [],
                   "images_dir": IMAGES_DIR,
-                  "automatic_marks": False}
+                  "automatic_marks": True,
+                  "cached_percentage": 2,
+                  "player_arguments": "",
+                  "cached_percentage_on_movies": False,
+                  "filename_template": "<show> S<season>E<episode> - <name>"}
 
 if not os.path.exists(CONFIG_DIR):
     os.makedirs(CONFIG_DIR)
@@ -58,18 +67,18 @@ class Config:
 
         self.data = {}
 
-        if not os.path.exists(self.config_file):
-            self.data = DEFAULT_VALUES
-            self.save()
-            return
+        if os.path.exists(self.config_file):
+            with open(self.config_file) as filehandler:
+                data = filehandler.read()
 
-        with open(self.config_file) as filehandler:
-            data = filehandler.read()
-            if data == [] or data:
                 try:
                     self.data = json.loads(data)
                 except ValueError:
                     self.data = DEFAULT_VALUES
+        else:
+            self.data = DEFAULT_VALUES
+
+        self.save()
 
     def get_key(self, key):
         """
@@ -116,9 +125,73 @@ class Config:
         """
 
         for key in DEFAULT_VALUES:
-            if key not in self.data or not self.data[key]:
+            if key not in self.data:
                 self.data[key] = get_default(key)
 
         with open(self.config_file, "w") as filehandler:
-            filehandler.write(json.dumps(self.data,
-                                         sort_keys=True, indent=4) + "\n")
+            json_data = json.dumps(self.data, sort_keys=True, indent=4)
+            filehandler.write(json_data + "\n")
+
+class Marks(object):
+    """
+    Class that handles marks storege and access.
+    """
+
+    def __init__(self):
+        """
+        Initialization and creation of the file if necessary.
+        """
+
+        self.marks = []
+
+        if not os.path.exists(MARKS_FILE):
+            self.save()
+
+        self.load()
+
+    def load(self):
+        """
+        Loads the data from the file.
+        """
+
+        with open(MARKS_FILE) as filehandler:
+            try:
+                self.marks = pickle.load(filehandler)
+            except:
+                self.marks = []
+
+    def save(self):
+        """
+        Saves the data to the file.
+        """
+
+        with open(MARKS_FILE, "w") as filehandler:
+            pickle.dump(self.marks, filehandler)
+
+
+    def add(self, name):
+        """
+        Adds a mark to the list.
+        Saves the file right after adding.
+        """
+
+        if str(name) not in self.marks:
+            self.marks.append(str(name))
+            self.save()
+
+    def remove(self, name):
+        """
+        Removes a mark from the list.
+        Saves the file right after removing.
+        """
+
+        if str(name) in self.marks:
+            self.marks.remove(str(name))
+            self.save()
+
+    def get_all(self):
+        """
+        Returns a list with all the marks.
+        """
+
+        return self.marks

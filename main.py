@@ -13,7 +13,7 @@ import gtk
 import sys
 import gobject
 
-from guicavane import Guicavane
+from guicavane import GUIHandler
 
 
 def main():
@@ -27,7 +27,7 @@ def main():
         os.chdir(path)
 
     # Create the program
-    Guicavane()
+    handler = GUIHandler()
 
     if sys.platform == "win32":
         gobject.threads_init()
@@ -35,7 +35,10 @@ def main():
         gtk.gdk.threads_init()
 
     # Starts main loop
-    gtk.main()
+    try:
+        gtk.main()
+    except KeyboardInterrupt:
+        handler.save_config()
 
 if __name__ == "__main__":
     main()

@@ -2,18 +2,11 @@
 # coding: utf-8
 
 """
-Guicavane: graphical user interface for the website cuevana.tv
-
-Uses gtk toolkit to provide the graphical interface of the website
-Author: Gonzalo Garcia (A.K.A j0hn) <j0hn.com.ar@gmail.com>
+Gui Handler. Module that takes care of the interface events.
 """
 
 import os
-import sys
 import gtk
-import time
-import string
-import gobject
 import urllib
 import webbrowser
 from unicodedata import normalize
@@ -21,12 +14,12 @@ from unicodedata import normalize
 import pycavane
 from constants import *
 from player import Player
-from config import Config
+from config import Config, Marks
 from settings import Settings
 from threadrunner import GtkThreadRunner
 
 
-class Guicavane:
+class GUIHandler:
     """
     Main class, loads the gui and handles all events.
     """
@@ -41,8 +34,9 @@ class Guicavane:
         self.builder.add_from_file(MAIN_GUI_FILE)
         self.builder.connect_signals(self)
 
-        # Config
+        # Config and Marks
         self.config = Config()
+        self.marks = Marks()
 
         # Settings window
         self.settings = Settings(self.config)
@@ -64,7 +58,9 @@ class Guicavane:
         # Getting the used widgets
         self.main_window = self.builder.get_object("mainWindow")
         self.statusbar_label = self.builder.get_object("statusbarLabel")
-        self.statusbar_progress = self.builder.get_object("statusbarProgress")
+        self.progress_box = self.builder.get_object("progressBox")
+        self.progress = self.builder.get_object("progress")
+        self.progress_label = self.builder.get_object("progressLabel")
         self.name_filter = self.builder.get_object("nameFilter")
         self.name_filter_clear = self.builder.get_object("nameFilterClear")
         self.name_list = self.builder.get_object("nameList")
@@ -195,8 +191,7 @@ class Guicavane:
         Called when the window closes.
         """
 
-        # Save the config to disk
-        self.config.save()
+        self.save_config()
 
         # We kill gtk
         gtk.main_quit()
@@ -339,6 +334,27 @@ class Guicavane:
 
         chooser.destroy()
 
+    def _on_name_key_press(self, treeview, event):
+        """
+        Called when the users presses a key on the name filter list.
+        """
+
+        acceptedchars = map(chr, range(97, 123)) + map(chr, range(65, 91)) \
+                        + ['0','1','2','3','4','5','6','7','8','9']
+
+        key = gtk.gdk.keyval_name(event.keyval)
+        if key in acceptedchars:
+            self.name_filter.set_text(key)
+            self.name_filter.grab_focus()
+            self.name_filter.set_position(len(self.name_filter.get_text()))
+
+    def save_config(self):
+        """
+        Saves the config to disk.
+        """
+
+        self.config.save()
+
     def mark_selected(self, *args):
         """
         Called when the user clicks on Mark item in the context menu.
@@ -349,15 +365,14 @@ class Guicavane:
         selected_text = model.get_value(iteration, FILE_VIEW_COLUMN_TEXT)
         model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE_MARK)
 
-        if selected_text not in self.config.get_key("marks"):
-            self.config.append_key("marks", selected_text)
+        self.marks.add(selected_text)
 
     def unmark_selected(self, *args):
         """
         Called when the user clicks on Mark item in the context menu.
         """
 
-        marks = self.config.get_key("marks")
+        marks = self.marks.get_all()
 
         selection = self.file_viewer.get_selection()
         model, iteration = selection.get_selected()
@@ -365,29 +380,7 @@ class Guicavane:
 
         if selected_text in marks:
             model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE)
-            self.config.remove_key("marks", selected_text)
-
-    def normalize_string(self, str):
-        """
-        Take a string and return a cleaned string ready to use for cuevana
-        """
-        repl_list = [(' ', '-'),
-                     ('.', ''),
-                     ('\'',''),
-                     ('?', ''),
-                     ('$', ''),
-                     ('#', ''),
-                     ('*', ''),
-                     ('!', ''),
-                     (':', '')]
-
-        uni_str = unicode(str, 'utf-8')
-        clean_str = normalize('NFKD',uni_str).encode('ASCII', 'ignore').lower()
-
-        for combo in repl_list:
-            clean_str = clean_str.replace(combo[0], combo[1])
-
-        return clean_str
+            self.marks.remove(selected_text)
 
     def open_in_cuevana(self, *args):
         """
@@ -397,8 +390,7 @@ class Guicavane:
         selected_text = get_selected_text(self.file_viewer,
                                           FILE_VIEW_COLUMN_TEXT)
 
-
-        if selected_text.count(" - "): #It's a serie
+        if selected_text.count(" - "):  # It's a serie
             link = "http://www.cuevana.tv/series/%s/%s/%s/"
             show = self.current_show
             season = self.current_seasson
@@ -412,8 +404,8 @@ class Guicavane:
                                                  show, season)
             assert data != None
 
-            show = self.normalize_string(show)
-            episode = self.normalize_string(data[2])
+            show = normalize_string(show)
+            episode = normalize_string(data[2])
 
             webbrowser.open(link % (data[0], show, episode))
         else:
@@ -421,7 +413,7 @@ class Guicavane:
             data = self.pycavane.movie_by_name(selected_text)
 
             print data[1]
-            movie = self.normalize_string(data[1])
+            movie = normalize_string(data[1])
 
             print movie
             webbrowser.open(link % (data[0], movie))
@@ -525,6 +517,9 @@ class Guicavane:
         desc = info[2]
         image_link = info[0]
 
+        empty_case = gtk.gdk.pixbuf_new_from_file(IMAGE_CASE_EMPTY)
+        self.info_image.set_from_pixbuf(empty_case)
+
         self.background_task(self.download_show_image, self.set_info_image,
                              image_link)
 
@@ -558,7 +553,7 @@ class Guicavane:
         """
 
         pixbuf = gtk.gdk.pixbuf_new_from_file(image_path)
-        case = gtk.gdk.pixbuf_new_from_file(CASE_IMAGE_PATH)
+        case = gtk.gdk.pixbuf_new_from_file(IMAGE_CASE)
 
         width = pixbuf.props.width
         height = pixbuf.props.height
@@ -598,7 +593,7 @@ class Guicavane:
         """
 
         self.file_model.clear()
-        marks = self.config.get_key("marks")
+        marks = self.marks.get_all()
 
         self.file_model.append((ICON_FOLDER, ".."))
 
@@ -621,7 +616,7 @@ class Guicavane:
         """
 
         self.file_model.clear()
-        marks = self.config.get_key("marks")
+        marks = self.marks.get_all()
 
         search_list, maybe_meant = search_result
 
@@ -691,6 +686,7 @@ class Guicavane:
         """
 
         print error
+        pass
 
     def on_player_error(self, error):
         """
@@ -707,6 +703,7 @@ class Guicavane:
 
         self.sidebar.show()
         self.search_entry.set_text("")
+        self.name_filter.set_text("")
         self.path_label.set_text("")
         self.name_model.clear()
         self.background_task(self.pycavane.get_shows, self.show_shows,
@@ -721,6 +718,7 @@ class Guicavane:
         self.search_entry.grab_focus()
         self.sidebar.hide()
         self.path_label.set_text("")
+        self.name_filter.set_text("")
 
     def set_mode_favorites(self):
         """
@@ -730,6 +728,7 @@ class Guicavane:
         self.sidebar.show()
         self.search_entry.set_text("")
         self.path_label.set_text("")
+        self.name_filter.set_text("")
         self.name_model.clear()
         for favorite in self.config.get_key("favorites"):
             self.name_model.append([favorite])
@@ -782,3 +781,27 @@ def generic_visible_func(model, iteration, (entry, text_column)):
         return filtered_text in row_text
 
     return False
+
+
+def normalize_string(string):
+    """
+    Take a string and return a cleaned string ready to use for cuevana
+    """
+    repl_list = [(" ", "-"),
+                 (".", ""),
+                 (",", ""),
+                 ("'", ""),
+                 ("?", ""),
+                 ("$", ""),
+                 ("#", ""),
+                 ("*", ""),
+                 ("!", ""),
+                 (":", "")]
+
+    uni_str = unicode(string, "utf-8")
+    clean_str = normalize("NFKD", uni_str).encode("ASCII", "ignore").lower()
+
+    for combo in repl_list:
+        clean_str = clean_str.replace(combo[0], combo[1])
+
+    return clean_str
