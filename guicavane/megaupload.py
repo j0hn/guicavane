@@ -12,7 +12,7 @@ import re
 import time
 from threading import Thread
 
-from pycavane.util import UrlOpen
+from util import UrlOpen
 
 
 MEGALINK_RE = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')
@@ -26,18 +26,19 @@ class MegaFile(Thread):
     Thread that downloads a megaupload file.
     """
 
-    def __init__(self, url, cachedir, errback=None, filename=None):
+    def __init__(self, url, cachedir, account, errback=None, filename=None):
         Thread.__init__(self)
         self.url = url
         self.filename = filename if filename else url.rsplit('/', 1)[1][3:]
         self.cachedir = cachedir
         self.errback = errback
+        self.account = account
         self.running = True
         self.size = 0
 
     def get_megalink(self, link):
         """
-        Returns the real file link after waiting the 45 seconds.
+        Returns the real file link after megaupload waiting time.
         """
 
         try:
@@ -51,7 +52,7 @@ class MegaFile(Thread):
         self.size = float(FILE_SIZE_RE.search(page_data).group(2))
 
         if megalink:
-            time.sleep(45)
+            time.sleep(self.account.wait)
             return megalink[0]
 
         return None
@@ -81,14 +82,14 @@ class MegaFile(Thread):
         Starts the thread so starts the downloading.
         """
 
+        if self.account.logged:
+            URL_OPEN.add_cookie(self.account.cookie)
+
         url = self.get_megalink(self.url)
 
         if self.downloaded_size < self.size:
             offset = int(self.downloaded_size * 1024 * 1024)  # In Bytes
-
-            if offset > 0:
-                URL_OPEN.add_headers({"Range": "bytes=%s-" % offset})
-
+            URL_OPEN.add_headers({"Range": "bytes=%s-" % offset})
             try:
                 handle = URL_OPEN(url, handle=True)
             except Exception, error:
@@ -99,9 +100,6 @@ class MegaFile(Thread):
             fd = open(self.cache_file, 'ab')
 
             while True:
-                if self.released:
-                    break
-
                 data = handle.read(1024)
 
                 if not data:

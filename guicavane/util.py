@@ -42,7 +42,7 @@ class UrlOpen(object):
     """
 
     def __init__(self):
-        self.setup_cookies()
+        self.build_opener()
 
     @retry
     def __call__(self, url, data=None, filename=None, handle=False):
@@ -79,18 +79,26 @@ class UrlOpen(object):
 
         return ret
 
-    def setup_cookies(self):
+    def build_opener(self):
         """
         Setup cookies in urllib2.
         """
 
-        jar = cookielib.CookieJar()
-        handler = urllib2.HTTPCookieProcessor(jar)
+        self.cookiejar = cookielib.CookieJar()
+        handler = urllib2.HTTPCookieProcessor(self.cookiejar)
         self.opener = urllib2.build_opener(handler)
+
+    def add_cookie(self, cookie):
+        """
+        Add new cookie.
+        """
+        self.cookiejar.set_cookie(cookie)
 
     def add_headers(self, headers):
         """
         Add new headers.
         `headers' argument has to be a diccionary.
         """
-        self.opener.addheaders.extend(headers.items())
+        base_headers = dict(self.opener.addheaders)
+        base_headers.update(headers)
+        self.opener.addheaders = base_headers.items()

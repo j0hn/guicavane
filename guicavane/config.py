@@ -30,12 +30,15 @@ if sys.platform == "win32":
 else:
     VLC_LOCATION = "/usr/bin/vlc"
 
+
 DEFAULT_VALUES = {"player_location": VLC_LOCATION,
                   "cache_dir": TEMP_DIR,
                   "last_mode": "Shows",
                   "favorites": [],
                   "last_download_directory": HOME_DIR,
                   "images_dir": IMAGES_DIR,
+                  "mega_user": "",
+                  "mega_pass": "",
                   "automatic_marks": True,
                   "cached_percentage": 2,
                   "player_arguments": "",
