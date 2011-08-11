@@ -31,6 +31,8 @@ class Settings(object):
         self.main_dialog = self.builder.get_object("settingsDialog")
         self.player_button = self.builder.get_object("playerLocationButton")
         self.player_arguments = self.builder.get_object("playerArgumentsEntry")
+        self.mega_user_entry = self.builder.get_object("megauploadUserEntry")
+        self.mega_pass_entry = self.builder.get_object("megauploadPassEntry")
         self.cache_dir_button = self.builder.get_object("cachedirButton")
         self.automatic_marks_button = self.builder.get_object("automaticMarks")
         self.cached_percentage = self.builder.get_object("cachePercentage")
@@ -48,6 +50,8 @@ class Settings(object):
         # Get the config values
         player_location = self.config.get_key("player_location")
         player_arguments = self.config.get_key("player_arguments")
+        mega_user = self.config.get_key("mega_user")
+        mega_pass = self.config.get_key("mega_pass")
         cache_dir = self.config.get_key("cache_dir")
         automatic_marks = self.config.get_key("automatic_marks")
         cached_percentage = self.config.get_key("cached_percentage")
@@ -57,6 +61,8 @@ class Settings(object):
         # Set the values
         self.player_button.set_filename(player_location)
         self.player_arguments.set_text(player_arguments)
+        self.mega_user_entry.set_text(mega_user)
+        self.mega_pass_entry.set_text(mega_pass)
         self.cache_dir_button.set_filename(cache_dir)
         self.automatic_marks_button.set_active(automatic_marks)
         self.cached_percentage.set_value(cached_percentage)
@@ -75,6 +81,8 @@ class Settings(object):
         # Get the values
         player_location = self.player_button.get_filename()
         player_arguments = self.player_arguments.get_text()
+        mega_user = self.mega_user_entry.get_text()
+        mega_pass = self.mega_pass_entry.get_text()
         cache_dir = self.cache_dir_button.get_filename()
         automatic_marks = self.automatic_marks_button.get_active()
         cached_percentage = self.cached_percentage.get_value()
@@ -83,6 +91,8 @@ class Settings(object):
 
         # Save the new values to the config
         self.config.set_key("player_location", player_location)
+        self.config.set_key("mega_user", mega_user)
+        self.config.set_key("mega_pass", mega_pass)
         self.config.set_key("cache_dir", cache_dir)
         self.config.set_key("automatic_marks", automatic_marks)
         self.config.set_key("cached_percentage", cached_percentage)

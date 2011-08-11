@@ -10,6 +10,7 @@ import time
 import gobject
 import subprocess
 from megaupload import MegaFile
+from login import MegaAccount
 
 
 class Player(object):
@@ -23,6 +24,7 @@ class Player(object):
         self.config = config
         self.pycavane = self.gui.pycavane
         self.error_callback = error_callback
+        self.account = MegaAccount()
 
     def play(self, to_download, is_movie=False,
              file_path=None, download_only=False):
@@ -48,9 +50,18 @@ class Player(object):
         else:
             title = to_download[2]
 
+        # Check login status
+        if not self.account.verified:
+            username = self.config.get_key("mega_user")
+            password = self.config.get_key("mega_pass")
+
+            if password:
+                self.account.login(username, password)
+
         # Create the megaupload instance
         filename = self.get_filename(to_download, is_movie)
-        megafile = MegaFile(link, cache_dir, self.error_callback, filename)
+        megafile = MegaFile(link, cache_dir, self.account,
+                            self.error_callback, filename)
         filepath = megafile.cache_file
 
         # Download the subtitles
@@ -59,8 +70,8 @@ class Player(object):
         # Start the file download
         megafile.start()
 
-        # Wait the megaupload 45 seconds
-        for i in xrange(45, 1, -1):
+        # Waiting megaupload link
+        for i in xrange(self.account.wait, 1, -1):
             loading_dots = "." * (3 - i % 4)
             self.set_status_message("Please wait %d seconds%s" % \
                                 (i, loading_dots))
