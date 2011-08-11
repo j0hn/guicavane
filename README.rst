@@ -50,3 +50,4 @@ Features List
 * Cuztomizable player
 * Cuztomizable file name
 * Automatic marking of watched shows
+* Support for megaupload regular and premium account
