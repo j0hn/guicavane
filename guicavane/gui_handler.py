@@ -787,16 +787,12 @@ def normalize_string(string):
     """
     Take a string and return a cleaned string ready to use for cuevana
     """
-    repl_list = [(" ", "-"),
-                 (".", ""),
-                 (",", ""),
-                 ("'", ""),
-                 ("?", ""),
-                 ("$", ""),
-                 ("#", ""),
-                 ("*", ""),
-                 ("!", ""),
-                 (":", "")]
+    repl_list = [(" ", "-"), (".", ""),
+                 (",", ""), ("'", ""),
+                 ("?", ""), ("$", ""),
+                 ("#", ""), ("*", ""),
+                 ("!", ""), (":", ""),
+                 ("(", ""), (")", ""),]
 
     uni_str = unicode(string, "utf-8")
     clean_str = normalize("NFKD", uni_str).encode("ASCII", "ignore").lower()
