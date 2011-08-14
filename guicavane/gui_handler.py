@@ -98,6 +98,13 @@ class GUIHandler:
         # Now we show the window
         self.main_window.show_all()
 
+        # Do the login if necesary
+        user = self.config.get_key("cuevana_user")
+        passwd = self.config.get_key("cuevana_pass")
+        if user and passwd:
+            self.background_task(self.pycavane.login, self.on_login_done,
+                                 user, passwd, status_message="Login in...")
+
         # Setup the basic stuff
         self.setup()
 
@@ -186,6 +193,16 @@ class GUIHandler:
         self.freeze(status_message)
         GtkThreadRunner(callback, func, *args, **kwargs)
 
+    @unfreeze
+    def on_login_done(self, err):
+        if err:
+            print err
+        else:
+            # Update the favorites
+            self.background_task(self.pycavane.get_favorite_series,
+                                 self.update_favorites,
+                                 status_message="Updating favorites...")
+
     def _on_destroy(self, *args):
         """
         Called when the window closes.
@@ -260,6 +277,9 @@ class GUIHandler:
         if selected not in self.config.get_key("favorites"):
             self.config.append_key("favorites", selected)
 
+        self.background_task(self.pycavane.add_favorite,
+                             self.on_finish_favorite, selected, False)
+
     def _on_name_remove_favorite(self, *args):
         """
         Removes the selected show from favorites.
@@ -269,6 +289,13 @@ class GUIHandler:
         if selected in self.config.get_key("favorites"):
             self.config.remove_key("favorites", selected)
             self.set_mode_favorites()
+
+        self.background_task(self.pycavane.del_favorite,
+                             self.on_finish_favorite, selected, False)
+
+    @unfreeze
+    def on_finish_favorite(self, *args):
+        pass
 
     def _on_file_button_press(self, view, event):
         """
@@ -725,6 +752,15 @@ class GUIHandler:
         self.name_model.clear()
         for favorite in self.config.get_key("favorites"):
             self.name_model.append([favorite])
+
+    @unfreeze
+    def update_favorites(self, favorites):
+        for fav in favorites:
+            if fav not in self.config.get_key("favorites"):
+                self.config.append_key("favorites", fav)
+
+        if self.get_mode() == MODE_FAVORITES:
+            self.set_mode_favorites()
 
     def get_mode(self):
         """
