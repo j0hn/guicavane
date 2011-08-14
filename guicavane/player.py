@@ -19,11 +19,11 @@ class Player(object):
     playing the file.
     """
 
-    def __init__(self, gui, config, error_callback):
+    def __init__(self, gui, config):
         self.gui = gui
         self.config = config
         self.pycavane = self.gui.pycavane
-        self.error_callback = error_callback
+        self.megaupload_error = False
         self.account = MegaAccount()
 
     def play(self, to_download, is_movie=False,
@@ -61,7 +61,7 @@ class Player(object):
         # Create the megaupload instance
         filename = self.get_filename(to_download, is_movie)
         megafile = MegaFile(link, cache_dir, self.account,
-                            self.error_callback, filename)
+                            self.on_megaupload_error, filename)
         filepath = megafile.cache_file
 
         # Download the subtitles
@@ -80,9 +80,12 @@ class Player(object):
         # Wait until the file exists
         file_exists = False
         while not file_exists:
-            self.set_status_message("A few seconds left...")
-            file_exists = os.path.exists(filepath)
-            time.sleep(1)
+            if self.megaupload_error:
+                raise Exception("Download error: time exceeded")
+            else:
+                self.set_status_message("A few seconds left...")
+                file_exists = os.path.exists(filepath)
+                time.sleep(1)
 
         if download_only:
             self.set_status_message("Downloading: %s" % title)
@@ -209,3 +212,6 @@ class Player(object):
     def show_progress(self):
         self.gui.progress_box.show()
         self.gui.progress.set_fraction(0.0)
+
+    def on_megaupload_error(self, error):
+        self.megaupload_error = True

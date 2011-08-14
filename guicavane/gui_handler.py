@@ -48,7 +48,7 @@ class GUIHandler:
         self.pycavane = pycavane.Pycavane(cache_dir=cache_dir)
 
         # Load the player
-        self.player = Player(self, self.config, self.on_player_error)
+        self.player = Player(self, self.config)
 
         # Attributes
         self.current_show = None
@@ -679,22 +679,15 @@ class GUIHandler:
                              movie, is_movie=True, file_path=file_path,
                              download_only=download_only)
 
-    @unfreeze
     def on_player_finish(self, error):
         """
         Called when the user closes the player.
         """
 
-        print error
-        pass
-
-    def on_player_error(self, error):
-        """
-        Called if the player has an error.
-        """
-
         self._unfreeze()
-        self.set_status_message("Download error: Limit Exceeded")
+
+        if error:
+            self.set_status_message(str(error))
 
     def set_mode_shows(self, *args):
         """
@@ -787,12 +780,16 @@ def normalize_string(string):
     """
     Take a string and return a cleaned string ready to use for cuevana
     """
-    repl_list = [(" ", "-"), (".", ""),
-                 (",", ""), ("'", ""),
-                 ("?", ""), ("$", ""),
-                 ("#", ""), ("*", ""),
-                 ("!", ""), (":", ""),
-                 ("(", ""), (")", ""),]
+    repl_list = [(" ", "-"),
+                 (".", ""),
+                 (",", ""),
+                 ("'", ""),
+                 ("?", ""),
+                 ("$", ""),
+                 ("#", ""),
+                 ("*", ""),
+                 ("!", ""),
+                 (":", "")]
 
     uni_str = unicode(string, "utf-8")
     clean_str = normalize("NFKD", uni_str).encode("ASCII", "ignore").lower()
