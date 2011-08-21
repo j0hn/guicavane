@@ -463,9 +463,23 @@ class GUIHandler:
 
         query = self.search_entry.get_text()
         self.current_movies = {}
-        self.background_task(self.pycavane.search_title,
+        self.background_task(self.search_movies,
                     self.show_search, query,
                     status_message="Searching movies with title %s..." % query)
+
+    def search_movies(self, query):
+        search = self.pycavane.search_title(query)
+        next_movies_pages_search = 3
+
+        movies = search[0]
+        for i in range(1, next_movies_pages_search + 1):
+            next_movies = self.pycavane.get_next_movies(i)
+            next_matched = [x for x in next_movies if \
+                            x[1].lower().count(query.lower()) > 0]
+            movies += next_matched
+
+
+        return (movies, search[1])
 
     def _on_open_file(self, widget, path, *args):
         """
