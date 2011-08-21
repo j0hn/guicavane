@@ -88,11 +88,12 @@ class UrlOpen(object):
         handler = urllib2.HTTPCookieProcessor(self.cookiejar)
         self.opener = urllib2.build_opener(handler)
 
-    def add_cookie(self, cookie):
+    def add_cookies(self, cookies):
         """
-        Add new cookie.
+        Add new cookies.
         """
-        self.cookiejar.set_cookie(cookie)
+        for c in cookies:
+            self.cookiejar.set_cookie(c)
 
     def add_headers(self, headers):
         """

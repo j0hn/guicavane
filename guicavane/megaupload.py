@@ -83,7 +83,7 @@ class MegaFile(Thread):
         """
 
         if self.account.logged:
-            URL_OPEN.add_cookie(self.account.cookie)
+            URL_OPEN.add_cookies(self.account.cookiejar)
 
         url = self.get_megalink(self.url)
 

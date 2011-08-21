@@ -43,7 +43,7 @@ class MegaAccount():
         rc = URL_OPEN(LOGIN_PAGE, data=data)
         if username in rc:
             self.logged = True
-            self.cookie = list(URL_OPEN.cookiejar)[0]
+            self.cookiejar = URL_OPEN.cookiejar
 
         else:
             self.logged = False
