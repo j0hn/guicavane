@@ -22,7 +22,7 @@ Linux Users
 
 ::
 
-    $ git clone git@github.com:j0hn/guicavane.git
+    $ git clone https://github.com/j0hn/guicavane.git
     $ cd guicavane
     $ git submodule init
     $ git submodule update
