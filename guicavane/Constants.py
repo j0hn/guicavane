@@ -22,7 +22,7 @@ else:
     MAIN_DIR = os.path.dirname(__file__)
     IMAGES_DIR = MAIN_DIR.rsplit(SEP, 1)[0] + SEP + "images"
 
-GUI_DIR = MAIN_DIR + SEP + "gui"
+GUI_DIR = "glade"
 
 # Gui Files
 MAIN_GUI_FILE = GUI_DIR + SEP + "main.glade"
@@ -38,7 +38,9 @@ MODES = [MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES]
 # Index of the columns on the tree views
 FILE_VIEW_COLUMN_PIXBUF = 0
 FILE_VIEW_COLUMN_TEXT = 1
+FILE_VIEW_COLUMN_OBJECT = 2
 NAME_COLUMN_TEXT = 0
+NAME_COLUMN_OBJECT = 1
 
 
 # Icons

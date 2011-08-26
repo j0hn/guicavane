@@ -2,213 +2,63 @@
 # coding: utf-8
 
 """
-Gui Handler. Module that takes care of the interface events.
+GuiManager. Takes care of the gui events.
 """
 
 import os
 import gtk
 import urllib
-import webbrowser
-from unicodedata import normalize
 
 import pycavane
-from constants import *
-from player import Player
-from config import Config, Marks
-from settings import Settings
+from Constants import *
 from threadrunner import GtkThreadRunner
 
 
-class GUIHandler:
-    """
-    Main class, loads the gui and handles all events.
-    """
+class GuiManager(object):
+    """ Main class, loads the gui and handles all events. """
 
     def __init__(self):
-        """
-        Creates the main window.
-        """
+        """ Creates the main window. """
 
         # Gtk builder
         self.builder = gtk.Builder()
         self.builder.add_from_file(MAIN_GUI_FILE)
         self.builder.connect_signals(self)
 
-        # Config and Marks
-        self.config = Config()
-        self.marks = Marks()
-
-        # Settings window
-        self.settings = Settings(self.config)
-
-        # Loading the API
-        cache_dir = self.config.get_key("cache_dir")
-        if cache_dir[-1] == os.sep:
-            cache_dir = cache_dir[:-1]
-        self.pycavane = pycavane.Pycavane(cache_dir=cache_dir)
-
-        # Load the player
-        self.player = Player(self, self.config)
-
-        # Attributes
-        self.current_show = None
-        self.current_seasson = None
-        self.current_movies = {}
-
         # Getting the used widgets
-        self.main_window = self.builder.get_object("mainWindow")
-        self.statusbar_label = self.builder.get_object("statusbarLabel")
-        self.progress_box = self.builder.get_object("progressBox")
-        self.progress = self.builder.get_object("progress")
-        self.progress_label = self.builder.get_object("progressLabel")
-        self.name_filter = self.builder.get_object("nameFilter")
-        self.name_filter_clear = self.builder.get_object("nameFilterClear")
-        self.name_list = self.builder.get_object("nameList")
-        self.name_model = self.name_list.get_model()
-        self.file_viewer = self.builder.get_object("fileViewer")
-        self.file_model = self.file_viewer.get_model()
-        self.mode_combo = self.builder.get_object("modeCombo")
-        self.search_entry = self.builder.get_object("searchEntry")
-        self.search_button = self.builder.get_object("searchButton")
-        self.search_clear = self.builder.get_object("searchClear")
-        self.sidebar = self.builder.get_object("sidebarVbox")
-        self.path_label = self.builder.get_object("pathLabel")
-        self.info_window = self.builder.get_object("infoWindow")
-        self.info_title = self.builder.get_object("infoTitle")
-        self.info_label = self.builder.get_object("infoLabel")
-        self.info_image = self.builder.get_object("infoImage")
+        widgets = ["main_window", "statusbar_label", "progress_box",
+                   "progress", "progress_label", "name_filter",
+                   "name_filter_clear", "name_list", "file_viewer",
+                   "mode_combo", "search_entry", "search_button",
+                   "search_clear", "sidebar_vbox", "path_label", "info_window",
+                   "info_title", "info_label", "info_image"]
 
-        # Creating a new filter model to allow the user filter the
-        # shows and movies by typing on an entry box
-        self.name_model_filter = self.name_model.filter_new()
-        self.name_model_filter.set_visible_func(generic_visible_func,
-                                          (self.name_filter, NAME_COLUMN_TEXT))
-        self.name_list.set_model(self.name_model_filter)
-
-        # Keyboard shortcuts
-        accel_group = gtk.AccelGroup()
-        key, modifier = gtk.accelerator_parse("<Ctrl>W")
-        accel_group.connect_group(key, modifier, gtk.ACCEL_VISIBLE,
-                                  lambda a, b, c, d: gtk.main_quit())
-        key, modifier = gtk.accelerator_parse("<Ctrl>Q")
-        accel_group.connect_group(key, modifier, gtk.ACCEL_VISIBLE,
-                                  lambda a, b, c, d: gtk.main_quit())
-        self.main_window.add_accel_group(accel_group)
+        for widget in widgets:
+            setattr(self, widget, self.builder.get_object(widget))
 
         # Now we show the window
         self.main_window.show_all()
 
-        # Do the login if necesary
-        user = self.config.get_key("cuevana_user")
-        passwd = self.config.get_key("cuevana_pass")
-        if user and passwd:
-            self.background_task(self.pycavane.login, self.on_login_done,
-                                 user, passwd, status_message="Login in...")
-
-        # Setup the basic stuff
-        self.setup()
-
-    def setup(self):
-        """
-        Sets the default things.
-        """
-
-        self.current_seasson = None
-
-        # Get and set the last used mode
-        last_mode = self.config.get_key("last_mode")
-        if last_mode not in MODES:
-            last_mode = MODE_SHOWS
-
-        # Set the combobox in the right mode
-        self.mode_combo.set_active(MODES.index(last_mode))
-
-        last_mode = last_mode.lower()
-        getattr(self, "set_mode_%s" % last_mode)()
-
     def freeze(self, status_message="Loading..."):
-        """
-        Freezes the gui so the user can't interact with it.
-        """
+        """ Freezes the gui so the user can't interact with it. """
 
-        self.mode_combo.set_sensitive(False)
-        self.name_list.set_sensitive(False)
-        self.name_filter.set_sensitive(False)
-        self.name_filter_clear.set_sensitive(False)
-        self.file_viewer.set_sensitive(False)
-        self.search_entry.set_sensitive(False)
-        self.search_clear.set_sensitive(False)
-        self.search_button.set_sensitive(False)
-        self.set_status_message(status_message)
+        self.main_window.set_sensitive(False)
 
-    def _unfreeze(self):
-        """
-        Sets the widgets to be usable.
-        Usually this function shouldn't be called directly but using the
-        decorator @unfreeze but is not completly wrong to use it.
-        """
+    def unfreeze(self):
+        """ Sets the widgets to be usable. """
 
+        self.main_window.set_sensitive(True)
         self.set_status_message("")
-        self.mode_combo.set_sensitive(True)
-        self.name_list.set_sensitive(True)
-        self.name_filter.set_sensitive(True)
-        self.name_filter_clear.set_sensitive(True)
-        self.file_viewer.set_sensitive(True)
-        self.search_entry.set_sensitive(True)
-        self.search_clear.set_sensitive(True)
-        self.search_button.set_sensitive(True)
-
-    def unfreeze(func):
-        """
-        Decorator that calls the decorated function and then unfreezes
-        the gui so the user can interact with it.
-        """
-
-        def decorate(self, *args, **kwargs):
-            self._unfreeze()
-
-            args = [self] + list(args)  # func is a method so it needs self
-            func(*args, **kwargs)
-
-        return decorate
 
     def set_status_message(self, message):
-        """
-        Sets the message shown in the statusbar.
-        """
+        """ Sets the message shown in the statusbar.  """
 
         self.statusbar_label.set_label(message)
 
-    def background_task(self, func, callback, *args, **kwargs):
-        """
-        Freezes the gui, starts a thread with func and when it's
-        over calls callback with the result.
-        """
-
-        status_message = "Loading..."
-        if "status_message" in kwargs:
-            status_message = kwargs["status_message"]
-            del kwargs["status_message"]
-
-        self.freeze(status_message)
-        GtkThreadRunner(callback, func, *args, **kwargs)
-
-    @unfreeze
-    def on_login_done(self, err):
-        if err:
-            print err
-        else:
-            # Update the favorites
-            self.background_task(self.pycavane.get_favorite_series,
-                                 self.update_favorites,
-                                 status_message="Updating favorites...")
-
     def _on_destroy(self, *args):
-        """
-        Called when the window closes.
-        """
+        """ Called when the window closes.  """
 
-        self.save_config()
+        #self.save_config()
 
         # We kill gtk
         gtk.main_quit()
@@ -293,7 +143,6 @@ class GUIHandler:
         self.background_task(self.pycavane.del_favorite,
                              self.on_finish_favorite, selected, False)
 
-    @unfreeze
     def on_finish_favorite(self, *args):
         pass
 
@@ -548,7 +397,6 @@ class GUIHandler:
 
         self.info_window.hide()
 
-    @unfreeze
     def open_info_window(self, info):
         """
         Opens the info window and loads the info.
@@ -587,7 +435,6 @@ class GUIHandler:
 
         return image_path
 
-    @unfreeze
     def set_info_image(self, image_path):
         """
         Sets the image of the current episode.
@@ -605,7 +452,6 @@ class GUIHandler:
 
         self.info_image.set_from_pixbuf(pixbuf)
 
-    @unfreeze
     def show_shows(self, shows):
         """
         Adds all the shows to the list.
@@ -616,7 +462,6 @@ class GUIHandler:
         for _, show_name in shows:
             self.name_model.append([show_name])
 
-    @unfreeze
     def show_seassons(self, seassons):
         """
         Fills the file viewer with the seassons.
@@ -627,7 +472,6 @@ class GUIHandler:
         for _, seasson_name in seassons:
             self.file_model.append((ICON_FOLDER, seasson_name))
 
-    @unfreeze
     def show_episodes(self, episodes):
         """
         Fills the file viewer with the episodes.
@@ -650,7 +494,6 @@ class GUIHandler:
 
             self.file_model.append((icon, episode_name))
 
-    @unfreeze
     def show_search(self, search_result):
         """
         Fills the file viewer with the movies from the search results.
@@ -767,7 +610,6 @@ class GUIHandler:
         for favorite in self.config.get_key("favorites"):
             self.name_model.append([favorite])
 
-    @unfreeze
     def update_favorites(self, favorites):
         for fav in favorites:
             if fav not in self.config.get_key("favorites"):
@@ -803,48 +645,3 @@ def get_selected_text(view, text_column=0):
     selected_text = model.get_value(iteration, text_column)
 
     return selected_text
-
-
-def generic_visible_func(model, iteration, (entry, text_column)):
-    """
-    Filters the treeview based on the text found on `entry`.
-    text_column should be the column index where the text can be
-    found.
-    """
-
-    filtered_text = entry.get_text()
-
-    row_text = model.get_value(iteration, text_column)
-
-    if row_text:
-        # Case insensitive search
-        filtered_text = filtered_text.lower()
-        row_text = row_text.lower()
-
-        return filtered_text in row_text
-
-    return False
-
-
-def normalize_string(string):
-    """
-    Take a string and return a cleaned string ready to use for cuevana
-    """
-    repl_list = [(" ", "-"),
-                 (".", ""),
-                 (",", ""),
-                 ("'", ""),
-                 ("?", ""),
-                 ("$", ""),
-                 ("#", ""),
-                 ("*", ""),
-                 ("!", ""),
-                 (":", "")]
-
-    uni_str = unicode(string, "utf-8")
-    clean_str = normalize("NFKD", uni_str).encode("ASCII", "ignore").lower()
-
-    for combo in repl_list:
-        clean_str = clean_str.replace(combo[0], combo[1])
-
-    return clean_str

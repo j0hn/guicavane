@@ -13,7 +13,7 @@ import gtk
 import sys
 import gobject
 
-from guicavane import GUIHandler
+from guicavane import GuiManager
 
 
 def main():
@@ -27,7 +27,7 @@ def main():
         os.chdir(path)
 
     # Create the program
-    handler = GUIHandler()
+    handler = GuiManager()
 
     if sys.platform == "win32":
         gobject.threads_init()

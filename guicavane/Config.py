@@ -31,21 +31,23 @@ else:
     VLC_LOCATION = "/usr/bin/vlc"
 
 
-DEFAULT_VALUES = {"player_location": VLC_LOCATION,
-                  "cache_dir": TEMP_DIR,
-                  "last_mode": "Shows",
-                  "favorites": [],
-                  "last_download_directory": HOME_DIR,
-                  "images_dir": IMAGES_DIR,
-                  "mega_user": "",
-                  "mega_pass": "",
-                  "cuevana_user": "",
-                  "cuevana_pass": "",
-                  "automatic_marks": True,
-                  "cached_percentage": 2,
-                  "player_arguments": "",
-                  "cached_percentage_on_movies": False,
-                  "filename_template": "<show> S<season>E<episode> - <name>"}
+DEFAULT_VALUES = {
+    "player_location": VLC_LOCATION,
+    "cache_dir": TEMP_DIR,
+    "last_mode": "Shows",
+    "favorites": [],
+    "last_download_directory": HOME_DIR,
+    "images_dir": IMAGES_DIR,
+    "mega_user": "",
+    "mega_pass": "",
+    "cuevana_user": "",
+    "cuevana_pass": "",
+    "automatic_marks": True,
+    "cached_percentage": 2,
+    "player_arguments": "",
+    "cached_percentage_on_movies": False,
+    "filename_template": "<show> S<season>E<episode> - <name>"
+}
 
 if not os.path.exists(CONFIG_DIR):
     os.makedirs(CONFIG_DIR)
