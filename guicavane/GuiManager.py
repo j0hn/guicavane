@@ -11,6 +11,7 @@ import urllib
 
 import pycavane
 from Constants import *
+from Marks import Marks
 from Config import Config
 from Player import Player
 from ThreadRunner import GtkThreadRunner
@@ -26,8 +27,9 @@ class GuiManager(object):
         self.current_show = None
         self.current_season = None
 
-        # Config
+        # Config & Marks
         self.config = Config()
+        self.marks = Marks()
 
         # Gtk builder
         self.builder = gtk.Builder()
@@ -207,22 +209,19 @@ class GuiManager(object):
             return
 
         self.file_viewer_model.clear()
-        #marks = self.marks.get_all()
+        marks = self.marks.get_all()
 
         # Add the 'up' folder
         self.file_viewer_model.append([ICON_FOLDER, "..", None])
 
         for episode in result:
-            try:
-                episode_name = "%.2d - %s" % (int(episode.id), episode.name)
-            except ValueError:
-                episode_name = "%s - %s" % (episode.id, episode.name)
+            episode_name = "%s - %s" % (episode.number, episode.name)
 
             icon = ICON_FILE_MOVIE
-            #if episode_name in marks:
-            #    icon = ICON_FILE_MOVIE_MARK
+            if episode.id in marks:
+                icon = ICON_FILE_MOVIE_MARK
 
-            self.file_viewer_model.append([icon, episode.name, episode])
+            self.file_viewer_model.append([icon, episode_name, episode])
 
 
     # ================================
@@ -406,31 +405,27 @@ class GuiManager(object):
             self.name_filter.set_position(len(self.name_filter.get_text()))
 
     def mark_selected(self, *args):
-        """
-        Called when the user clicks on Mark item in the context menu.
-        """
+        """ Called when the user clicks on Mark item in the context menu. """
 
         selection = self.file_viewer.get_selection()
         model, iteration = selection.get_selected()
-        selected_text = model.get_value(iteration, FILE_VIEW_COLUMN_TEXT)
+        episode = model.get_value(iteration, FILE_VIEW_COLUMN_OBJECT)
         model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE_MARK)
 
-        self.marks.add(selected_text)
+        self.marks.add(episode.id)
 
     def unmark_selected(self, *args):
-        """
-        Called when the user clicks on Mark item in the context menu.
-        """
+        """ Called when the user clicks on Mark item in the context menu. """
 
         marks = self.marks.get_all()
 
         selection = self.file_viewer.get_selection()
         model, iteration = selection.get_selected()
-        selected_text = model.get_value(iteration, FILE_VIEW_COLUMN_TEXT)
+        episode = model.get_value(iteration, FILE_VIEW_COLUMN_OBJECT)
 
-        if selected_text in marks:
+        if episode.id in marks:
             model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE)
-            self.marks.remove(selected_text)
+            self.marks.remove(episode.id)
 
     def open_in_cuevana(self, *args):
         """
