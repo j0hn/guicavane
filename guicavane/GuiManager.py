@@ -54,12 +54,16 @@ class GuiManager(object):
             (self.name_filter, NAME_LIST_COLUMN_TEXT))
         self.name_list.set_model(self.name_list_model_filter)
 
-
         # Now we show the window
         self.main_window.show_all()
 
-        # Start on shows mode
-        self.set_mode_shows()
+        # Start on last mode
+        try:
+            last_mode = self.config.get_key("last_mode")
+            getattr(self, "set_mode_%s" % last_mode.lower())()
+            self.mode_combo.set_active(MODES.index(last_mode))
+        except:
+            self.set_mode_shows()
 
     def freeze(self, status_message="Loading..."):
         """ Freezes the gui so the user can't interact with it. """
@@ -134,7 +138,8 @@ class GuiManager(object):
         self.name_filter.set_text("")
         self.name_list_model.clear()
         for favorite in self.config.get_key("favorites"):
-            self.name_list_model.append([favorite])
+            show = pycavane.api.Show.search(favorite).next()
+            self.name_list_model.append([show.name, show])
 
     def update_favorites(self, favorites):
         for fav in favorites:
@@ -233,18 +238,15 @@ class GuiManager(object):
         gtk.main_quit()
 
     def _on_mode_change(self, *args):
-        """
-        Called when the 'mode' combobox changes value.
-        """
+        """ Called when the mode combobox changes value. """
 
-        mode = self.get_mode()
-        self.config.set_key("last_mode", mode)
-        mode = mode.lower()
+        last_mode = self.get_mode()
+        self.config.set_key("last_mode", last_mode)
 
         self.file_viewer_model.clear()
 
         # Call the corresponding set_mode method
-        getattr(self, "set_mode_%s" % mode)()
+        getattr(self, "set_mode_%s" % last_mode.lower())()
 
     def _on_show_selected(self, tree_view, path, column):
         """ Called when the user selects a show from the name list. """
@@ -295,51 +297,46 @@ class GuiManager(object):
         self.name_filter.set_text("")
 
     def _on_name_button_press(self, view, event):
-        """
-        Called when the user press any mouse button on the name list.
-        """
+        """ Called when the user press any mouse button on the name list. """
 
         if event.button == 3:  # 3 it's right click
             if self.get_mode() == MODE_FAVORITES:
-                popup_menu = self.builder.get_object("nameFavoritesMenu")
+                popup_menu = self.builder.get_object("name_favorites_menu")
             else:
-                popup_menu = self.builder.get_object("nameShowsMenu")
+                popup_menu = self.builder.get_object("name_shows_menu")
 
             popup_menu.popup(None, None, None, event.button, event.time)
 
-    def _on_name_add_favorite(self, *args):
-        """
-        Adds the selected show from favorites.
-        """
+    def _on_add_favorite(self, *args):
+        """ Adds the selected show from favorites.  """
 
-        selected = get_selected_text(self.name_list, NAME_COLUMN_TEXT)
+        path, _ = self.name_list.get_cursor()
+        selected = self.name_list_model[path][NAME_LIST_COLUMN_TEXT]
+
         if selected not in self.config.get_key("favorites"):
             self.config.append_key("favorites", selected)
 
-        self.background_task(self.pycavane.add_favorite,
-                             self.on_finish_favorite, selected, False)
+        #self.background_task(self.pycavane.add_favorite,
+        #                     self.on_finish_favorite, selected, False)
 
-    def _on_name_remove_favorite(self, *args):
-        """
-        Removes the selected show from favorites.
-        """
+    def _on_remove_favorite(self, *args):
+        """ Removes the selected show from favorites. """
 
-        selected = get_selected_text(self.name_list, NAME_COLUMN_TEXT)
+        path, _ = self.name_list.get_cursor()
+        selected = self.name_list_model[path][NAME_LIST_COLUMN_TEXT]
+
         if selected in self.config.get_key("favorites"):
             self.config.remove_key("favorites", selected)
             self.set_mode_favorites()
 
-        self.background_task(self.pycavane.del_favorite,
-                             self.on_finish_favorite, selected, False)
-
-    def on_finish_favorite(self, *args):
-        pass
+        #self.background_task(self.pycavane.del_favorite,
+        #                     self.on_finish_favorite, selected, False)
 
     def _on_file_button_press(self, view, event):
         """ Called when the user press any mouse button on the file viewer. """
 
         if event.button == 3:  # Right button
-            path, column = view.get_cursor()
+            path, _ = view.get_cursor()
             model = view.get_model()
             file_object = model[path][FILE_VIEW_COLUMN_OBJECT]
 
@@ -397,9 +394,7 @@ class GuiManager(object):
         chooser.destroy()
 
     def _on_name_key_press(self, treeview, event):
-        """
-        Called when the users presses a key on the name filter list.
-        """
+        """ Called when the users presses a key on the name filter list. """
 
         acceptedchars = map(chr, range(97, 123)) + map(chr, range(65, 91)) \
                         + ['0','1','2','3','4','5','6','7','8','9']
@@ -524,7 +519,7 @@ class GuiManager(object):
         Called when click on the context menu info item.
         """
 
-        path, column = self.file_viewer.get_cursor()
+        path, _ = self.file_viewer.get_cursor()
         file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
 
         if isinstance(file_object, pycavane.api.Episode):

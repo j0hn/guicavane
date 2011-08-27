@@ -2,7 +2,7 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkAboutDialog" id="aboutDialog">
+  <object class="GtkAboutDialog" id="about_dialog">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="window_position">center</property>
@@ -726,7 +726,6 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
                                   </object>
                                   <attributes>
                                     <attribute name="family">0</attribute>
-                                    <attribute name="size-points">0</attribute>
                                     <attribute name="text">0</attribute>
                                   </attributes>
                                 </child>
@@ -907,22 +906,6 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
       </row>
     </data>
   </object>
-  <object class="GtkMenu" id="nameShowsMenu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkImageMenuItem" id="addfavoriteItem">
-        <property name="label" translatable="yes">Add to favorites</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="use_action_appearance">False</property>
-        <property name="image">imageAdd</property>
-        <property name="use_stock">False</property>
-        <property name="always_show_image">True</property>
-        <signal name="activate" handler="_on_name_add_favorite" swapped="no"/>
-      </object>
-    </child>
-  </object>
   <object class="GtkMenu" id="name_favorites_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -935,7 +918,7 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
         <property name="image">imageRemove</property>
         <property name="use_stock">False</property>
         <property name="always_show_image">True</property>
-        <signal name="activate" handler="_on_name_remove_favorite" swapped="no"/>
+        <signal name="activate" handler="_on_remove_favorite" swapped="no"/>
       </object>
     </child>
   </object>
@@ -946,5 +929,21 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
       <!-- column-name show_instance -->
       <column type="PyObject"/>
     </columns>
+  </object>
+  <object class="GtkMenu" id="name_shows_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="addfavoriteItem">
+        <property name="label" translatable="yes">Add to favorites</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_action_appearance">False</property>
+        <property name="image">imageAdd</property>
+        <property name="use_stock">False</property>
+        <property name="always_show_image">True</property>
+        <signal name="activate" handler="_on_add_favorite" swapped="no"/>
+      </object>
+    </child>
   </object>
 </interface>
