@@ -71,10 +71,6 @@ class Player(object):
         """ Starts the playing of file_object. """
 
         hosts = file_object.file_hosts
-        print hosts
-
-
-        print win
 
         return
 

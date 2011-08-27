@@ -223,6 +223,21 @@ class GuiManager(object):
 
             self.file_viewer_model.append([icon, episode_name, episode])
 
+    def display_movies(self, (is_error, result)):
+        """ Fills the file viewer with the movies from the search results. """
+
+        if is_error:
+            message = "Problem fetching movies, "
+            message = "please try again in a few minutes."
+            self.report_error(message)
+            return
+
+        self.file_viewer_model.clear()
+
+        for movie in result:
+            name = movie.name
+            icon = ICON_FILE_MOVIE
+            self.file_viewer_model.append([icon, name, movie])
 
     # ================================
     # =         CALLBACKS            =
@@ -269,21 +284,23 @@ class GuiManager(object):
         file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
 
         mode = self.get_mode()
-        if mode == MODE_SHOWS or mode == MODE_FAVORITES:
-            if isinstance(file_object, pycavane.api.Season):
-                self.current_season = file_object
 
-                self.path_label.set_text("%s / %s" % \
-                        (self.current_show.name, self.current_season.name))
+        if isinstance(file_object, pycavane.api.Movie):
+            Player(self, file_object)
+        elif isinstance(file_object, pycavane.api.Season):
+            self.current_season = file_object
 
-                self.background_task(pycavane.api.Episode.search,
-                                     self.display_episodes, file_object)
-            elif isinstance(file_object, pycavane.api.Episode):
-                Player(self, file_object)
-            elif file_object == None:
-                self.background_task(pycavane.api.Season.search, self.display_seasons,
-                    self.current_show, status_message="Loading show %s..." % \
-                    self.current_show.name)
+            self.path_label.set_text("%s / %s" % \
+                    (self.current_show.name, self.current_season.name))
+
+            self.background_task(pycavane.api.Episode.search,
+                                 self.display_episodes, file_object)
+        elif isinstance(file_object, pycavane.api.Episode):
+            Player(self, file_object)
+        elif file_object == None:
+            self.background_task(pycavane.api.Season.search, self.display_seasons,
+                self.current_show, status_message="Loading show %s..." % \
+                self.current_show.name)
 
     def _on_name_filter_change(self, *args):
         """ Called when the textbox to filter names changes. """
@@ -474,9 +491,8 @@ class GuiManager(object):
         self.mode_combo.set_active(MODES.index(MODE_MOVIES))
 
         query = self.search_entry.get_text()
-        self.current_movies = {}
-        self.background_task(self.search_movies,
-                    self.show_search, query,
+        self.background_task(pycavane.api.Movie.search,
+                    self.display_movies, query,
                     status_message="Searching movies with title %s..." % query)
 
     def search_movies(self, query):
@@ -489,7 +505,6 @@ class GuiManager(object):
             next_matched = [x for x in next_movies if \
                             x[1].lower().count(query.lower()) > 0]
             movies += next_matched
-
 
         return (movies, search[1])
 
@@ -534,7 +549,6 @@ class GuiManager(object):
 
         self.info_window.hide()
 
-
     def download_show_image(self, link):
         """ Downloads the show image from `link`. """
 
@@ -572,31 +586,6 @@ class GuiManager(object):
                        gtk.gdk.INTERP_HYPER, 255)
 
         self.info_image.set_from_pixbuf(pixbuf)
-
-    def show_search(self, search_result):
-        """
-        Fills the file viewer with the movies from the search results.
-        """
-
-        self.file_viewer_model.clear()
-        marks = self.marks.get_all()
-
-        search_list, maybe_meant = search_result
-
-        if maybe_meant:
-            self.set_status_message("Maybe you meant: %s" % maybe_meant)
-
-        if not search_list:
-            return
-
-        for result_id, result_name, is_movie in search_list:
-            if is_movie:
-                icon = ICON_FILE_MOVIE
-                if result_name in marks:
-                    icon = ICON_FILE_MOVIE_MARK
-
-                self.current_movies[result_name] = result_id
-                self.file_viewer_model.append((icon, result_name))
 
     def open_movie(self, movie_text, file_path=None, download_only=False):
         """

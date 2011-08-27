@@ -20,9 +20,7 @@ import urls
 
 def setup(username=None, password=None,
         cache_dir='/tmp/', cache_lifetime=60*60*6):
-    """
-    Does the inicialization and login of the website.
-    """
+    """ Does the inicialization and login of the website. """
 
     # Singleton
     cached = Cached.get()
@@ -69,15 +67,13 @@ class Episode(object):
 
     @property
     def name(self):
-        if self.__name.endswith('...'):
-            return self.info['name']
+        #if self.__name.endswith('...'):
+        #    return self.info['name']
         return self.__name
 
     @property
     def info(self):
-        """
-        set info data in __info dict and return it
-        """
+        """ set info data in __info dict and return it. """
 
         if self.__info:
             return self.__info
@@ -97,9 +93,7 @@ class Episode(object):
 
     @property
     def file_hosts(self):
-        """
-        Returns a a dict with name and instance
-        """
+        """ Returns a a dict with name and instance. """
 
         if self.__hosts:
             return self.__hosts
@@ -108,21 +102,19 @@ class Episode(object):
 
         data = url_open(urls.player_season % self.id)
         for id, name in self._hosts_re.findall(data):
-            class_name = name.title() + 'Host'
-            if getattr(downloaders, class_name, None):
-                # if implemented file host instance it
-                host = getattr(downloaders, class_name)(id)
-            else:
-                # else return a generic one
-                host = downloaders.FileHost(id, name=name)
-            self.__hosts[name] = host
+            data = [('key', id), ('host', name),
+                    ('vars', '&id=%s&subs=,ES,EN&tipo=&amp;sub_pre=ES' % self.id)]
+            url = url_open(urls.source_get, data=data)
+
+            # before http are ugly chars
+            url = url[url.find('http:'):].split('&id')[0]
+
+            self.__hosts[name] = url
 
         return self.__hosts
 
     def get_subtitle(self, lang='ES', filename=None):
-        """
-        Downloads the subtitle of the episode.
-        """
+        """ Downloads the subtitle of the episode. """
 
         if filename:
             filename += '.srt'
@@ -131,10 +123,7 @@ class Episode(object):
 
     @classmethod
     def search(self, season):
-        """
-        Returns a list with Episodes of
-        of `season`.
-        """
+        """ Returns a list with Episodes of of season. """
 
         data = url_open(urls.episodes % season.id)
         for episode in self._search_re.finditer(data):
@@ -210,7 +199,10 @@ class Movie(object):
                             '(?P<description>.*?)<div', re.DOTALL)
     _description_re = re.compile('<td class="infolabel" valign="top">Sinopsis</td>.*?' \
                                  '<td>(.+?)</td>', re.DOTALL)
+    _hosts_re = re.compile("goSource\('([a-zA-Z0-9]*?)','([a-zA-Z]*?)'\)")
+
     __info = ""
+    __hosts = None
 
     def __init__(self, id, name, year=None, description=""):
         self.id = id
@@ -231,9 +223,7 @@ class Movie(object):
 
     @property
     def info(self):
-        """
-        Returns a dict with info about this movie
-        """
+        """ Returns a dict with info about this movie. """
 
         if self.__info:
             return self.__info
@@ -246,12 +236,32 @@ class Movie(object):
         self.__info = {'description': description}
         return self.__info
 
+    @property
+    def file_hosts(self):
+        """ Returns a a dict with name and instance. """
+
+        if self.__hosts:
+            return self.__hosts
+
+        self.__hosts = {}
+
+        data = url_open(urls.player_movie % self.id)
+        for id, name in self._hosts_re.findall(data):
+            data = [('key', id), ('host', name),
+                    ('vars', '&id=%s&subs=,ES,EN&tipo=&amp;sub_pre=ES' % self.id)]
+            url = url_open(urls.source_get, data=data)
+
+            # before http are ugly chars
+            url = url[url.find('http:'):].split('&id')[0]
+
+            self.__hosts[name] = url
+
+        return self.__hosts
+
     @classmethod
     def search(self, query=""):
-        """
-        Returns a list with all the matched
-        movies searched using the query
-        """
+        """ Returns a list with all the matched
+        movies searched using the query. """
 
         query = query.lower().replace(' ', '+')
 
