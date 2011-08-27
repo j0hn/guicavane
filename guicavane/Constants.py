@@ -11,22 +11,12 @@ import os
 import sys
 import gtk
 
-# Directory separator
-SEP = os.sep
-
-# Directories
-if sys.platform == "win32":
-    MAIN_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
-    IMAGES_DIR = MAIN_DIR + SEP + "images"
-else:
-    MAIN_DIR = os.path.dirname(__file__)
-    IMAGES_DIR = MAIN_DIR.rsplit(SEP, 1)[0] + SEP + "images"
-
-GUI_DIR = "glade"
+from Paths import GUI_DIR, IMAGES_DIR, SEP
 
 # Gui Files
 MAIN_GUI_FILE = GUI_DIR + SEP + "main.glade"
 SETTINGS_GUI_FILE = GUI_DIR + SEP + "settings.glade"
+HOSTS_GUI_FILE = GUI_DIR + SEP + "hosts.glade"
 
 # Modes
 MODE_SHOWS = "Shows"
@@ -57,5 +47,5 @@ IMAGE_FILE_MOVIE_MARK = gtk.Image()
 IMAGE_FILE_MOVIE_MARK.set_from_file(IMAGES_DIR + SEP + "video_file_mark.png")
 ICON_FILE_MOVIE_MARK = IMAGE_FILE_MOVIE_MARK.get_pixbuf()
 
-IMAGE_CASE_EMPTY = "images/case_empty.png"
-IMAGE_CASE = "images/case.png"
+IMAGE_CASE_EMPTY = IMAGES_DIR + SEP + "case_empty.png"
+IMAGE_CASE = IMAGES_DIR + SEP + "case.png"

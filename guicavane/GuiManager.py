@@ -29,9 +29,6 @@ class GuiManager(object):
         # Config
         self.config = Config()
 
-        # Player
-        self.player = Player(self)
-
         # Gtk builder
         self.builder = gtk.Builder()
         self.builder.add_from_file(MAIN_GUI_FILE)
