@@ -40,7 +40,7 @@ class GuiManager(object):
             "name_list_model", "file_viewer", "file_viewer_model",
             "mode_combo", "search_entry", "search_button", "search_clear",
             "sidebar", "sidebar_vbox", "path_label", "info_window",
-            "info_title", "info_label", "info_image"
+            "info_title", "info_label", "info_image", "file_viewer_menu",
         ]
 
         for widget in widgets:
@@ -327,18 +327,15 @@ class GuiManager(object):
         pass
 
     def _on_file_button_press(self, view, event):
-        """
-        Called when the user press any mouse button on the file viewer.
-        """
+        """ Called when the user press any mouse button on the file viewer. """
 
-        if event.button == 3:
-            popup_menu = self.builder.get_object("fileViewerMenu")
+        if event.button == 3:  # Right button
+            path, column = view.get_cursor()
+            model = view.get_model()
+            file_object = model[path][FILE_VIEW_COLUMN_OBJECT]
 
-            selected_text = get_selected_text(self.file_viewer,
-                                              FILE_VIEW_COLUMN_TEXT)
-            if not selected_text.startswith("Temporada") and \
-               not selected_text == "..":
-                popup_menu.popup(None, None, None, event.button, event.time)
+            if isinstance(file_object, pycavane.api.Episode):
+                self.file_viewer_menu.popup(None, None, None, event.button, event.time)
 
     def _on_play_clicked(self, *args):
         """
@@ -404,13 +401,6 @@ class GuiManager(object):
             self.name_filter.grab_focus()
             self.name_filter.set_position(len(self.name_filter.get_text()))
 
-    def save_config(self):
-        """
-        Saves the config to disk.
-        """
-
-        self.config.save()
-
     def mark_selected(self, *args):
         """
         Called when the user clicks on Mark item in the context menu.
@@ -473,16 +463,12 @@ class GuiManager(object):
             webbrowser.open(link % (data[0], movie))
 
     def _on_search_clear_clicked(self, *args):
-        """
-        Clears the search input.
-        """
+        """ Clears the search input. """
 
         self.search_entry.set_text("")
 
     def _on_search_activate(self, *args):
-        """
-        Called when the user does a search.
-        """
+        """ Called when the user does a search. """
 
         # Sets the correct mode
         self.set_mode_movies()
@@ -529,59 +515,29 @@ class GuiManager(object):
         Called when click on the context menu info item.
         """
 
-        selected_text = get_selected_text(self.file_viewer,
-                                          FILE_VIEW_COLUMN_TEXT)
+        path, column = self.file_viewer.get_cursor()
+        file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
 
-        if selected_text.startswith("Temporada"):
-            return
+        if isinstance(file_object, pycavane.api.Episode):
+            empty_case = gtk.gdk.pixbuf_new_from_file(IMAGE_CASE_EMPTY)
+            self.info_image.set_from_pixbuf(empty_case)
 
-        try:
-            selected_episode = selected_text.split(" - ", 1)[1]
-        except IndexError:
-            return
+            print file_object.info["image"]
+            self.background_task(self.download_show_image, self.set_info_image,
+                                 file_object.info["image"])
 
-        show = self.current_show
-        seasson = self.current_seasson
-
-        episode_found = self.pycavane.episode_by_name(selected_episode,
-                                                      show, seasson)
-
-        if not episode_found:
-            return
-
-        self.background_task(self.pycavane.get_episode_info,
-                        self.open_info_window, episode_found)
+            self.info_title.set_label(file_object.name)
+            self.info_label.set_label(file_object.info["description"])
+            self.info_window.show()
 
     def _on_info_window_close(self, *args):
-        """
-        Called when the info window is closed.
-        """
+        """ Called when the info window is closed. """
 
         self.info_window.hide()
 
-    def open_info_window(self, info):
-        """
-        Opens the info window and loads the info.
-        """
-
-        title = "%s: %s" % (self.current_show, info[1])
-        desc = info[2]
-        image_link = info[0]
-
-        empty_case = gtk.gdk.pixbuf_new_from_file(IMAGE_CASE_EMPTY)
-        self.info_image.set_from_pixbuf(empty_case)
-
-        self.background_task(self.download_show_image, self.set_info_image,
-                             image_link)
-
-        self.info_title.set_label(title)
-        self.info_label.set_label(desc)
-        self.info_window.show()
 
     def download_show_image(self, link):
-        """
-        Downloads the show image from `link`.
-        """
+        """ Downloads the show image from `link`. """
 
         images_dir = self.config.get_key("images_dir")
         show = self.current_show.lower()
@@ -597,10 +553,14 @@ class GuiManager(object):
 
         return image_path
 
-    def set_info_image(self, image_path):
-        """
-        Sets the image of the current episode.
-        """
+    def set_info_image(self, (is_error, result)):
+        """ Sets the image of the current episode. """
+
+        if is_error:
+            self.set_status_message("Problem downloading show image.")
+            return
+
+        image_path = result
 
         pixbuf = gtk.gdk.pixbuf_new_from_file(image_path)
         case = gtk.gdk.pixbuf_new_from_file(IMAGE_CASE)
@@ -613,8 +573,6 @@ class GuiManager(object):
                        gtk.gdk.INTERP_HYPER, 255)
 
         self.info_image.set_from_pixbuf(pixbuf)
-
-
 
     def show_search(self, search_result):
         """
