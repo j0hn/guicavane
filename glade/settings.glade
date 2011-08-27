@@ -13,7 +13,7 @@
     <property name="title" translatable="yes">Settings</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="icon">../../images/logo.png</property>
+    <property name="icon">../images/logo.png</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <child internal-child="vbox">

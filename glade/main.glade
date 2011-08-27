@@ -6,7 +6,7 @@
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="window_position">center</property>
-    <property name="icon">../../images/logo.png</property>
+    <property name="icon">../images/logo.png</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="has_separator">True</property>
@@ -27,7 +27,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</property>
     <property name="authors">j0hn &lt;j0hn.com.ar@gmail.com&gt; - Lead developer
 Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
-    <property name="logo">../../images/logo_big.png</property>
+    <property name="logo">../images/logo_big.png</property>
     <property name="wrap_license">True</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
@@ -53,7 +53,7 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
       </object>
     </child>
   </object>
-  <object class="GtkMenu" id="fileViewerMenu">
+  <object class="GtkMenu" id="file_viewer_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
@@ -139,7 +139,7 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
       </object>
     </child>
   </object>
-  <object class="GtkListStore" id="file_store">
+  <object class="GtkListStore" id="file_viewer_model">
     <columns>
       <!-- column-name icon -->
       <column type="GdkPixbuf"/>
@@ -158,7 +158,7 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
   <object class="GtkImage" id="imageCuevana">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">../../images/cuevana.png</property>
+    <property name="pixbuf">../images/cuevana.png</property>
   </object>
   <object class="GtkImage" id="imageHardDisk">
     <property name="visible">True</property>
@@ -169,7 +169,7 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
   <object class="GtkImage" id="imageMark">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">../../images/mark.png</property>
+    <property name="pixbuf">../images/mark.png</property>
     <property name="icon-size">1</property>
   </object>
   <object class="GtkImage" id="imageRemove">
@@ -187,14 +187,14 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
   <object class="GtkImage" id="imageUnmark">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">../../images/unmark.png</property>
+    <property name="pixbuf">../images/unmark.png</property>
   </object>
   <object class="GtkWindow" id="infoWindow">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Information</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="icon">../../images/logo.png</property>
+    <property name="icon">../images/logo.png</property>
     <signal name="delete-event" handler="_on_info_window_close" swapped="no"/>
     <child>
       <object class="GtkHBox" id="mainHbox">
@@ -293,7 +293,7 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
     <property name="window_position">center</property>
     <property name="default_width">900</property>
     <property name="default_height">500</property>
-    <property name="icon">../../images/logo.png</property>
+    <property name="icon">../images/logo.png</property>
     <signal name="destroy" handler="_on_destroy" swapped="no"/>
     <child>
       <object class="GtkVBox" id="main_vbox">
@@ -535,7 +535,7 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
             <property name="can_focus">True</property>
             <property name="border_width">5</property>
             <child>
-              <object class="GtkVBox" id="sidebar_vbox">
+              <object class="GtkVBox" id="sidebar">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="border_width">5</property>
@@ -611,21 +611,21 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
                     <property name="resize_mode">queue</property>
                     <property name="shadow_type">etched-out</property>
                     <child>
-                      <object class="GtkScrolledWindow" id="nameScroll">
+                      <object class="GtkScrolledWindow" id="name_scroll">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="hscrollbar_policy">automatic</property>
                         <property name="vscrollbar_policy">automatic</property>
                         <child>
-                          <object class="GtkTreeView" id="nameList">
+                          <object class="GtkTreeView" id="name_list">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="model">name_liststore</property>
+                            <property name="model">name_list_model</property>
                             <property name="headers_visible">False</property>
                             <property name="enable_search">False</property>
                             <property name="search_column">0</property>
                             <signal name="button-press-event" handler="_on_name_button_press" swapped="no"/>
-                            <signal name="row-activated" handler="_on_name_change" swapped="no"/>
+                            <signal name="row-activated" handler="_on_show_selected" swapped="no"/>
                             <signal name="key-press-event" handler="_on_name_key_press" swapped="no"/>
                             <child>
                               <object class="GtkTreeViewColumn" id="name">
@@ -687,11 +687,11 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
                       <object class="GtkTreeView" id="file_viewer">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="model">file_store</property>
+                        <property name="model">file_viewer_model</property>
                         <property name="headers_visible">False</property>
                         <property name="headers_clickable">False</property>
                         <property name="search_column">1</property>
-                        <signal name="row-activated" handler="_on_open_file" swapped="no"/>
+                        <signal name="row-activated" handler="_on_file_viewer_open" swapped="no"/>
                         <signal name="button-release-event" handler="_on_file_button_press" swapped="no"/>
                         <child>
                           <object class="GtkTreeViewColumn" id="file_viewer_column">
@@ -817,14 +817,6 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
       </row>
     </data>
   </object>
-  <object class="GtkListStore" id="name_liststore">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name show_instance -->
-      <column type="PyObject"/>
-    </columns>
-  </object>
   <object class="GtkMenu" id="nameShowsMenu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -856,5 +848,13 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
         <signal name="activate" handler="_on_name_remove_favorite" swapped="no"/>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="name_list_model">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name show_instance -->
+      <column type="PyObject"/>
+    </columns>
   </object>
 </interface>

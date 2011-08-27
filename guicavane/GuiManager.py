@@ -11,7 +11,7 @@ import urllib
 
 import pycavane
 from Constants import *
-from threadrunner import GtkThreadRunner
+from ThreadRunner import GtkThreadRunner
 
 
 class GuiManager(object):
@@ -20,24 +20,36 @@ class GuiManager(object):
     def __init__(self):
         """ Creates the main window. """
 
+        # TODO: DELETE!!!
+
+
+        # Attributes
+        self.current_show = None
+        self.current_season = None
+
         # Gtk builder
         self.builder = gtk.Builder()
         self.builder.add_from_file(MAIN_GUI_FILE)
         self.builder.connect_signals(self)
 
         # Getting the used widgets
-        widgets = ["main_window", "statusbar_label", "progress_box",
-                   "progress", "progress_label", "name_filter",
-                   "name_filter_clear", "name_list", "file_viewer",
-                   "mode_combo", "search_entry", "search_button",
-                   "search_clear", "sidebar_vbox", "path_label", "info_window",
-                   "info_title", "info_label", "info_image"]
+        widgets = [
+            "main_window", "statusbar_label", "progress_box", "progress",
+            "progress_label", "name_filter", "name_filter_clear", "name_list",
+            "name_list_model", "file_viewer", "file_viewer_model",
+            "mode_combo", "search_entry", "search_button", "search_clear",
+            "sidebar", "sidebar_vbox", "path_label", "info_window",
+            "info_title", "info_label", "info_image"
+        ]
 
         for widget in widgets:
             setattr(self, widget, self.builder.get_object(widget))
 
         # Now we show the window
         self.main_window.show_all()
+
+        # Start on shows mode
+        self.set_mode_shows()
 
     def freeze(self, status_message="Loading..."):
         """ Freezes the gui so the user can't interact with it. """
@@ -50,10 +62,149 @@ class GuiManager(object):
         self.main_window.set_sensitive(True)
         self.set_status_message("")
 
+    def background_task(self, func, callback, *args, **kwargs):
+        """
+        Freezes the gui, starts a thread with func.
+        When it's done, unfreezes the gui and calls callback with the result.
+
+        The results it's a tuple (is_error, result) with a boolean if
+        an error has ocurred and the exception, or the result if there
+        was no errors.
+        """
+
+        status_message = "Loading..."
+
+        if "status_message" in kwargs:
+            status_message = kwargs["status_message"]
+            del kwargs["status_message"]
+
+        def unfreeze_first(result):
+            self.unfreeze()
+            callback(result)
+
+        self.freeze(status_message)
+        GtkThreadRunner(unfreeze_first, func, *args, **kwargs)
+
     def set_status_message(self, message):
         """ Sets the message shown in the statusbar.  """
 
         self.statusbar_label.set_label(message)
+
+    def set_mode_shows(self, *args):
+        """ Sets the current mode to shows. """
+
+        self.sidebar.show()
+        self.search_entry.set_text("")
+        self.name_filter.set_text("")
+        self.path_label.set_text("")
+        self.name_list_model.clear()
+        self.background_task(pycavane.api.Show.search, self.display_shows,
+                             status_message="Obtaining shows list")
+
+    def set_mode_movies(self):
+        """ Sets the current mode to movies. """
+
+        self.name_list_model.clear()
+        self.search_entry.grab_focus()
+        self.sidebar.hide()
+        self.path_label.set_text("")
+        self.name_filter.set_text("")
+
+    def set_mode_favorites(self):
+        """ Sets the current mode to favorites. """
+
+        self.sidebar.show()
+        self.search_entry.set_text("")
+        self.path_label.set_text("")
+        self.name_filter.set_text("")
+        self.name_list_model.clear()
+        for favorite in self.config.get_key("favorites"):
+            self.name_list_model.append([favorite])
+
+    def update_favorites(self, favorites):
+        for fav in favorites:
+            if fav not in self.config.get_key("favorites"):
+                self.config.append_key("favorites", fav)
+
+        if self.get_mode() == MODE_FAVORITES:
+            self.set_mode_favorites()
+
+    def get_mode(self):
+        """
+        Returns the current mode.
+        i.e the value of the mode combobox.
+        The result will be the constant MODE_* (see constants definitions).
+        """
+
+        model = self.mode_combo.get_model()
+        active = self.mode_combo.get_active()
+        mode_text = model[active][0]
+
+        # Poscondition
+        assert mode_text in MODES
+
+        return mode_text
+
+    def display_shows(self, (is_error, result)):
+        """ Displays the shows. """
+
+        self.name_list_model.clear()
+        self.file_viewer_model.clear()
+
+        if is_error:
+            message = "Problem fetching shows, "
+            message += "please try again in a few minutes."
+            self.report_error(message)
+            return
+
+        for show in result:
+            self.name_list_model.append([show.name, show])
+
+    def display_seasons(self, (is_error, result)):
+        """ Fills the file viewer with the seasons. """
+
+        if is_error:
+            message = "Problem fetching seasons, "
+            message = "please try again in a few minutes."
+            self.report_error(message)
+            return
+
+        self.file_viewer_model.clear()
+
+        for season in result:
+            self.file_viewer_model.append([ICON_FOLDER, season.name, season])
+
+    def display_episodes(self, (is_error, result)):
+        """ Fills the file viewer with the episodes. """
+
+        if is_error:
+            message = "Problem fetching episodes, "
+            message = "please try again in a few minutes."
+            self.report_error(message)
+            return
+
+        self.file_viewer_model.clear()
+        #marks = self.marks.get_all()
+
+        # Add the 'up' folder
+        self.file_viewer_model.append([ICON_FOLDER, "..", None])
+
+        for episode in result:
+            try:
+                episode_name = "%.2d - %s" % (int(episode.id), episode.name)
+            except ValueError:
+                episode_name = "%s - %s" % (episode.id, episode.name)
+
+            icon = ICON_FILE_MOVIE
+            #if episode_name in marks:
+            #    icon = ICON_FILE_MOVIE_MARK
+
+            self.file_viewer_model.append([icon, episode.name, episode])
+
+
+    # ================================
+    # =         CALLBACKS            =
+    # ================================
 
     def _on_destroy(self, *args):
         """ Called when the window closes.  """
@@ -72,31 +223,31 @@ class GuiManager(object):
         self.config.set_key("last_mode", mode)
         mode = mode.lower()
 
-        self.file_model.clear()
+        self.file_viewer_model.clear()
 
         # Call the corresponding set_mode method
         getattr(self, "set_mode_%s" % mode)()
 
-    def _on_name_change(self, *args):
-        """
-        Called when the user selects a show from the 'name list'.
-        """
+    def _on_show_selected(self, tree_view, path, column):
+        """ Called when the user selects a show from the name list. """
 
-        selected_text = get_selected_text(self.name_list, NAME_COLUMN_TEXT)
-        self.current_show = selected_text
+        self.file_viewer_model.clear()
 
-        self.path_label.set_text(self.current_show)
-        self.file_model.clear()
+        selected_show = self.name_list_model[path][NAME_LIST_COLUMN_OBJECT]
 
-        self.background_task(self.pycavane.seasson_by_show, self.show_seassons,
-            selected_text, status_message="Loading show %s..." % selected_text)
+        self.current_show = selected_show
+        self.path_label.set_text(selected_show.name)
+
+        self.background_task(pycavane.api.Season.search, self.display_seasons,
+                selected_show, status_message="Loading show %s..." % \
+                selected_show.name)
 
     def _on_name_filter_change(self, *args):
         """
         Called when the textbox to filter names changes.
         """
 
-        self.name_model_filter.refilter()
+        self.name_list_model_filter.refilter()
 
     def _on_name_filter_clear_clicked(self, *args):
         """
@@ -269,7 +420,7 @@ class GuiManager(object):
         if selected_text.count(" - "):  # It's a serie
             link = "http://www.cuevana.tv/series/%s/%s/%s/"
             show = self.current_show
-            season = self.current_seasson
+            season = self.current_season
 
             try:
                 selected_episode = selected_text.split(" - ", 1)[1]
@@ -288,10 +439,8 @@ class GuiManager(object):
             link = "http://www.cuevana.tv/peliculas/%s/%s/"
             data = self.pycavane.movie_by_name(selected_text)
 
-            print data[1]
             movie = normalize_string(data[1])
 
-            print movie
             webbrowser.open(link % (data[0], movie))
 
     def _on_search_clear_clicked(self, *args):
@@ -330,17 +479,22 @@ class GuiManager(object):
 
         return (movies, search[1])
 
-    def _on_open_file(self, widget, path, *args):
-        """
-        Called when the user double clicks on a file inside the file viewer.
-        """
+    def _on_file_viewer_open(self, widget, path, *args):
+        """ Called when the user double clicks on a file
+        inside the file viewer. """
 
-        selected_text = self.file_model[path][1]
+        file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
 
         mode = self.get_mode()
         if mode == MODE_SHOWS or mode == MODE_FAVORITES:
-            if selected_text.startswith("Temporada"):
-                self.open_seasson(selected_text)
+            if isinstance(file_object, pycavane.api.Season):
+                self.current_season = file_object
+
+                self.path_label.set_text("%s / %s" % \
+                        (self.current_show.name, self.current_season.name))
+
+                self.background_task(pycavane.api.Episode.search,
+                                     self.display_episodes, file_object)
             else:
                 self.open_show(selected_text)
         elif mode == MODE_MOVIES:
@@ -452,54 +606,14 @@ class GuiManager(object):
 
         self.info_image.set_from_pixbuf(pixbuf)
 
-    def show_shows(self, shows):
-        """
-        Adds all the shows to the list.
-        """
 
-        self.file_model.clear()
-
-        for _, show_name in shows:
-            self.name_model.append([show_name])
-
-    def show_seassons(self, seassons):
-        """
-        Fills the file viewer with the seassons.
-        """
-
-        self.file_model.clear()
-
-        for _, seasson_name in seassons:
-            self.file_model.append((ICON_FOLDER, seasson_name))
-
-    def show_episodes(self, episodes):
-        """
-        Fills the file viewer with the episodes.
-        """
-
-        self.file_model.clear()
-        marks = self.marks.get_all()
-
-        self.file_model.append((ICON_FOLDER, ".."))
-
-        for _, episode_number, episode_name in episodes:
-            try:
-                episode_name = "%.2d - %s" % (int(episode_number), episode_name)
-            except ValueError:
-                episode_name = "%s - %s" % (episode_number, episode_name)
-
-            icon = ICON_FILE_MOVIE
-            if episode_name in marks:
-                icon = ICON_FILE_MOVIE_MARK
-
-            self.file_model.append((icon, episode_name))
 
     def show_search(self, search_result):
         """
         Fills the file viewer with the movies from the search results.
         """
 
-        self.file_model.clear()
+        self.file_viewer_model.clear()
         marks = self.marks.get_all()
 
         search_list, maybe_meant = search_result
@@ -517,7 +631,7 @@ class GuiManager(object):
                     icon = ICON_FILE_MOVIE_MARK
 
                 self.current_movies[result_name] = result_id
-                self.file_model.append((icon, result_name))
+                self.file_viewer_model.append((icon, result_name))
 
     def open_seasson(self, seasson_text):
         """
@@ -573,66 +687,7 @@ class GuiManager(object):
         if error:
             self.set_status_message(str(error))
 
-    def set_mode_shows(self, *args):
-        """
-        Sets the current mode to shows.
-        """
 
-        self.sidebar.show()
-        self.search_entry.set_text("")
-        self.name_filter.set_text("")
-        self.path_label.set_text("")
-        self.name_model.clear()
-        self.background_task(self.pycavane.get_shows, self.show_shows,
-                             status_message="Obtaining shows list")
-
-    def set_mode_movies(self):
-        """
-        Sets the current mode to movies.
-        """
-
-        self.name_model.clear()
-        self.search_entry.grab_focus()
-        self.sidebar.hide()
-        self.path_label.set_text("")
-        self.name_filter.set_text("")
-
-    def set_mode_favorites(self):
-        """
-        Sets the current mode to favorites.
-        """
-
-        self.sidebar.show()
-        self.search_entry.set_text("")
-        self.path_label.set_text("")
-        self.name_filter.set_text("")
-        self.name_model.clear()
-        for favorite in self.config.get_key("favorites"):
-            self.name_model.append([favorite])
-
-    def update_favorites(self, favorites):
-        for fav in favorites:
-            if fav not in self.config.get_key("favorites"):
-                self.config.append_key("favorites", fav)
-
-        if self.get_mode() == MODE_FAVORITES:
-            self.set_mode_favorites()
-
-    def get_mode(self):
-        """
-        Returns the current mode.
-        i.e the value of the mode combobox.
-        The result will be the constant MODE_* (see constants definitions).
-        """
-
-        model = self.mode_combo.get_model()
-        active = self.mode_combo.get_active()
-        mode_text = model[active][0]
-
-        # Poscondition
-        assert mode_text in MODES
-
-        return mode_text
 
 
 def get_selected_text(view, text_column=0):
