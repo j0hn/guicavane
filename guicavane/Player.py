@@ -19,21 +19,17 @@ class Player(object):
     playing the file.
     """
 
-    def __init__(self, gui, config):
-        self.gui = gui
-        self.config = config
-        self.pycavane = self.gui.pycavane
-        self.megaupload_error = False
-        self.account = MegaAccount()
+    def __init__(self, GuiManager):
+        self.GuiManager = GuiManager
+        #self.account = MegaAccount()
 
-    def play(self, to_download, is_movie=False,
-             file_path=None, download_only=False):
-        """
-        Starts the playing of `to_download`.
-        """
+    def play(self, file_object, is_movie=False, file_path=None, download_only=False):
+        """ Starts the playing of file_object. """
 
-        link = self.pycavane.get_direct_links(to_download, host="megaupload",
-                                              movie=is_movie)
+        hosts = file_object.file_hosts
+        print hosts
+
+        return
 
         if link:
             link = link[1]

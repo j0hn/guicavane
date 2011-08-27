@@ -83,7 +83,6 @@ class Episode(object):
             return self.__info
 
         page_data = url_open(urls.show_info % self.id)
-        print urls.show_info % self.id
 
         name = self._name_re.findall(page_data)[0].strip()
         image = urls.host + self._image_re.findall(page_data)[0]

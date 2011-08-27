@@ -12,6 +12,7 @@ import urllib
 import pycavane
 from Constants import *
 from ThreadRunner import GtkThreadRunner
+from Player import Player
 
 
 class GuiManager(object):
@@ -20,12 +21,12 @@ class GuiManager(object):
     def __init__(self):
         """ Creates the main window. """
 
-        # TODO: DELETE!!!
-
-
         # Attributes
         self.current_show = None
         self.current_season = None
+
+        # Player
+        self.player = Player(self)
 
         # Gtk builder
         self.builder = gtk.Builder()
@@ -45,6 +46,13 @@ class GuiManager(object):
         for widget in widgets:
             setattr(self, widget, self.builder.get_object(widget))
 
+        # Set up the filter for the show list
+        self.name_list_model_filter = self.name_list_model.filter_new()
+        self.name_list_model_filter.set_visible_func(generic_visible_func,
+            (self.name_filter, NAME_LIST_COLUMN_TEXT))
+        self.name_list.set_model(self.name_list_model_filter)
+
+
         # Now we show the window
         self.main_window.show_all()
 
@@ -55,6 +63,7 @@ class GuiManager(object):
         """ Freezes the gui so the user can't interact with it. """
 
         self.main_window.set_sensitive(False)
+        self.set_status_message(status_message)
 
     def unfreeze(self):
         """ Sets the widgets to be usable. """
@@ -233,7 +242,8 @@ class GuiManager(object):
 
         self.file_viewer_model.clear()
 
-        selected_show = self.name_list_model[path][NAME_LIST_COLUMN_OBJECT]
+        model = tree_view.get_model()
+        selected_show = model[path][NAME_LIST_COLUMN_OBJECT]
 
         self.current_show = selected_show
         self.path_label.set_text(selected_show.name)
@@ -242,17 +252,36 @@ class GuiManager(object):
                 selected_show, status_message="Loading show %s..." % \
                 selected_show.name)
 
+    def _on_file_viewer_open(self, widget, path, *args):
+        """ Called when the user double clicks on a file
+        inside the file viewer. """
+
+        file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
+
+        mode = self.get_mode()
+        if mode == MODE_SHOWS or mode == MODE_FAVORITES:
+            if isinstance(file_object, pycavane.api.Season):
+                self.current_season = file_object
+
+                self.path_label.set_text("%s / %s" % \
+                        (self.current_show.name, self.current_season.name))
+
+                self.background_task(pycavane.api.Episode.search,
+                                     self.display_episodes, file_object)
+            elif isinstance(file_object, pycavane.api.Episode):
+                self.background_task(self.player.play, lambda x: x, file_object)
+            elif file_object == None:
+                self.background_task(pycavane.api.Season.search, self.display_seasons,
+                    self.current_show, status_message="Loading show %s..." % \
+                    self.current_show.name)
+
     def _on_name_filter_change(self, *args):
-        """
-        Called when the textbox to filter names changes.
-        """
+        """ Called when the textbox to filter names changes. """
 
         self.name_list_model_filter.refilter()
 
     def _on_name_filter_clear_clicked(self, *args):
-        """
-        Clears the name filter input.
-        """
+        """ Clears the name filter input. """
 
         self.name_filter.set_text("")
 
@@ -479,27 +508,6 @@ class GuiManager(object):
 
         return (movies, search[1])
 
-    def _on_file_viewer_open(self, widget, path, *args):
-        """ Called when the user double clicks on a file
-        inside the file viewer. """
-
-        file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
-
-        mode = self.get_mode()
-        if mode == MODE_SHOWS or mode == MODE_FAVORITES:
-            if isinstance(file_object, pycavane.api.Season):
-                self.current_season = file_object
-
-                self.path_label.set_text("%s / %s" % \
-                        (self.current_show.name, self.current_season.name))
-
-                self.background_task(pycavane.api.Episode.search,
-                                     self.display_episodes, file_object)
-            else:
-                self.open_show(selected_text)
-        elif mode == MODE_MOVIES:
-            self.open_movie(selected_text)
-
     def _on_about_clicked(self, *args):
         """
         Opens the about dialog.
@@ -633,40 +641,6 @@ class GuiManager(object):
                 self.current_movies[result_name] = result_id
                 self.file_viewer_model.append((icon, result_name))
 
-    def open_seasson(self, seasson_text):
-        """
-        Fills the file viewer with the episodes from the seasson.
-        """
-
-        show = self.current_show
-        self.current_seasson = seasson_text
-
-        self.path_label.set_text(show + " / " + self.current_seasson)
-
-        self.background_task(self.pycavane.episodes_by_season,
-                        self.show_episodes, show, seasson_text)
-
-    def open_show(self, episode_text, file_path=None, download_only=False):
-        """
-        Starts the download of the given episode.
-        """
-
-        if episode_text == "..":
-            self.background_task(self.pycavane.seasson_by_show,
-                           self.show_seassons, self.current_show)
-            return
-
-        selected_episode = episode_text.split(" - ", 1)[1]
-        show = self.current_show
-        seasson = self.current_seasson
-
-        episode_found = self.pycavane.episode_by_name(selected_episode,
-                                                      show, seasson)
-
-        self.background_task(self.player.play, self.on_player_finish,
-                             episode_found, file_path=file_path,
-                             download_only=download_only)
-
     def open_movie(self, movie_text, file_path=None, download_only=False):
         """
         Starts the download of the given movie.
@@ -688,15 +662,22 @@ class GuiManager(object):
             self.set_status_message(str(error))
 
 
-
-
-def get_selected_text(view, text_column=0):
+def generic_visible_func(model, iteration, (entry, text_column)):
     """
-    Returns the string of the selected item on the view.
+    Filters the treeview based on the text found on `entry`.
+    text_column should be the column index where the text can be
+    found.
     """
 
-    selection = view.get_selection()
-    model, iteration = selection.get_selected()
-    selected_text = model.get_value(iteration, text_column)
+    filtered_text = entry.get_text()
 
-    return selected_text
+    row_text = model.get_value(iteration, text_column)
+
+    if row_text:
+        # Case insensitive search
+        filtered_text = filtered_text.lower()
+        row_text = row_text.lower()
+
+        return filtered_text in row_text
+
+    return False
