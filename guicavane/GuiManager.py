@@ -88,12 +88,16 @@ class GuiManager(object):
             status_message = kwargs["status_message"]
             del kwargs["status_message"]
 
-        def unfreeze_first(result):
-            self.unfreeze()
-            callback(result)
+        if "unfreeze" in kwargs and not kwargs["unfreeze"]:
+            real_callback = callback
+            del kwargs["unfreeze"]
+        else:
+            def real_callback(result):
+                self.unfreeze()
+                callback(result)
 
         self.freeze(status_message)
-        GtkThreadRunner(unfreeze_first, func, *args, **kwargs)
+        GtkThreadRunner(real_callback, func, *args, **kwargs)
 
     def set_status_message(self, message):
         """ Sets the message shown in the statusbar.  """
@@ -270,7 +274,7 @@ class GuiManager(object):
                 self.background_task(pycavane.api.Episode.search,
                                      self.display_episodes, file_object)
             elif isinstance(file_object, pycavane.api.Episode):
-                self.background_task(self.player.play, lambda x: x, file_object)
+                Player(self, file_object)
             elif file_object == None:
                 self.background_task(pycavane.api.Season.search, self.display_seasons,
                     self.current_show, status_message="Loading show %s..." % \

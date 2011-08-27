@@ -6,11 +6,15 @@ Player. Handles the download and starts the player.
 """
 
 import os
+import gtk
 import time
 import gobject
 import subprocess
+
+import Downloaders
 from megaupload import MegaFile
 from login import MegaAccount
+from Constants import HOSTS_GUI_FILE
 
 
 class Player(object):
@@ -19,15 +23,58 @@ class Player(object):
     playing the file.
     """
 
-    def __init__(self, GuiManager):
+    def __init__(self, GuiManager, file_object):
         self.GuiManager = GuiManager
+        self.file_object = file_object
+
+        # Builder for the hosts selection
+        self.hosts_builder = gtk.Builder()
+        self.hosts_builder.add_from_file(HOSTS_GUI_FILE)
+        self.hosts_builder.connect_signals(self)
+
+        self.GuiManager.background_task(self.get_hosts, self.display_hosts,
+            status_message="Fetching hosts...", unfreeze=False)
         #self.account = MegaAccount()
+
+    def get_hosts(self):
+        """ Returns a list with the avaliable downloaders for the file. """
+
+        result = []
+        avaliable_downloaders = Downloaders.get_avaliable()
+
+        hosts = self.file_object.file_hosts
+
+        for host in hosts:
+            if host in avaliable_downloaders:
+                result.append(Downloaders.get(host, hosts[host]))
+
+        return result
+
+    def display_hosts(self, (is_error, result)):
+        """ Shows up the hosts selecting window. """
+
+        if is_error:
+            print "ERROR: %s" % result
+            return
+
+        model = self.hosts_builder.get_object("hosts_icon_view_model")
+        window = self.hosts_builder.get_object("hosts_window")
+
+        for downloader in result:
+            icon = downloader.icon
+            name = downloader.name
+            model.append([icon, name, downloader])
+
+        window.show_all()
 
     def play(self, file_object, is_movie=False, file_path=None, download_only=False):
         """ Starts the playing of file_object. """
 
         hosts = file_object.file_hosts
         print hosts
+
+
+        print win
 
         return
 
