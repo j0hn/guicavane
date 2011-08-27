@@ -11,8 +11,9 @@ import urllib
 
 import pycavane
 from Constants import *
-from ThreadRunner import GtkThreadRunner
+from Config import Config
 from Player import Player
+from ThreadRunner import GtkThreadRunner
 
 
 class GuiManager(object):
@@ -24,6 +25,9 @@ class GuiManager(object):
         # Attributes
         self.current_show = None
         self.current_season = None
+
+        # Config
+        self.config = Config()
 
         # Player
         self.player = Player(self)
