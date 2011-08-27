@@ -35,17 +35,18 @@ class GuiManager(object):
         self.builder.connect_signals(self)
 
         # Getting the used widgets
-        widgets = [
+        glade_objects = [
             "main_window", "statusbar_label", "progress_box", "progress",
             "progress_label", "name_filter", "name_filter_clear", "name_list",
             "name_list_model", "file_viewer", "file_viewer_model",
             "mode_combo", "search_entry", "search_button", "search_clear",
             "sidebar", "sidebar_vbox", "path_label", "info_window",
             "info_title", "info_label", "info_image", "file_viewer_menu",
+            "error_label", "error_dialog",
         ]
 
-        for widget in widgets:
-            setattr(self, widget, self.builder.get_object(widget))
+        for glade_object in glade_objects:
+            setattr(self, glade_object, self.builder.get_object(glade_object))
 
         # Set up the filter for the show list
         self.name_list_model_filter = self.name_list_model.filter_new()
@@ -144,11 +145,8 @@ class GuiManager(object):
             self.set_mode_favorites()
 
     def get_mode(self):
-        """
-        Returns the current mode.
-        i.e the value of the mode combobox.
-        The result will be the constant MODE_* (see constants definitions).
-        """
+        """ Returns the current mode. i.e the value of the mode combobox.
+        The result will be the constant MODE_* (see constants definitions). """
 
         model = self.mode_combo.get_model()
         active = self.mode_combo.get_active()
@@ -158,6 +156,12 @@ class GuiManager(object):
         assert mode_text in MODES
 
         return mode_text
+
+    def report_error(self, message):
+        """ Shows up an error dialog to the user. """
+
+        self.error_label.set_label(message)
+        self.error_dialog.show_all()
 
     def display_shows(self, (is_error, result)):
         """ Displays the shows. """
@@ -623,6 +627,10 @@ class GuiManager(object):
 
         if error:
             self.set_status_message(str(error))
+
+    def _on_hide_error_dialog(self, button):
+        """ Called when the user closes the error dialog. """
+        self.error_dialog.hide()
 
 
 def generic_visible_func(model, iteration, (entry, text_column)):
