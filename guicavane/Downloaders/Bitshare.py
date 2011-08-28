@@ -30,7 +30,7 @@ class Bitshare(BaseDownloader):
                         self.ask_captcha, unfreeze=False)
 
     def wait_time(self):
-        for i in range(self.wait_time, 0, -1):
+        for i in range(self.waiting_time, 0, -1):
             gobject.idle_add(self.gui_manager.set_status_message,
                              "Please wait %d more seconds..." % i)
             time.sleep(1)
