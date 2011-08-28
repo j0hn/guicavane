@@ -12,8 +12,6 @@ import gobject
 import subprocess
 
 import Downloaders
-from megaupload import MegaFile
-from login import MegaAccount
 from Constants import HOSTS_GUI_FILE, HOSTS_VIEW_COLUMN_OBJECT
 
 
@@ -25,6 +23,7 @@ class Player(object):
 
     def __init__(self, gui_manager, file_object):
         self.gui_manager = gui_manager
+        self.config = self.gui_manager.config
         self.file_object = file_object
 
         # Builder for the hosts selection
@@ -40,8 +39,6 @@ class Player(object):
 
         self.gui_manager.background_task(self.get_hosts, self.display_hosts,
             status_message="Fetching hosts...", unfreeze=False)
-
-        #self.account = MegaAccount()
 
     def get_hosts(self):
         """ Returns a list with the avaliable downloaders for the file. """
@@ -61,7 +58,7 @@ class Player(object):
         """ Shows up the hosts selecting window. """
 
         if is_error:
-            print "ERROR: %s" % result
+            self.gui_manager.report_error("Error displaying hosts: %s" % result)
             return
 
         for downloader in result:
@@ -74,141 +71,21 @@ class Player(object):
     def play_file(self, file_path):
         """ Starts the playing using downloader. """
 
-        #self.download_subtitles()
-        print "play here!!"
-        self.gui_manager.unfreeze()
-        return
-
-        if file_path:
-            cache_dir = file_path
-        else:
-            cache_dir = self.config.get_key("cache_dir")
-
-        if is_movie:
-            title = to_download[1]
-        else:
-            title = to_download[2]
-
-        # Check login status
-        if not self.account.verified:
-            username = self.config.get_key("mega_user")
-            password = self.config.get_key("mega_pass")
-
-            if password:
-                self.account.login(username, password)
-
-        # Create the megaupload instance
-        filename = self.get_filename(to_download, is_movie)
-        megafile = MegaFile(link, cache_dir, self.account,
-                            self.on_megaupload_error, filename)
-        filepath = megafile.cache_file
-
-        # Download the subtitles
-        self.download_subtitles(to_download, filepath, is_movie)
-
-        # Start the file download
-        megafile.start()
-
-        # Waiting megaupload link
-        for i in xrange(self.account.wait, 1, -1):
-            loading_dots = "." * (3 - i % 4)
-            self.set_status_message("Please wait %d seconds%s" % \
-                                (i, loading_dots))
-            time.sleep(1)
-
-        # Wait until the file exists
-        file_exists = False
-        while not file_exists:
-            if self.megaupload_error:
-                raise Exception("Download error: time exceeded")
-            else:
-                self.set_status_message("A few seconds left...")
-                file_exists = os.path.exists(filepath)
-                time.sleep(1)
-
-        if download_only:
-            self.set_status_message("Downloading: %s" % title)
-        else:
-            self.set_status_message("Now playing: %s" % title)
-
-        # Show the progress bar
-        gobject.idle_add(self.show_progress)
-
-        cache_on_movies = self.config.get_key("cached_percentage_on_movies")
-        cached_percentage = self.config.get_key("cached_percentage")
-        cached_percentage = cached_percentage / 100.0
-
-        if is_movie and not cache_on_movies:
-            cached_percentage = 0.008
-
         player_location = self.config.get_key("player_location")
         player_args = self.config.get_key("player_arguments").split()
+        player_cmd = [player_location] + player_args + [file_path]
 
-        size = megafile.size * 1024.0  # In KB
-        stop = False
-        running = False
-        speed_list = []
-        last_downloaded = 0
-        while not stop:
+        self.player_process = subprocess.Popen(player_cmd)
+
+        self.gui_manager.background_task(self.update, self.on_finish)
+
+    def update(self):
+        while self.player_process.poll() == None:
+            print "reproduciendo"
             time.sleep(1)
 
-            downloaded = megafile.downloaded_size * 1024.0  # In KB
-            speed_list.append(downloaded - last_downloaded)
-            offset = len(speed_list) - 30 if len(speed_list) > 30 else 0
-            speed_list = speed_list[offset:]
-
-            speed_avarage = sum(speed_list) / len(speed_list)
-            last_downloaded = downloaded
-
-            fraction = downloaded / size
-
-            if download_only:
-                if round(fraction, 2) >= 1:
-                    stop = True
-            else:
-                if not running and fraction > cached_percentage:
-                    player_cmd = [player_location] + player_args + [filepath]
-                    process = subprocess.Popen(player_cmd)
-                    running = True
-
-                if running and process.poll() != None:
-                    stop = True
-
-            if speed_avarage <= 0:
-                remaining_time = 0
-            else:
-                remaining_time = ((size - downloaded) / speed_avarage) / 60
-
-            if remaining_time >= 1:  # if it's more than a minute
-                if remaining_time == 1:
-                    remaining_message = "%d minute left" % remaining_time
-                else:
-                    remaining_message = "%d minutes left" % remaining_time
-            else:
-                if (remaining_time * 60) > 10:
-                    remaining_message = "%d seconds left" % (remaining_time * 60)
-                elif remaining_time != 0:
-                    remaining_message = "a few seconds left"
-                else:
-                    remaining_message = ""
-
-            if fraction < 1:
-                gobject.idle_add(self.gui.progress_label.set_text,
-                    "%.2fKB/s - %s" % (speed_avarage, remaining_message))
-            else:
-                gobject.idle_add(self.gui.progress_label.set_text, "")
-
-            gobject.idle_add(self.gui.progress.set_fraction, fraction)
-            gobject.idle_add(self.gui.progress.set_text,
-                             "%.2f%%" % (fraction * 100))
-
-        gobject.idle_add(self.gui.progress_box.hide)
-
-        # Automatic mark
-        if self.config.get_key("automatic_marks"):
-            self.gui.mark_selected()
-
-        megafile.released = True
+    def on_finish(self, (is_error, result)):
+        print "Done! bye bye"
 
     def download_subtitles(self, to_download, filepath, is_movie):
         """ Download the subtitle if it exists. """
@@ -235,13 +112,6 @@ class Player(object):
 
         result = result.replace(os.sep, "_")
         return result
-
-    def show_progress(self):
-        self.gui.progress_box.show()
-        self.gui.progress.set_fraction(0.0)
-
-    def on_megaupload_error(self, error):
-        self.megaupload_error = True
 
     # ================================
     # =         CALLBACKS            =
