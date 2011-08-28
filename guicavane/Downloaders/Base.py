@@ -25,8 +25,10 @@ class BaseDownloader(object):
 
         return self.__icon
 
-    def process(self):
+    def process(self, play_file):
         """ Do the necesary thing such waiting time or asking
-        for captcha. """
+        for captcha.
+        play_file is the callback to be called when the file is
+        downloading and can be played. """
 
         pass

@@ -71,11 +71,12 @@ class Player(object):
 
         self.hosts_window.show_all()
 
-    def play(self, downloader):
+    def play_file(self, file_path):
         """ Starts the playing using downloader. """
 
         #self.download_subtitles()
-        print "DONE!!"
+        print "play here!!"
+        self.gui_manager.unfreeze()
         return
 
         if file_path:
@@ -265,4 +266,4 @@ class Player(object):
         downloader = self.hosts_icon_view_model[path][HOSTS_VIEW_COLUMN_OBJECT]
 
         self.hosts_window.hide()
-        downloader.process_url(self.play)
+        downloader.process_url(self.play_file)
