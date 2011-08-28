@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+"""
+Base Downloader. Every Downloader must be a subclass from this Downloader.
+"""
+
 import gtk
 
 
@@ -32,3 +36,6 @@ class BaseDownloader(object):
         downloading and can be played. """
 
         pass
+
+    def __repr__(self):
+        return "<Downloader: name: '%s'>" % self.name
