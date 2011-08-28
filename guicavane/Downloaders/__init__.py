@@ -12,5 +12,5 @@ AVALIABLE_HOSTS = {
 def get_avaliable():
     return AVALIABLE_HOSTS.keys()
 
-def get(host, link):
-    return AVALIABLE_HOSTS[host](link)
+def get(host, gui_manager, link):
+    return AVALIABLE_HOSTS[host](gui_manager, link)

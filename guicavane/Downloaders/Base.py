@@ -11,7 +11,7 @@ class BaseDownloader(object):
     icon_path = ""
     __icon = None
 
-    def __init__(self, link):
+    def __init__(self, gui_manager, url):
         """ Sets up the basic stuff for a Downloader. """
 
         raise NotImplementedError()
@@ -24,3 +24,9 @@ class BaseDownloader(object):
             self.__icon = image.get_pixbuf()
 
         return self.__icon
+
+    def process(self):
+        """ Do the necesary thing such waiting time or asking
+        for captcha. """
+
+        pass

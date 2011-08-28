@@ -14,7 +14,7 @@ import subprocess
 import Downloaders
 from megaupload import MegaFile
 from login import MegaAccount
-from Constants import HOSTS_GUI_FILE
+from Constants import HOSTS_GUI_FILE, HOSTS_VIEW_COLUMN_OBJECT
 
 
 class Player(object):
@@ -23,8 +23,8 @@ class Player(object):
     playing the file.
     """
 
-    def __init__(self, GuiManager, file_object):
-        self.GuiManager = GuiManager
+    def __init__(self, gui_manager, file_object):
+        self.gui_manager = gui_manager
         self.file_object = file_object
 
         # Builder for the hosts selection
@@ -32,8 +32,15 @@ class Player(object):
         self.hosts_builder.add_from_file(HOSTS_GUI_FILE)
         self.hosts_builder.connect_signals(self)
 
-        self.GuiManager.background_task(self.get_hosts, self.display_hosts,
+        glade_objects = ["hosts_window", "hosts_icon_view",
+                         "hosts_icon_view_model"]
+
+        for glade_object in glade_objects:
+            setattr(self, glade_object, self.hosts_builder.get_object(glade_object))
+
+        self.gui_manager.background_task(self.get_hosts, self.display_hosts,
             status_message="Fetching hosts...", unfreeze=False)
+
         #self.account = MegaAccount()
 
     def get_hosts(self):
@@ -46,7 +53,7 @@ class Player(object):
 
         for host in hosts:
             if host in avaliable_downloaders:
-                result.append(Downloaders.get(host, hosts[host]))
+                result.append(Downloaders.get(host, self.gui_manager, hosts[host]))
 
         return result
 
@@ -57,27 +64,19 @@ class Player(object):
             print "ERROR: %s" % result
             return
 
-        model = self.hosts_builder.get_object("hosts_icon_view_model")
-        window = self.hosts_builder.get_object("hosts_window")
-
         for downloader in result:
             icon = downloader.icon
             name = downloader.name
-            model.append([icon, name, downloader])
+            self.hosts_icon_view_model.append([icon, name, downloader])
 
-        window.show_all()
+        self.hosts_window.show_all()
 
-    def play(self, file_object, is_movie=False, file_path=None, download_only=False):
-        """ Starts the playing of file_object. """
+    def play(self, downloader):
+        """ Starts the playing using downloader. """
 
-        hosts = file_object.file_hosts
-
+        #self.download_subtitles()
+        print "DONE!!"
         return
-
-        if link:
-            link = link[1]
-        else:
-            raise Exception("Not download source found")
 
         if file_path:
             cache_dir = file_path
@@ -211,21 +210,9 @@ class Player(object):
         megafile.released = True
 
     def download_subtitles(self, to_download, filepath, is_movie):
-        """
-        Download the subtitle if it exists.
-        """
+        """ Download the subtitle if it exists. """
 
-        self.set_status_message("Downloading subtitles...")
-        subs_filepath = filepath.split(".mp4", 1)[0]
-
-        try:
-            self.pycavane.get_subtitle(to_download, filename=subs_filepath,
-                                       movie=is_movie)
-        except Exception:
-            self.set_status_message("Not subtitles found")
-
-    def set_status_message(self, message):
-        gobject.idle_add(self.gui.set_status_message, message)
+        print "Obtain subtitle"
 
     def get_filename(self, to_download, is_movie):
         if is_movie:
@@ -254,3 +241,28 @@ class Player(object):
 
     def on_megaupload_error(self, error):
         self.megaupload_error = True
+
+    # ================================
+    # =         CALLBACKS            =
+    # ================================
+
+    def _on_hosts_cancel(self, button):
+        """ Called when the user press the cancel button on the
+        hosts window. """
+
+        self.hosts_window.hide()
+        self.gui_manager.unfreeze()
+
+    def _on_host_select(self, *args):
+        """ Called whe the user presses the ok button or double
+        clicks on the host. """
+
+        cursor = self.hosts_icon_view.get_cursor()
+        if cursor == None:
+            return
+
+        path = cursor[0]
+        downloader = self.hosts_icon_view_model[path][HOSTS_VIEW_COLUMN_OBJECT]
+
+        self.hosts_window.hide()
+        downloader.process_url(self.play)

@@ -13,5 +13,5 @@ class Bitshare(BaseDownloader):
     name = "Bitshare"
     icon_path = HOSTS_IMAGES_DIR + SEP + "bitshare.png"
 
-    def __init__(self, link):
+    def __init__(self, gui_manager, url):
         pass

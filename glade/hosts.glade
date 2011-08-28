@@ -20,6 +20,9 @@
     <property name="default_width">450</property>
     <property name="default_height">350</property>
     <property name="icon">../images/logo.png</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="urgency_hint">True</property>
     <child>
       <object class="GtkVBox" id="main_vbox">
         <property name="visible">True</property>
@@ -52,6 +55,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="model">hosts_icon_view_model</property>
+                <signal name="item-activated" handler="_on_host_select" swapped="no"/>
                 <child>
                   <object class="GtkCellRendererPixbuf" id="icon"/>
                   <attributes>
@@ -88,6 +92,7 @@
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
+                <signal name="clicked" handler="_on_hosts_cancel" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -103,6 +108,7 @@
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
+                <signal name="clicked" handler="_on_host_select" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
