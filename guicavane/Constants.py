@@ -17,6 +17,7 @@ from Paths import GUI_DIR, IMAGES_DIR, SEP
 MAIN_GUI_FILE = GUI_DIR + SEP + "main.glade"
 SETTINGS_GUI_FILE = GUI_DIR + SEP + "settings.glade"
 HOSTS_GUI_FILE = GUI_DIR + SEP + "hosts.glade"
+CAPTCHA_GUI_FILE = GUI_DIR + SEP + "captcha.glade"
 
 # Modes
 MODE_SHOWS = "Shows"

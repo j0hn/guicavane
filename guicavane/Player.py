@@ -25,6 +25,7 @@ class Player(object):
         self.gui_manager = gui_manager
         self.config = self.gui_manager.config
         self.file_object = file_object
+        self.file_path = self.get_file_path()
 
         # Builder for the hosts selection
         self.hosts_builder = gtk.Builder()
@@ -68,16 +69,21 @@ class Player(object):
 
         self.hosts_window.show_all()
 
-    def play_file(self, file_path):
-        """ Starts the playing using downloader. """
+    def play(self):
+        """ Starts the playing of the file on file_path. """
 
         player_location = self.config.get_key("player_location")
         player_args = self.config.get_key("player_arguments").split()
-        player_cmd = [player_location] + player_args + [file_path]
+        player_cmd = [player_location] + player_args + [self.file_path]
+
+        # TODO: wait for the file to exists and have some content
+        # while not os.path.exists(self.file_path):
+        #    time.sleep(1)
 
         self.player_process = subprocess.Popen(player_cmd)
 
-        self.gui_manager.background_task(self.update, self.on_finish)
+        self.gui_manager.background_task(self.update,
+                        self.on_finish, unfreeze=False)
 
     def update(self):
         while self.player_process.poll() == None:
@@ -92,25 +98,18 @@ class Player(object):
 
         print "Obtain subtitle"
 
-    def get_filename(self, to_download, is_movie):
-        if is_movie:
-            result = to_download[1]
-        else:
-            season_number = self.gui.current_seasson.split()[-1]
-            show_name = self.gui.current_show
-            name = to_download[2]
-            episode_number = to_download[1]
+    def get_file_path(self):
+        """ Returns the file path of the file. """
 
-            result = self.config.get_key("filename_template")
-            result = result.replace("<show>", show_name)
-            result = result.replace("<season>", "%.2d" % int(season_number))
-            try:
-                result = result.replace("<episode>", "%.2d" % int(episode_number))
-            except:
-                result = result.replace("<episode>", "%s" % str(episode_number))
-            result = result.replace("<name>", name)
+        # TODO: Implement
+        #result = self.config.get_key("filename_template")
+        #result = result.replace("<show>", show_name)
+        #result = result.replace("<season>", "%.2d" % int(season_number))
+        #result = result.replace("<episode>", "%s" % str(episode_number))
+        #result = result.replace("<name>", self.file_object.name)
+        #result = result.replace(os.sep, "_")
 
-        result = result.replace(os.sep, "_")
+        result = "/tmp/" + self.file_object.name
         return result
 
     # ================================
@@ -136,4 +135,4 @@ class Player(object):
         downloader = self.hosts_icon_view_model[path][HOSTS_VIEW_COLUMN_OBJECT]
 
         self.hosts_window.hide()
-        downloader.process_url(self.play_file)
+        downloader.process_url(self.play, self.file_path)

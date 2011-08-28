@@ -8,6 +8,10 @@ Base Downloader. Every Downloader must be a subclass from this Downloader.
 import gtk
 
 
+class DownloadError(Exception):
+    """ Indicates a downloading error. """
+
+
 class BaseDownloader(object):
     """ Base class for a Downloader. """
 
@@ -29,10 +33,10 @@ class BaseDownloader(object):
 
         return self.__icon
 
-    def process(self, play_file):
+    def process(self, play_callback):
         """ Do the necesary thing such waiting time or asking
         for captcha.
-        play_file is the callback to be called when the file is
+        play_callback is the callback to be called when the file is
         downloading and can be played. """
 
         pass
