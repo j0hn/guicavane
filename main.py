@@ -38,7 +38,7 @@ def main():
     try:
         gtk.main()
     except KeyboardInterrupt:
-        handler.save_config()
+        pass
 
 if __name__ == "__main__":
     main()
