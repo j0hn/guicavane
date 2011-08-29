@@ -73,8 +73,18 @@ class Bitshare(BaseDownloader):
         self.file_size = float(FILE_SIZE_RE.search(page_data).group(1)) * 1024 * 1024
 
         self.download_id = self.url.split("?f=")[1]
-        self.ajaxdl = AJAXDL_RE.search(page_data).group(1)
-        self.recaptcha_challenge_id = RECAPTCHA_CHALLENGE_ID_RE.search(page_data).group(1)
+
+        open("DATA", "w").write(page_data)
+
+        try:
+            self.ajaxdl = AJAXDL_RE.search(page_data).group(1)
+        except:
+            raise DownloadError("ajaxid not found")
+
+        try:
+            self.recaptcha_challenge_id = RECAPTCHA_CHALLENGE_ID_RE.search(page_data).group(1)
+        except:
+            self.recaptcha_challenge_id = None
 
         request_url = REQUEST_URL % self.download_id
         request_data = {"request": "generateID", "ajaxid": self.ajaxdl}
@@ -211,4 +221,7 @@ class Bitshare(BaseDownloader):
         self.play_callback()
 
     def _on_download_finish(self, (is_error, result)):
+        if is_error:
+            self.gui_manager.report_error("Error downloading: %s" % result)
+
         print "Downloading done"
