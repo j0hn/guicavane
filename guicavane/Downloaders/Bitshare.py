@@ -68,7 +68,6 @@ class Bitshare(BaseDownloader):
         except Exception, error:
             raise DownloadError(error)
 
-        print page_data
         page_data = page_data.split(":")
         waiting_time = int(page_data[1])
         has_captcha = page_data[2] == "1"
@@ -81,6 +80,9 @@ class Bitshare(BaseDownloader):
         return has_captcha
 
     def on_waiting_finish(self, (is_error, result)):
+        gobject.idle_add(self.gui_manager.set_status_message,
+                         "Obtaining bitshare link...")
+
         if is_error:
             self.gui_manager.report_error("Error obtaining bitshare's link: %s" % result)
             self.gui_manager.unfreeze()
@@ -92,7 +94,7 @@ class Bitshare(BaseDownloader):
             print "Not supported yet"
         else:
             self.gui_manager.background_task(self._download_loop,
-                        self._on_download_finish, unfreeze=False)
+                        self._on_download_finish)
 
             self.play_callback()
 

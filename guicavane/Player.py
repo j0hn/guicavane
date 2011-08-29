@@ -91,6 +91,9 @@ class Player(object):
                 time.sleep(1)
 
     def open_player(self, *args):
+        gobject.idle_add(self.gui_manager.set_status_message,
+                         "Playing: %s" % self.file_object.name)
+
         player_location = self.config.get_key("player_location")
         player_args = self.config.get_key("player_arguments").split()
         player_cmd = [player_location] + player_args + [self.file_path]
