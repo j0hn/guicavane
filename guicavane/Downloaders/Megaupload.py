@@ -15,6 +15,7 @@ from Base import BaseDownloader, DownloadError
 
 
 MEGALINK_RE = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')
+FILE_SIZE_RE = re.compile("<strong>(File size:|Tamaño del archivo:)</strong> (.+?) MB<br />")
 URL_OPEN = UrlOpen()
 
 
@@ -26,8 +27,11 @@ class Megaupload(BaseDownloader):
     waiting_time = 45
 
     def __init__(self, gui_manager, url):
+        BaseDownloader.__init__(self, gui_manager, url)
+
         self.gui_manager = gui_manager
         self.url = url
+        self.size = 0
 
     def process_url(self, play_callback, file_path):
         self.play_callback = play_callback
@@ -37,9 +41,9 @@ class Megaupload(BaseDownloader):
                     self._on_megalink_finish, unfreeze=False)
 
     def wait_time(self):
-        for i in range(self.waiting_time, 0, -1):
+        for i in range(self.waiting_time, 1, -1):
             gobject.idle_add(self.gui_manager.set_status_message,
-                            "Please wait %d more seconds..." % i)
+                            "Please wait %d second%s..." % (i, "s" * (i > 1)))
             time.sleep(1)
 
     def start_download(self, (is_error, result)):
@@ -58,6 +62,8 @@ class Megaupload(BaseDownloader):
             page_data = URL_OPEN(self.url)
         except Exception, error:
             raise DownloadError(error)
+
+        self.file_size = float(FILE_SIZE_RE.search(page_data).group(2)) * 1024 * 1024
 
         return MEGALINK_RE.findall(page_data)[0]
 

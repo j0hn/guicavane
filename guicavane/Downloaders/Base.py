@@ -5,6 +5,7 @@
 Base Downloader. Every Downloader must be a subclass from this Downloader.
 """
 
+import os
 import gtk
 
 
@@ -19,10 +20,19 @@ class BaseDownloader(object):
     icon_path = ""
     __icon = None
 
-    def __init__(self, gui_manager, url):
+    def __init__(self, gui_manager=None, url=None):
         """ Sets up the basic stuff for a Downloader. """
+        self.file_path = None
+        self.file_size = None
 
-        raise NotImplementedError()
+    @property
+    def downloaded_size(self):
+        """ Returns the currently downloaded size in bytes. """
+
+        if self.file_path:
+            return int(os.path.getsize(self.file_path))
+
+        return 0
 
     @property
     def icon(self):
@@ -33,11 +43,12 @@ class BaseDownloader(object):
 
         return self.__icon
 
-    def process(self, play_callback):
+    def process_url(self, play_callback, file_path):
         """ Do the necesary thing such waiting time or asking
         for captcha.
         play_callback is the callback to be called when the file is
-        downloading and can be played. """
+        downloading and can be played.
+        file_path is the file where to be written on. """
 
         pass
 

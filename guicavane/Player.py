@@ -62,6 +62,8 @@ class Player(object):
             self.gui_manager.report_error("Error displaying hosts: %s" % result)
             return
 
+        gobject.idle_add(self.gui_manager.set_status_message, "")
+
         for downloader in result:
             icon = downloader.icon
             name = downloader.name
@@ -72,23 +74,34 @@ class Player(object):
     def play(self):
         """ Starts the playing of the file on file_path. """
 
+        self.gui_manager.background_task(self.fill_cache,
+                        self.open_player, unfreeze=False)
+
+    def fill_cache(self):
+        gobject.idle_add(self.gui_manager.set_status_message,
+                         "Filling the cache...")
+
+        while not os.path.exists(self.file_path):
+            time.sleep(0.5)
+
+        if self.downloader.file_size != None:
+            percent = self.downloader.file_size * 0.01  # %1 of the total
+
+            while self.downloader.downloaded_size < percent:
+                time.sleep(0.5)
+
+    def open_player(self, *args):
         player_location = self.config.get_key("player_location")
         player_args = self.config.get_key("player_arguments").split()
         player_cmd = [player_location] + player_args + [self.file_path]
 
-        # TODO: wait for the file to exists and have some content
-        # while not os.path.exists(self.file_path):
-        #    time.sleep(1)
-
         self.player_process = subprocess.Popen(player_cmd)
-
         self.gui_manager.background_task(self.update,
                         self.on_finish, unfreeze=False)
 
     def update(self):
         while self.player_process.poll() == None:
-            print "reproduciendo"
-            time.sleep(1)
+            time.sleep(2)
 
     def on_finish(self, (is_error, result)):
         print "Done! bye bye"
@@ -132,7 +145,7 @@ class Player(object):
             return
 
         path = cursor[0]
-        downloader = self.hosts_icon_view_model[path][HOSTS_VIEW_COLUMN_OBJECT]
+        self.downloader = self.hosts_icon_view_model[path][HOSTS_VIEW_COLUMN_OBJECT]
 
         self.hosts_window.hide()
-        downloader.process_url(self.play, self.file_path)
+        self.downloader.process_url(self.play, self.file_path)
