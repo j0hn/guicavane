@@ -78,17 +78,17 @@ class Player(object):
                         self.open_player, unfreeze=False)
 
     def fill_cache(self):
-        gobject.idle_add(self.gui_manager.set_status_message,
-                         "Filling the cache...")
+        # gobject.idle_add(self.gui_manager.set_status_message,
+        #                  "Filling the cache...")
 
         while not os.path.exists(self.file_path):
-            time.sleep(0.5)
+            time.sleep(1)
 
         if self.downloader.file_size != None:
             percent = self.downloader.file_size * 0.01  # %1 of the total
 
             while self.downloader.downloaded_size < percent:
-                time.sleep(0.5)
+                time.sleep(1)
 
     def open_player(self, *args):
         player_location = self.config.get_key("player_location")
