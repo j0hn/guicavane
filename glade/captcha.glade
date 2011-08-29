@@ -15,6 +15,7 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="urgency_hint">True</property>
+    <signal name="destroy" handler="_on_captcha_cancel" swapped="no"/>
     <child>
       <object class="GtkVBox" id="main_vbox">
         <property name="visible">True</property>
@@ -53,7 +54,7 @@
               <placeholder/>
             </child>
             <child>
-              <object class="GtkEntry" id="input">
+              <object class="GtkEntry" id="response_input">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
@@ -61,6 +62,7 @@
                 <property name="secondary_icon_activatable">False</property>
                 <property name="primary_icon_sensitive">True</property>
                 <property name="secondary_icon_sensitive">True</property>
+                <signal name="activate" handler="_on_captcha_ok" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
