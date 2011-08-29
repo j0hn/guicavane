@@ -84,15 +84,20 @@ class Player(object):
         while not os.path.exists(self.file_path):
             time.sleep(1)
 
+        # Show the progress bar box
+        gobject.idle_add(self.gui_manager.progress_box.show)
+
         if self.downloader.file_size != None:
             # Waits %1 of the total download
             percent = self.downloader.file_size * 0.01
 
             while self.downloader.downloaded_size < percent:
+                self._update_progress()
                 time.sleep(1)
         else:
             # Waits 2MB, just an arbitrary amount
             while self.downloader.downloaded_size < 2 * 1024 * 1024:
+                self._update_progress()
                 time.sleep(1)
 
     def open_player(self, *args):
@@ -106,8 +111,7 @@ class Player(object):
         player_cmd = [player_location] + player_args + [self.file_path]
 
         self.player_process = subprocess.Popen(player_cmd)
-        self.gui_manager.background_task(self.update,
-                        self.on_finish, unfreeze=False)
+        self.gui_manager.background_task(self.update, self.on_finish)
 
     def update(self):
         """ Updates the GUI with downloading data. """
@@ -115,13 +119,27 @@ class Player(object):
         file_size = self.downloader.file_size
 
         while self.player_process.poll() == None:
-            downloaded_size = self.downloader.downloaded_size
-
-            print "%%%.2f Downloaded" % ((downloaded_size / file_size) * 100)
+            self._update_progress()
             time.sleep(1)
 
+    def _update_progress(self):
+        downloaded_size = self.downloader.downloaded_size
+        file_size = self.downloader.file_size
+
+        fraction = downloaded_size / file_size
+        gobject.idle_add(self.gui_manager.progress.set_fraction, fraction)
+        gobject.idle_add(self.gui_manager.progress.set_text,
+            "%.2f%%" % (fraction * 100))
+
     def on_finish(self, (is_error, result)):
+        assert not is_error, str(result)
+
         self.downloader.stop_downloading = True
+
+        # Hide the progress
+        gobject.idle_add(self.gui_manager.progress.hide)
+
+        # TODO: automark here
 
     def download_subtitles(self, to_download, filepath, is_movie):
         """ Download the subtitle if it exists. """
