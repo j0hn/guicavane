@@ -35,6 +35,7 @@ class Bitshare(BaseDownloader):
 
         self.gui_manager = gui_manager
         self.url = url
+        self.stop_downloading = True
 
         self.builder = gtk.Builder()
         self.builder.add_from_file(CAPTCHA_GUI_FILE)
@@ -142,7 +143,7 @@ class Bitshare(BaseDownloader):
         while True:
             data = handle.read(1024)
 
-            if not data:
+            if not data or self.stop_downloading:
                 filehandler.close()
                 break
 

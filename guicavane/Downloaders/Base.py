@@ -24,6 +24,7 @@ class BaseDownloader(object):
         """ Sets up the basic stuff for a Downloader. """
         self.file_path = None
         self.file_size = None
+        self.stop_downloading = False
 
     @property
     def downloaded_size(self):

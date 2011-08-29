@@ -9,8 +9,8 @@ import re
 import time
 import gobject
 
-from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
 from guicavane.util import UrlOpen
+from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
 from Base import BaseDownloader, DownloadError
 
 
@@ -32,6 +32,7 @@ class Megaupload(BaseDownloader):
         self.gui_manager = gui_manager
         self.url = url
         self.size = 0
+        self.stop_downloading = False
 
     def process_url(self, play_callback, file_path):
         self.play_callback = play_callback
@@ -41,7 +42,7 @@ class Megaupload(BaseDownloader):
                     self._on_megalink_finish, unfreeze=False)
 
     def wait_time(self):
-        for i in range(self.waiting_time, 1, -1):
+        for i in range(self.waiting_time, 0, -1):
             gobject.idle_add(self.gui_manager.set_status_message,
                             "Please wait %d second%s..." % (i, "s" * (i > 1)))
             time.sleep(1)
@@ -89,7 +90,7 @@ class Megaupload(BaseDownloader):
         while True:
             data = handle.read(1024)
 
-            if not data:
+            if not data or self.stop_downloading:
                 filehandler.close()
                 break
 

@@ -78,19 +78,26 @@ class Player(object):
                         self.open_player, unfreeze=False)
 
     def fill_cache(self):
-        # gobject.idle_add(self.gui_manager.set_status_message,
-        #                  "Filling the cache...")
+        """ Downloads some content to start safely the player. """
 
+        # Wait for the file to exists
         while not os.path.exists(self.file_path):
             time.sleep(1)
 
         if self.downloader.file_size != None:
-            percent = self.downloader.file_size * 0.01  # %1 of the total
+            # Waits %1 of the total download
+            percent = self.downloader.file_size * 0.01
 
             while self.downloader.downloaded_size < percent:
                 time.sleep(1)
+        else:
+            # Waits 2MB, just an arbitrary amount
+            while self.downloader.downloaded_size < 2 * 1024 * 1024:
+                time.sleep(1)
 
     def open_player(self, *args):
+        """ Fires up a new process with the player runing. """
+
         gobject.idle_add(self.gui_manager.set_status_message,
                          "Playing: %s" % self.file_object.name)
 
@@ -103,11 +110,18 @@ class Player(object):
                         self.on_finish, unfreeze=False)
 
     def update(self):
+        """ Updates the GUI with downloading data. """
+
+        file_size = self.downloader.file_size
+
         while self.player_process.poll() == None:
-            time.sleep(2)
+            downloaded_size = self.downloader.downloaded_size
+
+            print "%%%.2f Downloaded" % ((downloaded_size / file_size) * 100)
+            time.sleep(1)
 
     def on_finish(self, (is_error, result)):
-        print "Done! bye bye"
+        self.downloader.stop_downloading = True
 
     def download_subtitles(self, to_download, filepath, is_movie):
         """ Download the subtitle if it exists. """
