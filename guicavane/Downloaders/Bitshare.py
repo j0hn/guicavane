@@ -74,8 +74,6 @@ class Bitshare(BaseDownloader):
 
         self.download_id = self.url.split("?f=")[1]
 
-        open("DATA", "w").write(page_data)
-
         try:
             self.ajaxdl = AJAXDL_RE.search(page_data).group(1)
         except:
@@ -84,6 +82,7 @@ class Bitshare(BaseDownloader):
         try:
             self.recaptcha_challenge_id = RECAPTCHA_CHALLENGE_ID_RE.search(page_data).group(1)
         except:
+            print "Captcha id not found"
             self.recaptcha_challenge_id = None
 
         request_url = REQUEST_URL % self.download_id
