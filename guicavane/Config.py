@@ -24,9 +24,7 @@ DEFAULT_VALUES = {
     "cuevana_user": "",
     "cuevana_pass": "",
     "automatic_marks": True,
-    "cached_percentage": 2,
     "player_arguments": "",
-    "cached_percentage_on_movies": False,
     "filename_template": "<show> S<season>E<episode> - <name>"
 }
 

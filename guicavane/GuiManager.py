@@ -14,6 +14,7 @@ from Constants import *
 from Marks import Marks
 from Config import Config
 from Player import Player
+from Settings import SettingsDialog
 from ThreadRunner import GtkThreadRunner
 
 
@@ -27,9 +28,10 @@ class GuiManager(object):
         self.current_show = None
         self.current_season = None
 
-        # Config & Marks
+        # Config, Marks and Settings
         self.config = Config()
         self.marks = Marks()
+        self.settings_dialog = SettingsDialog(self.config)
 
         # Gtk builder
         self.builder = gtk.Builder()
@@ -44,7 +46,8 @@ class GuiManager(object):
             "mode_combo", "search_entry", "search_button", "search_clear",
             "sidebar", "sidebar_vbox", "path_label", "info_window",
             "info_title", "info_label", "info_image", "file_viewer_menu",
-            "error_label", "error_dialog",
+            "error_label", "error_dialog", "header_hbox", "main_hpaned",
+            "about_dialog",
         ]
 
         for glade_object in glade_objects:
@@ -70,13 +73,15 @@ class GuiManager(object):
     def freeze(self, status_message="Loading..."):
         """ Freezes the gui so the user can't interact with it. """
 
-        self.main_window.set_sensitive(False)
+        self.header_hbox.set_sensitive(False)
+        self.main_hpaned.set_sensitive(False)
         self.set_status_message(status_message)
 
     def unfreeze(self):
         """ Sets the widgets to be usable. """
 
-        self.main_window.set_sensitive(True)
+        self.header_hbox.set_sensitive(True)
+        self.main_hpaned.set_sensitive(True)
         self.set_status_message("")
 
     def background_task(self, func, callback, *args, **kwargs):
@@ -513,16 +518,15 @@ class GuiManager(object):
         Opens the about dialog.
         """
 
-        help_dialog = self.builder.get_object("aboutDialog")
-        help_dialog.run()
-        help_dialog.hide()
+        self.about_dialog.run()
+        self.about_dialog.hide()
 
     def _on_open_settings(self, *args):
         """
         Called when the user opens the preferences from the menu.
         """
 
-        self.settings.show()
+        self.settings_dialog.show()
 
     def _on_info_clicked(self, *args):
         """

@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.24"/>
-  <object class="GtkAdjustment" id="cachePercentageScale">
-    <property name="upper">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
-  </object>
-  <object class="GtkDialog" id="settingsDialog">
+  <!-- interface-naming-policy toplevel-contextual -->
+  <object class="GtkDialog" id="settings_dialog">
     <property name="width_request">600</property>
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -17,18 +13,17 @@
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <child internal-child="vbox">
-      <object class="GtkBox" id="dialogMainVbox">
+      <object class="GtkVBox" id="dialog_main_vbox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialogButtonBox">
+          <object class="GtkHButtonBox" id="dialog_button_box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="cancelButton">
+              <object class="GtkButton" id="cancel_button">
                 <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -43,7 +38,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="applyButton">
+              <object class="GtkButton" id="apply_button">
                 <property name="label">gtk-apply</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -67,12 +62,12 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="playerCommandHbox">
+          <object class="GtkHBox" id="player_command_hbox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="homogeneous">True</property>
             <child>
-              <object class="GtkLabel" id="playerLocationLabel">
+              <object class="GtkLabel" id="player_location_label">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -90,7 +85,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkFileChooserButton" id="playerLocationButton">
+              <object class="GtkFileChooserButton" id="player_location_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Location of the executable file that will be fired to show the video.</property>
@@ -112,12 +107,12 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="playerArgumentsHbox">
+          <object class="GtkHBox" id="player_arguments_hbox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="homogeneous">True</property>
             <child>
-              <object class="GtkLabel" id="playerArgumentsLabel">
+              <object class="GtkLabel" id="player_arguments_label">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -135,13 +130,15 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="playerArgumentsEntry">
+              <object class="GtkEntry" id="player_arguments_entry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="tooltip_text" translatable="yes">Arguments to be passed to the player. Optional.</property>
                 <property name="invisible_char">•</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
                 <signal name="activate" handler="_on_save_settings" swapped="no"/>
               </object>
               <packing>
@@ -158,12 +155,12 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="cacheDirHbox">
+          <object class="GtkHBox" id="cache_dir_hbox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="homogeneous">True</property>
             <child>
-              <object class="GtkLabel" id="cacheDirLabel">
+              <object class="GtkLabel" id="cache_dir_label">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -181,7 +178,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkFileChooserButton" id="cachedirButton">
+              <object class="GtkFileChooserButton" id="cache_dir_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Directory where the files will be downloaded temporarily</property>
@@ -204,11 +201,11 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="filenameTemplateHbox">
+          <object class="GtkHBox" id="filename_template_hbox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkLabel" id="filenameTemplateLabel">
+              <object class="GtkLabel" id="filename_template_label">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -226,7 +223,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="filenameTemplate">
+              <object class="GtkEntry" id="filename_template">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -235,6 +232,8 @@
                 <property name="invisible_char_set">True</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
                 <signal name="activate" handler="_on_save_settings" swapped="no"/>
               </object>
               <packing>
@@ -251,78 +250,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="cachePercentageHbox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
-            <child>
-              <object class="GtkLabel" id="cachePercentageLabel">
-                <property name="width_request">200</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Percentage of the video to be downloaded before start the player</property>
-                <property name="xalign">0</property>
-                <property name="label" translatable="yes">Cache Percentage:</property>
-                <attributes>
-                  <attribute name="weight" value="bold"/>
-                </attributes>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkVBox" id="cacheVbox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkHScale" id="cachePercentage">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="tooltip_text" translatable="yes">Percentage of the video to be downloaded before start the player</property>
-                    <property name="adjustment">cachePercentageScale</property>
-                    <property name="round_digits">0</property>
-                    <property name="digits">0</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkCheckButton" id="cacheOnMovies">
-                    <property name="label" translatable="yes">enable on movies</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">5</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="automaticMarks">
+          <object class="GtkCheckButton" id="automatic_marks">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
@@ -330,7 +258,7 @@
             <property name="use_action_appearance">False</property>
             <property name="draw_indicator">True</property>
             <child>
-              <object class="GtkLabel" id="automaticMarksLabel">
+              <object class="GtkLabel" id="automatic_marks_label">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="xalign">0</property>
@@ -344,20 +272,20 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">6</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="cuevanaUserHBox">
+          <object class="GtkHBox" id="cuevana_user_hbox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkVBox" id="cuevanaUserLabelVBox">
+              <object class="GtkVBox" id="cuevana_user_label_vbox">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkLabel" id="cuevanaUserLabel1">
+                  <object class="GtkLabel" id="cuevana_user_label1">
                     <property name="width_request">200</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -375,12 +303,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="cuevanaUserLabel2">
+                  <object class="GtkLabel" id="cuevana_user_label2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="xalign">0</property>
                     <property name="yalign">0</property>
-                    <property name="label" translatable="yes">(It's not required)</property>
+                    <property name="label" translatable="yes">(not required)</property>
                     <attributes>
                       <attribute name="style" value="italic"/>
                       <attribute name="size" value="8700"/>
@@ -400,7 +328,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="cuevanaUserEntry">
+              <object class="GtkEntry" id="cuevana_user_entry">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -408,6 +336,8 @@
                 <property name="invisible_char_set">True</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -419,20 +349,20 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">7</property>
+            <property name="position">6</property>
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="cuevanaPassHBox">
+          <object class="GtkHBox" id="cuevana_pass_hbox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkVBox" id="cuevanaPassLabelVBox">
+              <object class="GtkVBox" id="cuevana_pass_label_vbox">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkLabel" id="cuevanaPassLabel1">
+                  <object class="GtkLabel" id="cuevana_pass_label1">
                     <property name="width_request">200</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -450,12 +380,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="cuevanaPassLabel2">
+                  <object class="GtkLabel" id="cuevana_pass_label2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="xalign">0</property>
                     <property name="yalign">0</property>
-                    <property name="label" translatable="yes">(It's not required)</property>
+                    <property name="label" translatable="yes">(not required)</property>
                     <attributes>
                       <attribute name="style" value="italic"/>
                       <attribute name="size" value="8700"/>
@@ -475,7 +405,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="cuevanaPassEntry">
+              <object class="GtkEntry" id="cuevana_pass_entry">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -484,6 +414,8 @@
                 <property name="invisible_char_set">True</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -495,20 +427,20 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">8</property>
+            <property name="position">7</property>
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="megauploadUserHBox">
+          <object class="GtkHBox" id="megaupload_user_hbox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkVBox" id="megauploadUserLabelVBox">
+              <object class="GtkVBox" id="megaupload_user_label_vbox">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkLabel" id="megauploadUserLabel1">
+                  <object class="GtkLabel" id="megaupload_user_label1">
                     <property name="width_request">200</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -526,12 +458,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="megauploadUserLabel2">
+                  <object class="GtkLabel" id="megaupload_user_label2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="xalign">0</property>
                     <property name="yalign">0</property>
-                    <property name="label" translatable="yes">(It's not required)</property>
+                    <property name="label" translatable="yes">(not required)</property>
                     <attributes>
                       <attribute name="style" value="italic"/>
                       <attribute name="size" value="8700"/>
@@ -551,7 +483,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="megauploadUserEntry">
+              <object class="GtkEntry" id="megaupload_user_entry">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -559,6 +491,8 @@
                 <property name="invisible_char_set">True</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -570,20 +504,20 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">9</property>
+            <property name="position">8</property>
           </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="megauploadPassHBox">
+          <object class="GtkHBox" id="megaupload_pass_hbox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkVBox" id="megauploadPassLabelVBox">
+              <object class="GtkVBox" id="megaupload_pass_label_vbox">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkLabel" id="megauploadPassLabel1">
+                  <object class="GtkLabel" id="megaupload_pass_label1">
                     <property name="width_request">200</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -601,12 +535,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="megauploadPassLabel2">
+                  <object class="GtkLabel" id="megaupload_pass_label2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="xalign">0</property>
                     <property name="yalign">0</property>
-                    <property name="label" translatable="yes">(It's not required)</property>
+                    <property name="label" translatable="yes">(not required)</property>
                     <attributes>
                       <attribute name="style" value="italic"/>
                       <attribute name="size" value="8700"/>
@@ -626,7 +560,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="megauploadPassEntry">
+              <object class="GtkEntry" id="megaupload_pass_entry">
                 <property name="width_request">200</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -635,6 +569,8 @@
                 <property name="invisible_char_set">True</property>
                 <property name="primary_icon_activatable">False</property>
                 <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -646,14 +582,17 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">10</property>
+            <property name="position">9</property>
           </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>
     <action-widgets>
-      <action-widget response="0">cancelButton</action-widget>
-      <action-widget response="0">applyButton</action-widget>
+      <action-widget response="0">cancel_button</action-widget>
+      <action-widget response="0">apply_button</action-widget>
     </action-widgets>
   </object>
 </interface>
