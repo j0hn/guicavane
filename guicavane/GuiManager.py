@@ -174,6 +174,7 @@ class GuiManager(object):
 
         self.error_label.set_label(message)
         self.error_dialog.show_all()
+        self.set_status_message("")
 
     def display_shows(self, (is_error, result)):
         """ Displays the shows. """
@@ -332,7 +333,8 @@ class GuiManager(object):
         """ Adds the selected show from favorites.  """
 
         path, _ = self.name_list.get_cursor()
-        selected = self.name_list_model[path][NAME_LIST_COLUMN_TEXT]
+        model = self.name_list.get_model()
+        selected = model[path][NAME_LIST_COLUMN_TEXT]
 
         if selected not in self.config.get_key("favorites"):
             self.config.append_key("favorites", selected)
@@ -344,7 +346,8 @@ class GuiManager(object):
         """ Removes the selected show from favorites. """
 
         path, _ = self.name_list.get_cursor()
-        selected = self.name_list_model[path][NAME_LIST_COLUMN_TEXT]
+        model = self.name_list.get_model()
+        selected = model[path][NAME_LIST_COLUMN_TEXT]
 
         if selected in self.config.get_key("favorites"):
             self.config.remove_key("favorites", selected)
