@@ -16,7 +16,7 @@ from guicavane.Constants import CAPTCHA_GUI_FILE
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP, TEMP_DIR
 
 
-FILE_SIZE_RE = re.compile("<h1>Downloading.*? - (.*?)MByte</h1>")
+FILE_SIZE_RE = re.compile("<h1>(Downloading|Descargando).*? - (.*?)MByte</h1>")
 AJAXDL_RE = re.compile('var ajaxdl = "(.*?)";')
 
 REQUEST_URL = "http://bitshare.com/files-ajax/%s/request.html"
@@ -70,7 +70,7 @@ class Bitshare(BaseDownloader):
         except Exception, error:
             raise DownloadError(error)
 
-        self.file_size = float(FILE_SIZE_RE.search(page_data).group(1)) * 1024 * 1024
+        self.file_size = float(FILE_SIZE_RE.search(page_data).group(2)) * 1024 * 1024
 
         self.download_id = self.url.split("?f=")[1]
 
