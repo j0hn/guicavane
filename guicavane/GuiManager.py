@@ -104,6 +104,7 @@ class GuiManager(object):
             real_callback = callback
             del kwargs["unfreeze"]
         else:
+
             def real_callback(result):
                 self.unfreeze()
                 callback(result)
@@ -318,6 +319,14 @@ class GuiManager(object):
 
         self.name_filter.set_text("")
 
+    def _on_name_filter_keypress(self, widget, event):
+        """ Called when the user presses a key in the name
+        filter. It clears it out if the key is escape. """
+
+        key = gtk.gdk.keyval_name(event.keyval)
+        if key == "Escape":
+            self.name_filter.set_text("")
+
     def _on_name_button_press(self, view, event):
         """ Called when the user press any mouse button on the name list. """
 
@@ -409,8 +418,8 @@ class GuiManager(object):
     def _on_name_key_press(self, treeview, event):
         """ Called when the users presses a key on the name filter list. """
 
-        acceptedchars = map(chr, range(97, 123)) + map(chr, range(65, 91)) \
-                        + ['0','1','2','3','4','5','6','7','8','9']
+        chr_numbers = range(48, 57) + range(65, 91) + range(97, 123)
+        acceptedchars = map(chr, chr_numbers)
 
         key = gtk.gdk.keyval_name(event.keyval)
         if key in acceptedchars:
@@ -578,7 +587,6 @@ class GuiManager(object):
                        gtk.gdk.INTERP_HYPER, 255)
 
         self.info_image.set_from_pixbuf(pixbuf)
-
 
     def on_player_finish(self, error):
         """

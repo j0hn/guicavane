@@ -658,6 +658,7 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
                         <property name="primary_icon_sensitive">True</property>
                         <property name="secondary_icon_sensitive">True</property>
                         <signal name="changed" handler="_on_name_filter_change" swapped="no"/>
+                        <signal name="key-press-event" handler="_on_name_filter_keypress" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
