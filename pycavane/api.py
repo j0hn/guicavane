@@ -210,6 +210,14 @@ class Movie(object):
         self.year = year
         self.__description = description
 
+    def get_subtitle(self, lang='ES', filename=None):
+        """ Downloads the subtitle of the movie. """
+
+        if filename:
+            filename += '.srt'
+
+        return url_open(urls.sub_movie % (self.id, lang), filename=filename)
+
     @property
     def description(self):
         if self.__description.endswith('...'):

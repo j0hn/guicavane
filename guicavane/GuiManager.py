@@ -367,29 +367,22 @@ class GuiManager(object):
             if isinstance(file_object, pycavane.api.Episode):
                 self.file_viewer_menu.popup(None, None, None, event.button, event.time)
 
-    def _on_play_clicked(self, *args):
-        """
-        Called when the user click on the play context menu item.
-        """
+    def _on_menu_play_clicked(self, *args):
+        """ Called when the user click on the play context menu item. """
 
-        selected_text = get_selected_text(self.file_viewer,
-                                          FILE_VIEW_COLUMN_TEXT)
-        if selected_text.count(" - "):  # It's an episode. I know this is ugly
-            self.open_show(selected_text)
-        else:
-            self.open_movie(selected_text)
+        path, _ = self.file_viewer.get_cursor()
+        file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
+        Player(self, file_object)
 
-    def _on_download_only_clicked(self, *args):
-        """
-        Called when the user click on the download only context menu item.
-        """
+    def _on_menu_download_only_clicked(self, widget):
+        """ Called when the user click on the download only
+        context menu item. """
 
-        self._on_download_clicked(None, True)
+        self._on_menu_download_clicked(widget, download_only=True)
 
-    def _on_download_clicked(self, widget, download_only=False):
-        """
-        Called when the user click on the download and play context menu item.
-        """
+    def _on_menu_download_clicked(self, widget, download_only=False):
+        """ Called when the user click on the download and
+        play context menu item. """
 
         chooser = gtk.FileChooserDialog(title="Dowload to...",
                   parent=self.main_window,
@@ -400,22 +393,18 @@ class GuiManager(object):
         last_download_dir = self.config.get_key("last_download_directory")
         chooser.set_current_folder(last_download_dir)
         response = chooser.run()
-        if response == gtk.RESPONSE_OK:
 
-            save_to = chooser.get_filename()
-            self.config.set_key("last_download_directory", save_to)
+        if response != gtk.RESPONSE_OK:
+            chooser.destroy()
+            return
 
-            selected_text = get_selected_text(self.file_viewer,
-                                              FILE_VIEW_COLUMN_TEXT)
-
-            if self.get_mode() == MODE_MOVIES:
-                self.open_movie(selected_text, file_path=save_to,
-                                download_only=download_only)
-            else:
-                self.open_show(selected_text, file_path=save_to,
-                               download_only=download_only)
-
+        save_to = chooser.get_filename()
+        self.config.set_key("last_download_directory", save_to)
         chooser.destroy()
+
+        path, _ = self.file_viewer.get_cursor()
+        file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
+        Player(self, file_object, save_to, download_only=download_only)
 
     def _on_name_key_press(self, treeview, event):
         """ Called when the users presses a key on the name filter list. """
@@ -517,17 +506,13 @@ class GuiManager(object):
         return (movies, search[1])
 
     def _on_about_clicked(self, *args):
-        """
-        Opens the about dialog.
-        """
+        """ Opens the about dialog. """
 
         self.about_dialog.run()
         self.about_dialog.hide()
 
     def _on_open_settings(self, *args):
-        """
-        Called when the user opens the preferences from the menu.
-        """
+        """ Called when the user opens the preferences from the menu. """
 
         self.settings_dialog.show()
 
@@ -594,15 +579,6 @@ class GuiManager(object):
 
         self.info_image.set_from_pixbuf(pixbuf)
 
-    def open_movie(self, movie_text, file_path=None, download_only=False):
-        """
-        Starts the download of the given movie.
-        """
-
-        movie = (self.current_movies[movie_text], movie_text)
-        self.background_task(self.player.play, self.on_player_finish,
-                             movie, is_movie=True, file_path=file_path,
-                             download_only=download_only)
 
     def on_player_finish(self, error):
         """

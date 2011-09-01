@@ -21,11 +21,17 @@ class Player(object):
     playing the file.
     """
 
-    def __init__(self, gui_manager, file_object):
+    def __init__(self, gui_manager, file_object, file_path=None, download_only=False):
         self.gui_manager = gui_manager
         self.config = self.gui_manager.config
         self.file_object = file_object
-        self.file_path = self.get_file_path()
+        self.download_only = download_only
+
+        self.file_path = file_path
+        if not self.file_path:
+            self.file_path = self.config.get_key("cache_dir")
+
+        self.file_path = os.path.join(self.file_path, self.get_filename())
 
         # Builder for the hosts selection
         self.hosts_builder = gtk.Builder()
@@ -74,11 +80,15 @@ class Player(object):
     def play(self):
         """ Starts the playing of the file on file_path. """
 
-        self.gui_manager.background_task(self.fill_cache,
-                        self.open_player, unfreeze=False)
+        self.gui_manager.background_task(self.pre_download,
+            self.open_player, unfreeze=False)
 
-    def fill_cache(self):
+    def pre_download(self):
         """ Downloads some content to start safely the player. """
+
+        # Download the subtitle
+        gobject.idle_add(self.gui_manager.set_status_message, "Downloading subtitles...")
+        self.file_object.get_subtitle(filename=self.file_path.replace(".mp4", ""))
 
         # Wait for the file to exists
         while not os.path.exists(self.file_path):
@@ -104,24 +114,38 @@ class Player(object):
     def open_player(self, *args):
         """ Fires up a new process with the player runing. """
 
+        if self.download_only:
+            message = "Downloading: %s"
+        else:
+            message = "Playing: %s"
+
         gobject.idle_add(self.gui_manager.set_status_message,
-                         "Playing: %s" % self.file_object.name)
+                         message % self.file_object.name)
 
         player_location = self.config.get_key("player_location")
         player_args = self.config.get_key("player_arguments").split()
         player_cmd = [player_location] + player_args + [self.file_path]
 
-        self.player_process = subprocess.Popen(player_cmd)
+        if not self.download_only:
+            self.player_process = subprocess.Popen(player_cmd)
+
         self.gui_manager.background_task(self.update, self.on_finish)
 
     def update(self):
         """ Updates the GUI with downloading data. """
 
         file_size = self.downloader.file_size
+        stop = False
 
-        while self.player_process.poll() == None:
+        while not stop:
+            downloaded_size = self.downloader.downloaded_size
             self._update_progress()
             time.sleep(1)
+
+            if self.download_only:
+                stop = downloaded_size >= file_size
+            else:
+                stop = self.player_process.poll() != None
 
     def _update_progress(self):
         """ Updates the progress bar using the downloaded size and the
@@ -145,12 +169,7 @@ class Player(object):
 
         # TODO: automark here
 
-    def download_subtitles(self, to_download, filepath, is_movie):
-        """ Download the subtitle if it exists. """
-
-        print "Obtain subtitle"
-
-    def get_file_path(self):
+    def get_filename(self):
         """ Returns the file path of the file. """
 
         # TODO: Implement
@@ -161,7 +180,7 @@ class Player(object):
         #result = result.replace("<name>", self.file_object.name)
         #result = result.replace(os.sep, "_")
 
-        result = "/tmp/" + self.file_object.name
+        result = self.file_object.name + ".mp4"
         return result
 
     # ================================
