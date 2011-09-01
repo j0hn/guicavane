@@ -196,7 +196,7 @@ class Bitshare(BaseDownloader):
             raise DownloadError("Error downloading from bitshare: %s" % error)
 
         try:
-            self.file_size = handle.headers["Content-Length"]
+            self.file_size = float(handle.headers["Content-Length"])
         except:
             pass
 
