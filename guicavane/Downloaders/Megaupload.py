@@ -64,7 +64,10 @@ class Megaupload(BaseDownloader):
         except Exception, error:
             raise DownloadError(error)
 
-        self.file_size = float(FILE_SIZE_RE.search(page_data).group(2)) * 1024 * 1024
+        try:
+            self.file_size = float(FILE_SIZE_RE.search(page_data).group(2)) * 1024 * 1024
+        except:
+            self.file_size = 0
 
         return MEGALINK_RE.findall(page_data)[0]
 
@@ -84,6 +87,11 @@ class Megaupload(BaseDownloader):
             handle = URL_OPEN(self.megalink, handle=True)
         except Exception, error:
             raise DownloadError("Error downloading from megaupload: %s" % error)
+
+        try:
+            self.file_size = float(handle.headers["Content-Length"])
+        except:
+            pass
 
         filehandler = open(self.file_path, "wb")
 

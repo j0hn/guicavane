@@ -70,7 +70,10 @@ class Bitshare(BaseDownloader):
         except Exception, error:
             raise DownloadError(error)
 
-        self.file_size = float(FILE_SIZE_RE.search(page_data).group(2)) * 1024 * 1024
+        try:
+            self.file_size = float(FILE_SIZE_RE.search(page_data).group(2)) * 1024 * 1024
+        except:
+            self.file_size = 0
 
         self.download_id = self.url.split("?f=")[1]
 
@@ -191,6 +194,11 @@ class Bitshare(BaseDownloader):
             handle = URL_OPEN(real_link, handle=True)
         except Exception, error:
             raise DownloadError("Error downloading from bitshare: %s" % error)
+
+        try:
+            self.file_size = handle.headers["Content-Length"]
+        except:
+            pass
 
         filehandler = open(self.file_path, "wb")
 

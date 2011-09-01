@@ -86,6 +86,7 @@ class Player(object):
 
         # Show the progress bar box
         gobject.idle_add(self.gui_manager.progress_box.show)
+        gobject.idle_add(self.gui_manager.set_status_message, "Filling cache...")
 
         if self.downloader.file_size != None:
             # Waits %1 of the total download
@@ -123,6 +124,9 @@ class Player(object):
             time.sleep(1)
 
     def _update_progress(self):
+        """ Updates the progress bar using the downloaded size and the
+        total file size if posible. """
+
         downloaded_size = self.downloader.downloaded_size
         file_size = self.downloader.file_size
 
