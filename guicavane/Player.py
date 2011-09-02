@@ -70,12 +70,19 @@ class Player(object):
 
         gobject.idle_add(self.gui_manager.set_status_message, "")
 
-        for downloader in result:
-            icon = downloader.icon
-            name = downloader.name
-            self.hosts_icon_view_model.append([icon, name, downloader])
+        if len(result) == 0:
+            self.gui_manager.report_error("No hots found")
+            self.gui_manager.unfreeze()
+        elif len(result) == 1:
+            self.downloader = result[0]
+            self.downloader.process_url(self.play, self.file_path)
+        else:
+            for downloader in result:
+                icon = downloader.icon
+                name = downloader.name
+                self.hosts_icon_view_model.append([icon, name, downloader])
 
-        self.hosts_window.show_all()
+            self.hosts_window.show_all()
 
     def play(self):
         """ Starts the playing of the file on file_path. """
