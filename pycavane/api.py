@@ -44,6 +44,8 @@ class Episode(object):
 
     _name_re = re.compile(
             r'<div class="clearleft"></div>.*?</div>.*?: (.*?)</div>', re.DOTALL)
+    _show_re = re.compile(
+            r'<div class="clearleft"></div>.*?</div>(.*?): .*?</div>', re.DOTALL)
     _image_re = re.compile('<img src="(.*?)" border="0" />')
     _description_re = re.compile('<div>(.*)<div class="sep"></div>', re.DOTALL)
     _cast_re = re.compile('<a href=\'/buscar/\?q=.*?&cat=actor\'>(.*?)</a>')
@@ -59,11 +61,19 @@ class Episode(object):
         self.__name = name
         self.number = number
 
-        info_keys = ['image', 'description', 'cast', 'genere', 'language']
+        info_keys = ['image', 'description', 'cast', 'genere', 'language', 'show']
 
         for info_key in info_keys:
             setattr(self.__class__, info_key,
                     property(lambda self, i=info_key:self.info[i]))
+
+    def get_subtitle(self, lang='ES', filename=None):
+        """ Downloads the subtitle of the episode. """
+
+        if filename:
+            filename += '.srt'
+
+        return url_open(urls.sub_show % (self.id, lang), filename=filename)
 
     @property
     def name(self):
@@ -81,13 +91,14 @@ class Episode(object):
         page_data = url_open(urls.show_info % self.id)
 
         name = self._name_re.findall(page_data)[0].strip()
+        show = self._show_re.findall(page_data)[0].strip()
         image = urls.host + self._image_re.findall(page_data)[0]
         description = self._description_re.findall(page_data)[0].strip()
         cast = self._cast_re.findall(page_data)
         genere = self._genere_re.findall(page_data)[0].strip()
         language = self._language_re.findall(page_data)[0].strip()
 
-        self.__info = {'name': name, 'image': image, 'description': description,
+        self.__info = {'name': name, 'show': show, 'image': image, 'description': description,
                 'cast': cast, 'genere': genere, 'language': language}
         return self.__info
 
@@ -113,13 +124,17 @@ class Episode(object):
 
         return self.__hosts
 
-    def get_subtitle(self, lang='ES', filename=None):
-        """ Downloads the subtitle of the episode. """
+    @property
+    def cuevana_url(self):
+        """ Returns the link to this episode on cuevana. """
 
-        if filename:
-            filename += '.srt'
+        name = self.normalized_name
+        return urls.cuevana_url_show % (self.id, self.show, name)
 
-        return url_open(urls.sub_show % (self.id, lang), filename=filename)
+    @property
+    def normalized_name(self):
+        return normalize_string(self.info["name"])
+
 
     @classmethod
     def search(self, season):
@@ -224,6 +239,13 @@ class Movie(object):
             return self.info['description']
 
         return self.__description
+
+    @property
+    def cuevana_url(self):
+        """ Returns the link to this episode on cuevana. """
+
+        name = self.normalized_name
+        return urls.cuevana_url_movie % (self.id, name)
 
     @property
     def normalized_name(self):

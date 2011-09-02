@@ -8,6 +8,7 @@ GuiManager. Takes care of the gui events.
 import os
 import gtk
 import urllib
+import webbrowser
 
 import pycavane
 from Constants import *
@@ -373,7 +374,8 @@ class GuiManager(object):
             model = view.get_model()
             file_object = model[path][FILE_VIEW_COLUMN_OBJECT]
 
-            if isinstance(file_object, pycavane.api.Episode):
+            if isinstance(file_object, pycavane.api.Episode) or \
+               isinstance(file_object, pycavane.api.Movie):
                 self.file_viewer_menu.popup(None, None, None, event.button, event.time)
 
     def _on_menu_play_clicked(self, *args):
@@ -451,38 +453,11 @@ class GuiManager(object):
             self.marks.remove(episode.id)
 
     def open_in_cuevana(self, *args):
-        """
-        Open selected episode or movie on cuevana website.
-        """
+        """ Open selected episode or movie on cuevana website. """
 
-        selected_text = get_selected_text(self.file_viewer,
-                                          FILE_VIEW_COLUMN_TEXT)
-
-        if selected_text.count(" - "):  # It's a serie
-            link = "http://www.cuevana.tv/series/%s/%s/%s/"
-            show = self.current_show
-            season = self.current_season
-
-            try:
-                selected_episode = selected_text.split(" - ", 1)[1]
-            except IndexError:
-                return
-
-            data = self.pycavane.episode_by_name(selected_episode,
-                                                 show, season)
-            assert data != None
-
-            show = normalize_string(show)
-            episode = normalize_string(data[2])
-
-            webbrowser.open(link % (data[0], show, episode))
-        else:
-            link = "http://www.cuevana.tv/peliculas/%s/%s/"
-            data = self.pycavane.movie_by_name(selected_text)
-
-            movie = normalize_string(data[1])
-
-            webbrowser.open(link % (data[0], movie))
+        path, _ = self.file_viewer.get_cursor()
+        file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
+        webbrowser.open(file_object.cuevana_url)
 
     def _on_search_clear_clicked(self, *args):
         """ Clears the search input. """
