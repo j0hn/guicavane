@@ -12,6 +12,7 @@ import gobject
 import subprocess
 
 import Downloaders
+from pycavane import api
 from Constants import HOSTS_GUI_FILE, HOSTS_VIEW_COLUMN_OBJECT
 
 
@@ -66,6 +67,7 @@ class Player(object):
 
         if is_error:
             self.gui_manager.report_error("Error displaying hosts: %s" % result)
+            gobject.idle_add(self.gui_manager.progress.hide)
             return
 
         gobject.idle_add(self.gui_manager.set_status_message, "")
@@ -174,20 +176,30 @@ class Player(object):
         # Hide the progress
         gobject.idle_add(self.gui_manager.progress.hide)
 
-        # TODO: automark here
+        downloaded_size = self.downloader.downloaded_size
+        file_size = self.downloader.file_size
+
+        if downloaded_size >= file_size:
+            if self.config.get_key("automatic_marks"):
+                self.gui_manager.mark_selected()
 
     def get_filename(self):
         """ Returns the file path of the file. """
 
-        # TODO: Implement
-        #result = self.config.get_key("filename_template")
-        #result = result.replace("<show>", show_name)
-        #result = result.replace("<season>", "%.2d" % int(season_number))
-        #result = result.replace("<episode>", "%s" % str(episode_number))
-        #result = result.replace("<name>", self.file_object.name)
-        #result = result.replace(os.sep, "_")
+        if isinstance(self.file_object, api.Movie):
+            return file_object.name.replace(os.sep, "_")
 
-        result = self.file_object.name + ".mp4"
+        # If isn't a movie it must be an episode
+        assert isinstance(self.file_object, api.Episode)
+
+        result = self.config.get_key("filename_template")
+        result = result.replace("<show>", self.file_object.show)
+        result = result.replace("<season>", "%.2d" % int(self.file_object.season))
+        result = result.replace("<episode>", "%s" % str(self.file_object.number))
+        result = result.replace("<name>", self.file_object.name)
+        result = result.replace(os.sep, "_")
+        result = result + ".mp4"
+
         return result
 
     # ================================

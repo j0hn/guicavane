@@ -51,6 +51,7 @@ class Episode(object):
     _cast_re = re.compile('<a href=\'/buscar/\?q=.*?&cat=actor\'>(.*?)</a>')
     _genere_re = re.compile('<b>Género:</b>(.*?)<br />')
     _language_re = re.compile('<b>Idioma:</b>(.*?)<br />')
+    _season_number_re = re.compile('<b>Temporada:</b> (.*?)<br />')
 
     __info = None
     __hosts = None
@@ -61,7 +62,8 @@ class Episode(object):
         self.__name = name
         self.number = number
 
-        info_keys = ['image', 'description', 'cast', 'genere', 'language', 'show']
+        info_keys = ['image', 'description', 'cast', 'genere',
+                     'language', 'show', 'season']
 
         for info_key in info_keys:
             setattr(self.__class__, info_key,
@@ -97,9 +99,10 @@ class Episode(object):
         cast = self._cast_re.findall(page_data)
         genere = self._genere_re.findall(page_data)[0].strip()
         language = self._language_re.findall(page_data)[0].strip()
+        season = self._season_number_re.findall(page_data)[0].strip()
 
         self.__info = {'name': name, 'show': show, 'image': image, 'description': description,
-                'cast': cast, 'genere': genere, 'language': language}
+                'cast': cast, 'genere': genere, 'language': language, 'season': season}
         return self.__info
 
     @property
