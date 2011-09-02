@@ -16,7 +16,6 @@ from guicavane.Constants import CAPTCHA_GUI_FILE
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP, TEMP_DIR
 
 
-FILE_SIZE_RE = re.compile("<h1>(Downloading|Descargando).*? - (.*?)MByte</h1>")
 AJAXDL_RE = re.compile('var ajaxdl = "(.*?)";')
 
 REQUEST_URL = "http://bitshare.com/files-ajax/%s/request.html"
@@ -69,11 +68,6 @@ class Bitshare(BaseDownloader):
             page_data = URL_OPEN(self.url)
         except Exception, error:
             raise DownloadError(error)
-
-        try:
-            self.file_size = float(FILE_SIZE_RE.search(page_data).group(2)) * 1024 * 1024
-        except:
-            self.file_size = 0
 
         self.download_id = self.url.split("?f=")[1]
 
@@ -128,6 +122,7 @@ class Bitshare(BaseDownloader):
             self.play_callback()
 
     def request_captcha(self):
+        assert self.recaptcha_challenge_id != None, "Captcha required but challenge not found"
 
         try:
             page_data = URL_OPEN2(RECAPTCHA_CHALLENGE_URL + self.recaptcha_challenge_id)
@@ -152,7 +147,6 @@ class Bitshare(BaseDownloader):
 
         self.captcha_image.set_from_file(CAPTCHA_IMAGE_PATH)
         self.captcha_window.show_all()
-
 
     def send_captcha(self):
         gobject.idle_add(self.gui_manager.set_status_message,
@@ -191,26 +185,12 @@ class Bitshare(BaseDownloader):
         real_link = page_data.split("#")[1]
 
         try:
-            handle = URL_OPEN(real_link, handle=True)
+            handler = URL_OPEN(real_link, handle=True)
         except Exception, error:
             raise DownloadError("Error downloading from bitshare: %s" % error)
 
-        try:
-            self.file_size = float(handle.headers["Content-Length"])
-        except:
-            pass
-
-        filehandler = open(self.file_path, "wb")
-
-        while True:
-            data = handle.read(1024)
-
-            if not data or self.stop_downloading:
-                filehandler.close()
-                break
-
-            filehandler.write(data)
-            filehandler.flush()
+        # Using the BaseDownloader download function
+        self.download_to(handler, self.file_path)
 
     def _on_captcha_ok(self, *args):
         self.gui_manager.background_task(self.send_captcha,
@@ -229,6 +209,6 @@ class Bitshare(BaseDownloader):
 
     def _on_download_finish(self, (is_error, result)):
         if is_error:
-            self.gui_manager.report_error("Error downloading: %s" % result)
+            self.gui_manager.report_error("Download finish with error: %s" % result)
 
-        print "Downloading done"
+        self.gui_manager.unfreeze()

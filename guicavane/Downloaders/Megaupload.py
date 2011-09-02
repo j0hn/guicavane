@@ -15,7 +15,6 @@ from Base import BaseDownloader, DownloadError
 
 
 MEGALINK_RE = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')
-FILE_SIZE_RE = re.compile("<strong>(File size:|Tamaño del archivo:)</strong> (.+?) MB<br />")
 URL_OPEN = UrlOpen()
 
 
@@ -31,10 +30,11 @@ class Megaupload(BaseDownloader):
 
         self.gui_manager = gui_manager
         self.url = url
-        self.size = 0
         self.stop_downloading = False
 
     def process_url(self, play_callback, file_path):
+        """ Start the download process. """
+
         self.play_callback = play_callback
         self.file_path = file_path
 
@@ -42,12 +42,15 @@ class Megaupload(BaseDownloader):
                     self._on_megalink_finish, unfreeze=False)
 
     def wait_time(self):
+        """ Waits the necesary time to start the download. """
+
         for i in range(self.waiting_time, 0, -1):
             gobject.idle_add(self.gui_manager.set_status_message,
                             "Please wait %d second%s..." % (i, "s" * (i > 1)))
             time.sleep(1)
 
     def start_download(self, (is_error, result)):
+        """ Starts the actually download loop and opens up the player. """
         if is_error:
             self.gui_manager.report_error("Error: %s" % result)
             self.gui_manager.unfreeze()
@@ -59,19 +62,17 @@ class Megaupload(BaseDownloader):
         self.play_callback()
 
     def get_megalink(self):
+        """ Returns the real downloadeable megaupload url. """
         try:
             page_data = URL_OPEN(self.url)
         except Exception, error:
             raise DownloadError(error)
 
-        try:
-            self.file_size = float(FILE_SIZE_RE.search(page_data).group(2)) * 1024 * 1024
-        except:
-            self.file_size = 0
-
         return MEGALINK_RE.findall(page_data)[0]
 
     def _on_megalink_finish(self, (is_error, result)):
+        """ Called on finish finding the real link. """
+
         if is_error:
             self.gui_manager.report_error("Error obtaining megaupload's link: %s" % result)
             self.gui_manager.unfreeze()
@@ -83,27 +84,18 @@ class Megaupload(BaseDownloader):
                     self.start_download, unfreeze=False)
 
     def _download_loop(self):
+        """ Actually download the file. """
+
         try:
-            handle = URL_OPEN(self.megalink, handle=True)
+            handler = URL_OPEN(self.megalink, handle=True)
         except Exception, error:
             raise DownloadError("Error downloading from megaupload: %s" % error)
 
-        try:
-            self.file_size = float(handle.headers["Content-Length"])
-        except:
-            pass
-
-        filehandler = open(self.file_path, "wb")
-
-        while True:
-            data = handle.read(1024)
-
-            if not data or self.stop_downloading:
-                filehandler.close()
-                break
-
-            filehandler.write(data)
-            filehandler.flush()
+        # Using the BaseDownloader download function
+        self.download_to(handler, self.file_path)
 
     def _on_download_finish(self, (is_error, result)):
-        print "Downloading done"
+        if is_error:
+            self.gui_manager.report_error("Download finish with error: %s" % result)
+
+        self.gui_manager.unfreeze()

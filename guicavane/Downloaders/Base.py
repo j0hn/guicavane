@@ -26,6 +26,25 @@ class BaseDownloader(object):
         self.file_size = None
         self.stop_downloading = False
 
+    def download_to(self, handler, file_path):
+        """ Starts a download. handler must be a UrlOpen instance and file_path
+        a string with the absolute path to the file to be written on"""
+
+        # Sets the file size using the request headers
+        self.file_size = float(handler.headers["Content-Length"])
+
+        filehandler = open(file_path, "wb")
+
+        while True:
+            data = handler.read(1024)
+
+            if not data or self.stop_downloading:
+                filehandler.close()
+                break
+
+            filehandler.write(data)
+            filehandler.flush()
+
     @property
     def downloaded_size(self):
         """ Returns the currently downloaded size in bytes. """
