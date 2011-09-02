@@ -512,9 +512,8 @@ class GuiManager(object):
             empty_case = gtk.gdk.pixbuf_new_from_file(IMAGE_CASE_EMPTY)
             self.info_image.set_from_pixbuf(empty_case)
 
-            print file_object.info["image"]
             self.background_task(self.download_show_image, self.set_info_image,
-                                 file_object.info["image"])
+                                 file_object)
 
             self.info_title.set_label(file_object.name)
             self.info_label.set_label(file_object.info["description"])
@@ -525,16 +524,16 @@ class GuiManager(object):
 
         self.info_window.hide()
 
-    def download_show_image(self, link):
-        """ Downloads the show image from `link`. """
+    def download_show_image(self, file_object):
+        """ Downloads the current show image and returs the path to it. """
 
         images_dir = self.config.get_key("images_dir")
-        show = self.current_show.lower()
-        show_file = show.replace(" ", "_") + ".jpg"
-        image_path = images_dir + os.sep + show_file
+        show_name = self.current_show.name.lower()
+        show_name = show_name.replace(" ", "_") + ".jpg"
+        image_path = os.path.join(images_dir, show_name)
 
         if not os.path.exists(image_path):
-            url_open = urllib.urlopen(link)
+            url_open = urllib.urlopen(file_object.info["image"])
             img = open(image_path, "wb")
             img.write(url_open.read())
             img.close()
@@ -546,7 +545,7 @@ class GuiManager(object):
         """ Sets the image of the current episode. """
 
         if is_error:
-            self.set_status_message("Problem downloading show image.")
+            self.set_status_message("Problem downloading show image")
             return
 
         image_path = result
