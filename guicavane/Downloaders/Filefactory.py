@@ -6,21 +6,18 @@ Filefactory Downloader.
 """
 
 import re
-import gtk
 import time
 import gobject
 
 from guicavane.util import UrlOpen
-from Base import BaseDownloader, DownloadError
-from guicavane.Constants import CAPTCHA_GUI_FILE
-from guicavane.Paths import HOSTS_IMAGES_DIR, SEP, TEMP_DIR
+from Base import BaseDownloader
+from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
+from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
 
 HOST = "http://www.filefactory.com"
 RECAPTCHA_CHALLENGE_URL = "http://api.recaptcha.net/challenge?k="
 RECAPTCHA_IMAGE_URL = "http://www.google.com/recaptcha/api/image?c="
 CHECK_CAPTCHA_URL = HOST + "/file/checkCaptcha.php"
-
-CAPTCHA_IMAGE_PATH = TEMP_DIR + SEP + "recaptcha_image"
 
 CAPTCHA_ID_RE = re.compile(r'Recaptcha\.create\("(.*?)", "ffRecaptcha"')
 CAPTCHA_ID2_RE = re.compile(r"challenge : '(.*?)',")
@@ -44,19 +41,12 @@ class Filefactory(BaseDownloader):
     def __init__(self, gui_manager, url):
         BaseDownloader.__init__(self, gui_manager, url)
 
-        CAPTCHA_URL_OPEN.add_headers({"referer": url})
-
         self.gui_manager = gui_manager
         self.url = url
-        self.stop_downloading = False
 
-        self.builder = gtk.Builder()
-        self.builder.add_from_file(CAPTCHA_GUI_FILE)
-        self.builder.connect_signals(self)
+        self.captcha_window = CaptchaWindow(gui_manager, self._on_captcha_ok)
 
-        self.captcha_image = self.builder.get_object("captcha_image")
-        self.response_input = self.builder.get_object("response_input")
-        self.captcha_window = self.builder.get_object("captcha_window")
+        CAPTCHA_URL_OPEN.add_headers({"referer": url})
 
     def process_url(self, play_callback, file_path):
         """ Start the download process. """
@@ -65,7 +55,7 @@ class Filefactory(BaseDownloader):
         self.file_path = file_path
 
         self.gui_manager.background_task(self.request_captcha,
-                    self.ask_captcha, unfreeze=False)
+                    self.captcha_window.show, unfreeze=False)
 
     def request_captcha(self):
         page_data = CAPTCHA_URL_OPEN(self.url)
@@ -81,21 +71,11 @@ class Filefactory(BaseDownloader):
         filehandler.write(page_data)
         filehandler.close()
 
-    def ask_captcha(self, (is_error, result)):
-        if is_error:
-            self.gui_manager.report_error("Error fetching captcha: %s" % result)
-            return
-
-        gobject.idle_add(self.gui_manager.set_status_message, "Please fill the captcha")
-
-        self.captcha_image.set_from_file(CAPTCHA_IMAGE_PATH)
-        self.captcha_window.show_all()
-
     def send_captcha(self):
         gobject.idle_add(self.gui_manager.set_status_message,
             "Sending Captcha...")
 
-        response_text = self.response_input.get_text()
+        response_text = self.captcha_window.get_input_text()
 
         data = {"recaptcha_challenge_field": self.captcha_id2,
                 "recaptcha_response_field": response_text,
@@ -111,10 +91,7 @@ class Filefactory(BaseDownloader):
 
         self.file_url = FILE_URL_RE.search(page_data).group(1)
 
-        try:
-            self.waiting_time = int(COUNTDOWN_RE.search(page_data).group(1))
-        except:
-            pass
+        self.waiting_time = int(COUNTDOWN_RE.search(page_data).group(1))
 
     def _download_loop(self):
         for i in range(self.waiting_time, 0, -1):
@@ -125,17 +102,13 @@ class Filefactory(BaseDownloader):
         handler = MAIN_URL_OPEN(self.file_url, handle=True)
 
         gobject.idle_add(self.gui_manager.set_status_message, "Loading...")
+
         # Using the BaseDownloader download function
         self.download_to(handler, self.file_path)
 
     def _on_captcha_ok(self, *args):
         self.gui_manager.background_task(self.send_captcha,
-                                    self._on_captcha_finish)
-        self.captcha_window.hide()
-
-    def _on_captcha_cancel(self, *args):
-        self.gui_manager.unfreeze()
-        self.captcha_window.hide()
+            self._on_captcha_finish)
 
     def _on_captcha_finish(self, (is_error, result)):
         if is_error:

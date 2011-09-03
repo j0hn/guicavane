@@ -15,7 +15,7 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <property name="urgency_hint">True</property>
-    <signal name="destroy" handler="_on_captcha_cancel" swapped="no"/>
+    <signal name="destroy" handler="_on_cancel" swapped="no"/>
     <child>
       <object class="GtkVBox" id="main_vbox">
         <property name="visible">True</property>
@@ -62,7 +62,7 @@
                 <property name="secondary_icon_activatable">False</property>
                 <property name="primary_icon_sensitive">True</property>
                 <property name="secondary_icon_sensitive">True</property>
-                <signal name="activate" handler="_on_captcha_ok" swapped="no"/>
+                <signal name="activate" handler="_on_ok" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -93,7 +93,7 @@
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="_on_captcha_cancel" swapped="no"/>
+                <signal name="clicked" handler="_on_cancel" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -109,7 +109,7 @@
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="_on_captcha_ok" swapped="no"/>
+                <signal name="clicked" handler="_on_ok" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>

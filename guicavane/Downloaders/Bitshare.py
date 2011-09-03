@@ -6,14 +6,13 @@ Bitshare Downloader.
 """
 
 import re
-import gtk
 import time
 import gobject
 
 from Base import BaseDownloader, DownloadError
 from guicavane.util import UrlOpen
-from guicavane.Constants import CAPTCHA_GUI_FILE
-from guicavane.Paths import HOSTS_IMAGES_DIR, SEP, TEMP_DIR
+from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
+from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
 
 
 AJAXDL_RE = re.compile('var ajaxdl = "(.*?)";')
@@ -27,10 +26,8 @@ RECAPTCHA_CHALLENGE_ID_RE = re.compile('<script type="text/javascript" ' \
                      'src="http://api.recaptcha.net/challenge\?k=(.+?) ">')
 RECAPTCHA_NEW_CHALLENGE_RE = re.compile("challenge : '(.+?)',")
 
-CAPTCHA_IMAGE_PATH = TEMP_DIR + SEP + "recaptcha_image"
-
-URL_OPEN = UrlOpen()
-URL_OPEN2 = UrlOpen()
+MAIN_URL_OPEN = UrlOpen()
+CAPTCHA_URL_OPEN = UrlOpen()
 
 
 class Bitshare(BaseDownloader):
@@ -42,19 +39,12 @@ class Bitshare(BaseDownloader):
     def __init__(self, gui_manager, url):
         BaseDownloader.__init__(self, gui_manager, url)
 
-        URL_OPEN2.add_headers({"referer": url})
-
         self.gui_manager = gui_manager
         self.url = url
-        self.stop_downloading = False
 
-        self.builder = gtk.Builder()
-        self.builder.add_from_file(CAPTCHA_GUI_FILE)
-        self.builder.connect_signals(self)
+        self.captcha_window = CaptchaWindow(gui_manager, self._on_captcha_ok)
 
-        self.captcha_image = self.builder.get_object("captcha_image")
-        self.response_input = self.builder.get_object("response_input")
-        self.captcha_window = self.builder.get_object("captcha_window")
+        CAPTCHA_URL_OPEN.add_headers({"referer": url})
 
     def process_url(self, play_callback, file_path):
         self.play_callback = play_callback
@@ -64,11 +54,7 @@ class Bitshare(BaseDownloader):
                         self.on_waiting_finish, unfreeze=False)
 
     def start_regular(self):
-        try:
-            page_data = URL_OPEN(self.url)
-        except Exception, error:
-            raise DownloadError(error)
-
+        page_data = MAIN_URL_OPEN(self.url)
         self.download_id = self.url.split("?f=")[1]
 
         try:
@@ -85,11 +71,7 @@ class Bitshare(BaseDownloader):
         request_url = REQUEST_URL % self.download_id
         request_data = {"request": "generateID", "ajaxid": self.ajaxdl}
 
-        try:
-            page_data = URL_OPEN(request_url, data=request_data)
-        except Exception, error:
-            raise DownloadError(error)
-
+        page_data = MAIN_URL_OPEN(request_url, data=request_data)
         page_data = page_data.split(":")
         waiting_time = int(page_data[1])
         has_captcha = page_data[2] == "1"
@@ -114,66 +96,44 @@ class Bitshare(BaseDownloader):
 
         if has_captcha:
             self.gui_manager.background_task(self.request_captcha,
-                        self.ask_captcha)
+                self.captcha_window.show)
         else:
             self.gui_manager.background_task(self._download_loop,
-                        self._on_download_finish)
+                self._on_download_finish)
 
             self.play_callback()
 
     def request_captcha(self):
         assert self.recaptcha_challenge_id != None, "Captcha required but challenge not found"
 
-        try:
-            page_data = URL_OPEN2(RECAPTCHA_CHALLENGE_URL + self.recaptcha_challenge_id)
-        except Exception, error:
-            raise DownloadError("Error obtaining recaptcha challenge: %s" % error)
-
+        page_data = CAPTCHA_URL_OPEN(RECAPTCHA_CHALLENGE_URL + self.recaptcha_challenge_id)
         self.recaptcha_new_challenge = RECAPTCHA_NEW_CHALLENGE_RE.search(page_data).group(1)
         image_url = RECAPTCHA_IMAGE_URL + self.recaptcha_new_challenge
 
-        try:
-            page_data = URL_OPEN2(image_url)
-        except Exception, error:
-            raise DownloadError("Error obtaining recaptcha image: %s" % error)
-
+        page_data = CAPTCHA_URL_OPEN(image_url)
         filehandler = open(CAPTCHA_IMAGE_PATH, "w")
         filehandler.write(page_data)
         filehandler.close()
 
-    def ask_captcha(self, (is_error, result)):
-        gobject.idle_add(self.gui_manager.set_status_message,
-                         "Please fill the captcha")
-
-        self.captcha_image.set_from_file(CAPTCHA_IMAGE_PATH)
-        self.captcha_window.show_all()
-
     def send_captcha(self):
         gobject.idle_add(self.gui_manager.set_status_message,
-                         "Sending Captcha...")
+            "Sending Captcha...")
 
-        response_text = self.response_input.get_text()
+        response_text = self.captcha_window.get_input_text()
 
         request_url = REQUEST_URL % self.download_id
         request_data = {"request": "validateCaptcha", "ajaxid": self.ajaxdl,
             "recaptcha_challenge_field": self.recaptcha_new_challenge,
             "recaptcha_response_field": response_text}
 
-        try:
-            page_data = URL_OPEN(request_url, data=request_data)
-        except Exception, error:
-            raise DownloadError("Error sending captcha: %s" % error)
-
+        page_data = MAIN_URL_OPEN(request_url, data=request_data)
         return page_data.count("SUCCESS") > 0
 
     def _download_loop(self):
         request_url = REQUEST_URL % self.download_id
         request_data = {"request": "getDownloadURL", "ajaxid": self.ajaxdl}
 
-        try:
-            page_data = URL_OPEN(request_url, data=request_data)
-        except Exception, error:
-            raise DownloadError("Error downloading from bitshare: %s" % error)
+        page_data = MAIN_URL_OPEN(request_url, data=request_data)
 
         if not page_data.startswith("SUCCESS"):
             message = "Not success finding the bitshare "
@@ -184,26 +144,18 @@ class Bitshare(BaseDownloader):
 
         real_link = page_data.split("#")[1]
 
-        try:
-            handler = URL_OPEN(real_link, handle=True)
-        except Exception, error:
-            raise DownloadError("Error downloading from bitshare: %s" % error)
+        handler = MAIN_URL_OPEN(real_link, handle=True)
 
         # Using the BaseDownloader download function
         self.download_to(handler, self.file_path)
 
-    def _on_captcha_ok(self, *args):
+    def _on_captcha_ok(self):
         self.gui_manager.background_task(self.send_captcha,
-                                    self._on_captcha_finish)
-        self.captcha_window.hide()
-
-    def _on_captcha_cancel(self, *args):
-        self.gui_manager.unfreeze()
-        self.captcha_window.hide()
+            self._on_captcha_finish)
 
     def _on_captcha_finish(self, (is_error, result)):
         self.gui_manager.background_task(self._download_loop,
-                    self._on_download_finish)
+            self._on_download_finish)
 
         self.play_callback()
 
