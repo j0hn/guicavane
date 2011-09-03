@@ -3,10 +3,12 @@
 
 from Megaupload import Megaupload
 from Bitshare import Bitshare
+from Filefactory import Filefactory
 
 AVALIABLE_HOSTS = {
     "megaupload": Megaupload,
     "bitshare": Bitshare,
+    "filefactory": Filefactory
 }
 
 def get_avaliable():

@@ -23,7 +23,7 @@ class BaseDownloader(object):
     def __init__(self, gui_manager=None, url=None):
         """ Sets up the basic stuff for a Downloader. """
         self.file_path = None
-        self.file_size = None
+        self.file_size = 0
         self.stop_downloading = False
 
     def download_to(self, handler, file_path):
@@ -31,7 +31,10 @@ class BaseDownloader(object):
         a string with the absolute path to the file to be written on"""
 
         # Sets the file size using the request headers
-        self.file_size = float(handler.headers["Content-Length"])
+        try:
+            self.file_size = float(handler.headers["Content-Length"])
+        except:
+            self.file_size = 0.0
 
         filehandler = open(file_path, "wb")
 

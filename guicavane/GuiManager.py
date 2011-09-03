@@ -177,6 +177,7 @@ class GuiManager(object):
         self.error_label.set_label(message)
         self.error_dialog.show_all()
         self.set_status_message("")
+        self.unfreeze()
 
     def display_shows(self, (is_error, result)):
         """ Displays the shows. """
