@@ -15,6 +15,7 @@ from Constants import *
 from Marks import Marks
 from Config import Config
 from Player import Player
+from Accounts import ACCOUNTS
 from Settings import SettingsDialog
 from ThreadRunner import GtkThreadRunner
 
@@ -29,10 +30,11 @@ class GuiManager(object):
         self.current_show = None
         self.current_season = None
 
-        # Config, Marks and Settings
+        # Config, Marks, Accounts and Settings
         self.config = Config()
         self.marks = Marks()
-        self.settings_dialog = SettingsDialog(self.config)
+        self.accounts = ACCOUNTS
+        self.settings_dialog = SettingsDialog(self.config, self.accounts)
 
         # Gtk builder
         self.builder = gtk.Builder()
