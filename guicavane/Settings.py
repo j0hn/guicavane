@@ -8,11 +8,14 @@ Settings. Manages the gui of the settings.
 import gtk
 from Constants import SETTINGS_GUI_FILE
 
+HOSTS = {"megaupload": ("mega_user", "mega_pass"),
+        }
+
 
 class SettingsDialog(object):
     """ Settings interface manager. """
 
-    def __init__(self, config):
+    def __init__(self, config, accounts):
         """ Creates the window and initializes the attributes. """
 
         # Gtk builder
@@ -20,8 +23,9 @@ class SettingsDialog(object):
         self.builder.add_from_file(SETTINGS_GUI_FILE)
         self.builder.connect_signals(self)
 
-        # Config
+        # Config and Accounts
         self.config = config
+        self.accounts = accounts
 
         # Widgets
         glade_objects = [
@@ -33,6 +37,9 @@ class SettingsDialog(object):
 
         for glade_object in glade_objects:
             setattr(self, glade_object, self.builder.get_object(glade_object))
+
+        # First login
+        self._update_accounts()
 
     def show(self):
         """ Shows the window with the values correctly asigned. """
@@ -89,5 +96,16 @@ class SettingsDialog(object):
         self.config.set_key("filename_template", filename_template)
         self.config.save()
 
+        # Relog
+        self._update_accounts()
+
         # Hide the dialog
         self.settings_dialog.hide()
+
+    def _update_accounts(self):
+        """Logs into the accounts with the config settings."""
+        for host in HOSTS:
+            username = self.config.get_key(HOSTS[host][0])
+            password = self.config.get_key(HOSTS[host][1])
+
+            self.accounts[host].login(username, password)
