@@ -23,7 +23,6 @@ class Megaupload(BaseDownloader):
 
     name = "Megaupload"
     icon_path = HOSTS_IMAGES_DIR + SEP + "megaupload.png"
-    waiting_time = 45
 
     def __init__(self, gui_manager, url):
         BaseDownloader.__init__(self, gui_manager, url)
@@ -31,6 +30,11 @@ class Megaupload(BaseDownloader):
         self.gui_manager = gui_manager
         self.url = url
         self.stop_downloading = False
+
+        accounts = self.gui_manager.accounts
+        self.account = accounts.get(self.name.lower())
+        if self.account:
+            URL_OPEN.add_cookies(self.account.cookiejar)
 
     def process_url(self, play_callback, file_path):
         """ Start the download process. """
@@ -44,7 +48,7 @@ class Megaupload(BaseDownloader):
     def wait_time(self):
         """ Waits the necesary time to start the download. """
 
-        for i in range(self.waiting_time, 0, -1):
+        for i in range(self.account.wait_time, 0, -1):
             gobject.idle_add(self.gui_manager.set_status_message,
                             "Please wait %d second%s..." % (i, "s" * (i > 1)))
             time.sleep(1)
@@ -61,7 +65,7 @@ class Megaupload(BaseDownloader):
         self.play_callback()
 
     def get_megalink(self):
-        """ Returns the real downloadeable megaupload url. """
+        """ Returns the real downloadable megaupload url. """
         try:
             page_data = URL_OPEN(self.url)
         except Exception, error:
