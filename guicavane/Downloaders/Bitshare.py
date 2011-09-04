@@ -153,6 +153,10 @@ class Bitshare(BaseDownloader):
             self._on_captcha_finish)
 
     def _on_captcha_finish(self, (is_error, result)):
+        if not result:
+            self.gui_manager.report_error("Wrong captcha")
+            return
+
         self.gui_manager.background_task(self._download_loop,
             self._on_download_finish)
 
