@@ -11,7 +11,6 @@ Contributor: j0hn <j0hn.com.ar@gmail.com>
 
 import re
 
-import downloaders
 from util import url_open, normalize_string
 from cached import Cached
 
