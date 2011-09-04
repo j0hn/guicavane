@@ -111,7 +111,7 @@ class Bitshare(BaseDownloader):
         image_url = RECAPTCHA_IMAGE_URL + self.recaptcha_new_challenge
 
         page_data = CAPTCHA_URL_OPEN(image_url)
-        filehandler = open(CAPTCHA_IMAGE_PATH, "w")
+        filehandler = open(CAPTCHA_IMAGE_PATH, "wb")
         filehandler.write(page_data)
         filehandler.close()
 

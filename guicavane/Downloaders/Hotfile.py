@@ -54,7 +54,6 @@ class Hotfile(BaseDownloader):
                         self.captcha_window.show, unfreeze=False)
 
     def start_regular(self):
-        print "hi regular"
         page_data = MAIN_URL_OPEN(self.url)
 
         waiting_time = int(WAIT_RE.search(page_data).group(1))
@@ -72,23 +71,18 @@ class Hotfile(BaseDownloader):
                 "wait": waiting_time, "waithash": waithash,
                 "upidhash": upidhash}
 
-        print data
 
         # Get the challenge id for the captcha request
         page_data = MAIN_URL_OPEN(self.url, data=data)
         captcha_id = CAPTCHA_ID_RE.search(page_data).group(1)
 
-        print captcha_id
-
         # Get the challenge id for the captcha image
         page_data = CAPTCHA_URL_OPEN(RECAPTCHA_CHALLENGE_URL + captcha_id)
         self.captcha_id2 = CAPTCHA_ID2_RE.search(page_data).group(1)
 
-        print self.captcha_id2
-
         # Download the captcha image
         page_data = CAPTCHA_URL_OPEN(RECAPTCHA_IMAGE_URL + self.captcha_id2)
-        filehandler = open(CAPTCHA_IMAGE_PATH, "w")
+        filehandler = open(CAPTCHA_IMAGE_PATH, "wb")
         filehandler.write(page_data)
         filehandler.close()
 
@@ -101,8 +95,6 @@ class Hotfile(BaseDownloader):
         data = {"action": "checkcaptcha",
                 "recaptcha_challenge_field": self.captcha_id2,
                 "recaptcha_response_field": response_text}
-
-        print data
 
         page_data = MAIN_URL_OPEN(self.url, data=data)
         self.file_url = FILE_URL_RE.search(page_data).group(1)
