@@ -516,8 +516,13 @@ class GuiManager(object):
             self.background_task(self.download_show_image, self.set_info_image,
                                  file_object)
 
-            self.info_title.set_label(file_object.name)
-            self.info_label.set_label(file_object.info["description"])
+            full_description = file_object.info["description"] + "\n\n" \
+                "<b>Cast:</b> " + ", ".join(file_object.info["cast"]) + "\n" \
+                "<b>Genere:</b> " + file_object.info["genere"] + "\n" \
+                "<b>Language:</b> " + file_object.info["language"]
+
+            self.info_title.set_label(file_object.info["name"])
+            self.info_label.set_label(full_description)
             self.info_window.show()
 
     def _on_info_window_close(self, *args):
@@ -527,6 +532,8 @@ class GuiManager(object):
 
     def download_show_image(self, file_object):
         """ Downloads the current show image and returs the path to it. """
+
+        self.unfreeze()
 
         images_dir = self.config.get_key("images_dir")
         show_name = self.current_show.name.lower()
