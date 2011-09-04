@@ -76,6 +76,8 @@ class Player(object):
             self.gui_manager.report_error("No hots found")
             self.gui_manager.unfreeze()
         elif len(result) == 1:
+            gobject.idle_add(self.gui_manager.set_status_message,
+                "Only one host found, starting download...")
             self.downloader = result[0]
             self.downloader.process_url(self.play, self.file_path)
         else:

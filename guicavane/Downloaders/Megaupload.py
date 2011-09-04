@@ -53,7 +53,6 @@ class Megaupload(BaseDownloader):
         """ Starts the actually download loop and opens up the player. """
         if is_error:
             self.gui_manager.report_error("Error: %s" % result)
-            self.gui_manager.unfreeze()
             return
 
         self.gui_manager.background_task(self._download_loop,
@@ -75,7 +74,6 @@ class Megaupload(BaseDownloader):
 
         if is_error:
             self.gui_manager.report_error("Error obtaining megaupload's link: %s" % result)
-            self.gui_manager.unfreeze()
             return
 
         self.megalink = result

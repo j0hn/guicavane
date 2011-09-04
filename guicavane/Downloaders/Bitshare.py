@@ -89,7 +89,6 @@ class Bitshare(BaseDownloader):
 
         if is_error:
             self.gui_manager.report_error("Error obtaining bitshare's link: %s" % result)
-            self.gui_manager.unfreeze()
             return
 
         has_captcha = result
