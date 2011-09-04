@@ -34,7 +34,7 @@ class BaseDownloader(object):
         try:
             self.file_size = float(handler.headers["Content-Length"])
         except:
-            self.file_size = 0.0
+            self.file_size = 0
 
         filehandler = open(file_path, "wb")
 

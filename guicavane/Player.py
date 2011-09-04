@@ -109,7 +109,7 @@ class Player(object):
         gobject.idle_add(self.gui_manager.progress_box.show)
         gobject.idle_add(self.gui_manager.set_status_message, "Filling cache...")
 
-        if self.downloader.file_size != None:
+        if self.downloader.file_size != 0:
             # Waits %1 of the total download
             percent = self.downloader.file_size * 0.01
 
@@ -119,8 +119,8 @@ class Player(object):
         else:
             # Waits 2MB, just an arbitrary amount
             while self.downloader.downloaded_size < 2 * 1024 * 1024:
-                self._update_progress()
-                time.sleep(1)
+                gobject.idle_add(self.gui_manager.progress.pulse)
+                time.sleep(0.5)
 
     def open_player(self, *args):
         """ Fires up a new process with the player runing. """
@@ -150,8 +150,12 @@ class Player(object):
 
         while not stop:
             downloaded_size = self.downloader.downloaded_size
-            self._update_progress()
-            time.sleep(1)
+            if file_size != 0:
+                self._update_progress()
+                time.sleep(1)
+            else:
+                gobject.idle_add(self.gui_manager.progress.pulse)
+                time.sleep(0.5)
 
             if self.download_only:
                 stop = downloaded_size >= file_size

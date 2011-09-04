@@ -104,6 +104,7 @@ class SettingsDialog(object):
 
     def _update_accounts(self):
         """Logs into the accounts with the config settings."""
+
         for host in HOSTS:
             username = self.config.get_key(HOSTS[host][0])
             password = self.config.get_key(HOSTS[host][1])
