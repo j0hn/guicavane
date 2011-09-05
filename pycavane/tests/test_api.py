@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath(__file__).rsplit(os.sep, 2)[0])
 import api
 
 def repopulate_cache():
-    api.setup("guicavane", "guicavane", cache_dir="./", cache_lifetime=13**37)
+    api.setup("guicavane", "guicavane", cache_dir="./", cache_lifetime=0)
 
     house_search = [x for x in api.Show.search("house")]
     house = [x for x in house_search if x.name == "House M.D."][0]
