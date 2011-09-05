@@ -73,7 +73,7 @@ class Player(object):
         gobject.idle_add(self.gui_manager.set_status_message, "")
 
         if len(result) == 0:
-            self.gui_manager.report_error("No hots found")
+            self.gui_manager.report_error("No host found")
             self.gui_manager.unfreeze()
         elif len(result) == 1:
             gobject.idle_add(self.gui_manager.set_status_message,
@@ -145,12 +145,11 @@ class Player(object):
     def update(self):
         """ Updates the GUI with downloading data. """
 
-        file_size = self.downloader.file_size
         stop = False
 
         while not stop:
             downloaded_size = self.downloader.downloaded_size
-            if file_size != 0:
+            if self.downloader.file_size != 0:
                 self._update_progress()
                 time.sleep(1)
             else:
@@ -158,7 +157,7 @@ class Player(object):
                 time.sleep(0.5)
 
             if self.download_only:
-                stop = downloaded_size >= file_size
+                stop = downloaded_size >= self.downloader.file_size
             else:
                 stop = self.player_process.poll() != None
 
