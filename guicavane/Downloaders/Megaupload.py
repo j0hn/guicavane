@@ -23,18 +23,14 @@ class Megaupload(BaseDownloader):
 
     name = "Megaupload"
     icon_path = HOSTS_IMAGES_DIR + SEP + "megaupload.png"
+    accept_ranges = True
 
     def __init__(self, gui_manager, url):
-        BaseDownloader.__init__(self, gui_manager, url)
+        BaseDownloader.__init__(self, URL_OPEN, gui_manager, url)
 
         self.gui_manager = gui_manager
         self.url = url
         self.stop_downloading = False
-
-        accounts = self.gui_manager.accounts
-        self.account = accounts.get(self.name.lower())
-        if self.account:
-            URL_OPEN.add_cookies(self.account.cookiejar)
 
     def process_url(self, play_callback, file_path):
         """ Start the download process. """
@@ -88,6 +84,7 @@ class Megaupload(BaseDownloader):
     def _download_loop(self):
         """ Actually download the file. """
 
+        self.add_range(URL_OPEN)
         try:
             handler = URL_OPEN(self.megalink, handle=True)
         except Exception, error:

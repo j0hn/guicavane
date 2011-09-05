@@ -35,9 +35,10 @@ class Hotfile(BaseDownloader):
 
     name = "Hotfile"
     icon_path = HOSTS_IMAGES_DIR + SEP + "hotfile.png"
+    accept_ranges = False
 
     def __init__(self, gui_manager, url):
-        BaseDownloader.__init__(self, gui_manager, url)
+        BaseDownloader.__init__(self, MAIN_URL_OPEN, gui_manager, url)
 
         self.gui_manager = gui_manager
         self.url = url
@@ -100,6 +101,7 @@ class Hotfile(BaseDownloader):
         self.file_url = FILE_URL_RE.search(page_data).group(1)
 
     def _download_loop(self):
+        self.add_range(MAIN_URL_OPEN)
         handler = MAIN_URL_OPEN(self.file_url, handle=True)
 
         gobject.idle_add(self.gui_manager.set_status_message, "Loading...")

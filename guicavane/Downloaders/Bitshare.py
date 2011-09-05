@@ -35,9 +35,10 @@ class Bitshare(BaseDownloader):
 
     name = "Bitshare"
     icon_path = HOSTS_IMAGES_DIR + SEP + "bitshare.png"
+    accept_ranges = False
 
     def __init__(self, gui_manager, url):
-        BaseDownloader.__init__(self, gui_manager, url)
+        BaseDownloader.__init__(self, MAIN_URL_OPEN, gui_manager, url)
 
         self.gui_manager = gui_manager
         self.url = url
@@ -143,6 +144,7 @@ class Bitshare(BaseDownloader):
 
         real_link = page_data.split("#")[1]
 
+        self.add_range(MAIN_URL_OPEN)
         handler = MAIN_URL_OPEN(real_link, handle=True)
 
         # Using the BaseDownloader download function

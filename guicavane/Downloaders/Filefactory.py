@@ -37,9 +37,10 @@ class Filefactory(BaseDownloader):
     name = "File Factory"
     icon_path = HOSTS_IMAGES_DIR + SEP + "filefactory.png"
     waiting_time = 60
+    accept_ranges = False
 
     def __init__(self, gui_manager, url):
-        BaseDownloader.__init__(self, gui_manager, url)
+        BaseDownloader.__init__(self, MAIN_URL_OPEN, gui_manager, url)
 
         self.gui_manager = gui_manager
         self.url = url
@@ -99,6 +100,7 @@ class Filefactory(BaseDownloader):
                             "Please wait %d second%s..." % (i, "s" * (i > 1)))
             time.sleep(1)
 
+        self.add_range(MAIN_URL_OPEN)
         handler = MAIN_URL_OPEN(self.file_url, handle=True)
 
         gobject.idle_add(self.gui_manager.set_status_message, "Loading...")
