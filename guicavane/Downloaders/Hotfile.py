@@ -9,7 +9,7 @@ import re
 import time
 import gobject
 
-from Base import BaseDownloader
+from Base import BaseDownloader, DownloadError
 from guicavane.util import UrlOpen
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
 from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
@@ -52,10 +52,13 @@ class Hotfile(BaseDownloader):
         self.file_path = file_path
 
         self.gui_manager.background_task(self.start_regular,
-                        self.captcha_window.show, unfreeze=False)
+                        self.show_captcha_window, unfreeze=False)
 
     def start_regular(self):
         page_data = MAIN_URL_OPEN(self.url)
+
+        if page_data.count("You reached your hourly traffic limit."):
+            raise DownloadError("Hotfile is saturated. Please try again later")
 
         waiting_time = int(WAIT_RE.search(page_data).group(1))
         tm = TM_RE.search(page_data).group(1)
@@ -72,13 +75,13 @@ class Hotfile(BaseDownloader):
                 "wait": waiting_time, "waithash": waithash,
                 "upidhash": upidhash}
 
-
         # Get the challenge id for the captcha request
         page_data = MAIN_URL_OPEN(self.url, data=data)
         captcha_id = CAPTCHA_ID_RE.search(page_data).group(1)
 
         # Get the challenge id for the captcha image
         page_data = CAPTCHA_URL_OPEN(RECAPTCHA_CHALLENGE_URL + captcha_id)
+        print "captcha_id2"
         self.captcha_id2 = CAPTCHA_ID2_RE.search(page_data).group(1)
 
         # Download the captcha image
@@ -86,6 +89,13 @@ class Hotfile(BaseDownloader):
         filehandler = open(CAPTCHA_IMAGE_PATH, "wb")
         filehandler.write(page_data)
         filehandler.close()
+
+    def show_captcha_window(self, (is_error, result)):
+        if is_error:
+            self.gui_manager.report_error("Error: %s" % result)
+            return
+
+        self.captcha_window.show()
 
     def send_captcha(self):
         gobject.idle_add(self.gui_manager.set_status_message,
@@ -98,6 +108,7 @@ class Hotfile(BaseDownloader):
                 "recaptcha_response_field": response_text}
 
         page_data = MAIN_URL_OPEN(self.url, data=data)
+        print page_data
         self.file_url = FILE_URL_RE.search(page_data).group(1)
 
     def _download_loop(self):
@@ -114,6 +125,10 @@ class Hotfile(BaseDownloader):
             self._on_captcha_finish)
 
     def _on_captcha_finish(self, (is_error, result)):
+        if is_error:
+            self.gui_manager.report_error("Error sending captcha: %s" % result)
+            return
+
         self.gui_manager.background_task(self._download_loop,
             self._on_download_finish)
 
