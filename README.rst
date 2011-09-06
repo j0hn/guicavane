@@ -23,11 +23,8 @@ Linux Users
 ::
 
     $ git clone git@github.com:j0hn/guicavane.git
-    $ git submodule init
-    $ git submodule update
-    $ # ???
-    $ # profit
-    $ python main.py
+    $ sudo python setup.py install
+    $ guicavane
 
 Windows Users
 -------------
@@ -39,7 +36,7 @@ the settings dialog.
 
 Current Version
 ---------------
-1.1.0
+1.5.0
 
 Features List
 -------------
@@ -51,3 +48,5 @@ Features List
 * Cuztomizable file name
 * Automatic marking of watched shows
 * Support for megaupload regular and premium account
+* Multiple hosts to download (e.g Megaupload, Bitshare, Filefactory and more)
+* Resume downloads on unespected close
