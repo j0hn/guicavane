@@ -60,9 +60,9 @@ def setup_windows():
     import py2exe
 
     outdata_win = {
-        "script": "main.py",
+        "script": "bin\\guicavane",
         "dest_base": "guicavane",
-        "icon_resources": [(1, "images/logo.ico")]
+        "icon_resources": [(1, "guicavane\\images\\logo.ico")]
     }
 
     outdata_con = outdata_win.copy()
@@ -85,9 +85,13 @@ def setup_windows():
     }
 
     files = []
-    files.append(("glade", ["glade\\" + x for x in os.listdir("glade")]))
-    files.append(("images", ["images\\" + x for x in os.listdir("images") if not os.path.isdir("images\\" + x)]))
-    files.append(("images\\hosts\\", ["images\\hosts\\" + x for x in os.listdir("images\\hosts\\")]))
+    files.append(("glade", 
+        ["guicavane\\glade\\" + x for x in os.listdir("guicavane\\glade")]))
+    files.append(("images", 
+        ["guicavane\\images\\" + x for x in os.listdir("guicavane\\images") if \
+            not os.path.isdir("guicavane\\images\\" + x)]))
+    files.append(("images\\hosts\\", 
+        ["guicavane\\images\\hosts\\" + x for x in os.listdir("guicavane\\images\\hosts\\")]))
 
     setup(
         name = "Guicavane",
