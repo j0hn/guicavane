@@ -436,52 +436,64 @@
           </packing>
         </child>
         <child>
-          <object class="GtkFrame" id="megaupload_frame">
+          <object class="GtkExpander" id="accounts_expander">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label_xalign">0</property>
-            <property name="shadow_type">out</property>
+            <property name="can_focus">True</property>
             <child>
-              <object class="GtkVBox" id="megaupload_frame_vbox">
+              <object class="GtkVBox" id="accounts_vbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="border_width">5</property>
-                <property name="spacing">3</property>
+                <property name="border_width">10</property>
                 <child>
-                  <object class="GtkHBox" id="megaupload_user_hbox">
+                  <object class="GtkExpander" id="megaupload_account">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
                     <child>
-                      <object class="GtkLabel" id="megaupload_user_label">
-                        <property name="width_request">200</property>
+                      <object class="GtkHBox" id="megaupload_hbox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Megaupload Username:</property>
+                        <property name="spacing">5</property>
+                        <child>
+                          <object class="GtkEntry" id="megaupload_username">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="invisible_char">•</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="megaupload_password">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="visibility">False</property>
+                            <property name="invisible_char">•</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
                     </child>
-                    <child>
-                      <object class="GtkEntry" id="megaupload_user_entry">
-                        <property name="width_request">200</property>
+                    <child type="label">
+                      <object class="GtkLabel" id="megaupload_title">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="invisible_char">•</property>
-                        <property name="invisible_char_set">True</property>
-                        <property name="primary_icon_activatable">False</property>
-                        <property name="secondary_icon_activatable">False</property>
-                        <property name="primary_icon_sensitive">True</property>
-                        <property name="secondary_icon_sensitive">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Megaupload</property>
                       </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
                     </child>
                   </object>
                   <packing>
@@ -491,41 +503,56 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkHBox" id="megaupload_pass_hbox">
+                  <object class="GtkExpander" id="bitshare_account">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
                     <child>
-                      <object class="GtkLabel" id="megaupload_pass_label">
-                        <property name="width_request">200</property>
+                      <object class="GtkHBox" id="bitshare_hbox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Megaupload Password:</property>
+                        <property name="spacing">5</property>
+                        <child>
+                          <object class="GtkEntry" id="bitshare_username">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="invisible_char">•</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="bitshare_password">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="visibility">False</property>
+                            <property name="invisible_char">•</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">True</property>
+                            <property name="secondary_icon_sensitive">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
                     </child>
-                    <child>
-                      <object class="GtkEntry" id="megaupload_pass_entry">
-                        <property name="width_request">200</property>
+                    <child type="label">
+                      <object class="GtkLabel" id="bitshare_title">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="visibility">False</property>
-                        <property name="invisible_char">•</property>
-                        <property name="invisible_char_set">True</property>
-                        <property name="primary_icon_activatable">False</property>
-                        <property name="secondary_icon_activatable">False</property>
-                        <property name="primary_icon_sensitive">True</property>
-                        <property name="secondary_icon_sensitive">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Bitsharee</property>
                       </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
                     </child>
                   </object>
                   <packing>
@@ -537,15 +564,15 @@
               </object>
             </child>
             <child type="label">
-              <object class="GtkHBox" id="megaupload_frame_label_hbox">
+              <object class="GtkHBox" id="accounts_title_hbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="spacing">5</property>
                 <child>
-                  <object class="GtkLabel" id="megaupload_frame_label">
+                  <object class="GtkLabel" id="account_title_label1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Megaupload</property>
+                    <property name="label" translatable="yes">Accounts</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
                     </attributes>
@@ -557,7 +584,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="megaupload_frame_label2">
+                  <object class="GtkLabel" id="account_title_label2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">(not required)</property>
@@ -576,7 +603,7 @@
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">3</property>
           </packing>

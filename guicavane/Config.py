@@ -19,13 +19,12 @@ DEFAULT_VALUES = {
     "favorites": [],
     "last_download_directory": HOME_DIR,
     "images_dir": IMAGES_DIR,
-    "mega_user": "",
-    "mega_pass": "",
     "cuevana_user": "",
     "cuevana_pass": "",
     "automatic_marks": True,
     "player_arguments": "",
-    "filename_template": "<show> S<season>E<episode> - <name>"
+    "filename_template": "<show> S<season>E<episode> - <name>",
+    "accounts": [("megaupload", {"username": "", "password": ""})],
 }
 
 if not os.path.exists(CONFIG_DIR):

@@ -34,7 +34,7 @@ class GuiManager(object):
         self.config = Config()
         self.marks = Marks()
         self.accounts = ACCOUNTS
-        self.settings_dialog = SettingsDialog(self.config, self.accounts)
+        self.settings_dialog = SettingsDialog(self)
 
         # Gtk builder
         self.builder = gtk.Builder()
@@ -73,6 +73,25 @@ class GuiManager(object):
         except:
             self.set_mode_shows()
 
+        # Login
+        self.background_task(self.login_accounts, freeze=False)
+
+    def login_accounts(self):
+        accounts = self.config.get_key("accounts")
+        for account in accounts:
+            account_name = account[0]
+            username = account[1]["username"]
+            password = account[1]["password"]
+
+            try:
+                account_obj = ACCOUNTS[account_name]
+            except KeyError:
+                print "Warning: account not recognized: %s" % account_name
+                continue
+
+            if username and password:
+                account_obj.login(username, password)
+
     def freeze(self, status_message="Loading..."):
         """ Freezes the gui so the user can't interact with it. """
 
@@ -87,7 +106,7 @@ class GuiManager(object):
         self.main_hpaned.set_sensitive(True)
         self.set_status_message("")
 
-    def background_task(self, func, callback, *args, **kwargs):
+    def background_task(self, func, callback=None, *args, **kwargs):
         """
         Freezes the gui, starts a thread with func.
         When it's done, unfreezes the gui and calls callback with the result.
@@ -98,21 +117,35 @@ class GuiManager(object):
         """
 
         status_message = "Loading..."
+        freeze = True
 
         if "status_message" in kwargs:
             status_message = kwargs["status_message"]
             del kwargs["status_message"]
 
+        if "freeze" in kwargs:
+            freeze = kwargs["freeze"]
+            del kwargs["freeze"]
+
+        if freeze:
+            self.freeze(status_message)
+        else:
+            kwargs["unfreeze"] = False
+
         if "unfreeze" in kwargs and not kwargs["unfreeze"]:
             real_callback = callback
             del kwargs["unfreeze"]
         else:
-
             def real_callback(result):
                 self.unfreeze()
                 callback(result)
 
-        self.freeze(status_message)
+        if callback == None:
+            def real_callback((is_error, result)):
+                if is_error:
+                    print "Error: %s" % result
+
+
         GtkThreadRunner(real_callback, func, *args, **kwargs)
 
     def set_status_message(self, message):

@@ -8,14 +8,18 @@ Settings. Manages the gui of the settings.
 import gtk
 from Constants import SETTINGS_GUI_FILE
 
-HOSTS = {"megaupload": ("mega_user", "mega_pass"),
-        }
+# Dict with host -> (username_input, password_input) to retrive the
+# accounts information
+HOSTS_INPUTS = {
+    "megaupload": ("megaupload_username", "megaupload_password"),
+    "bitshare": ("bitshare_username", "bitshare_password"),
+}
 
 
 class SettingsDialog(object):
     """ Settings interface manager. """
 
-    def __init__(self, config, accounts):
+    def __init__(self, gui_manager):
         """ Creates the window and initializes the attributes. """
 
         # Gtk builder
@@ -23,9 +27,8 @@ class SettingsDialog(object):
         self.builder.add_from_file(SETTINGS_GUI_FILE)
         self.builder.connect_signals(self)
 
-        # Config and Accounts
-        self.config = config
-        self.accounts = accounts
+        self.gui_manager = gui_manager
+        self.config = self.gui_manager.config
 
         # Widgets
         glade_objects = [
@@ -38,17 +41,12 @@ class SettingsDialog(object):
         for glade_object in glade_objects:
             setattr(self, glade_object, self.builder.get_object(glade_object))
 
-        # First login
-        self._update_accounts()
-
     def show(self):
         """ Shows the window with the values correctly asigned. """
 
         # Get the config values
         player_location = self.config.get_key("player_location")
         player_arguments = self.config.get_key("player_arguments")
-        mega_user = self.config.get_key("mega_user")
-        mega_pass = self.config.get_key("mega_pass")
         cuevana_user = self.config.get_key("cuevana_user")
         cuevana_pass = self.config.get_key("cuevana_pass")
         cache_dir = self.config.get_key("cache_dir")
@@ -58,13 +56,21 @@ class SettingsDialog(object):
         # Set the values
         self.player_location_button.set_filename(player_location)
         self.player_arguments_entry.set_text(player_arguments)
-        self.megaupload_user_entry.set_text(mega_user)
-        self.megaupload_pass_entry.set_text(mega_pass)
         self.cuevana_user_entry.set_text(cuevana_user)
         self.cuevana_pass_entry.set_text(cuevana_pass)
         self.cache_dir_button.set_filename(cache_dir)
         self.automatic_marks.set_active(automatic_marks)
         self.filename_template.set_text(filename_template)
+
+        # Accounts
+        accounts = self.config.get_key("accounts")
+        for host, data in accounts:
+            if host in HOSTS_INPUTS:
+                user_input = self.builder.get_object(HOSTS_INPUTS[host][0])
+                passwd_input = self.builder.get_object(HOSTS_INPUTS[host][1])
+
+                user_input.set_text(data["username"])
+                passwd_input.set_text(data["password"])
 
         # Show the dialog and hide on close
         self.settings_dialog.run()
@@ -76,8 +82,6 @@ class SettingsDialog(object):
         # Get the values
         player_location = self.player_location_button.get_filename()
         player_arguments = self.player_arguments_entry.get_text()
-        mega_user = self.megaupload_user_entry.get_text()
-        mega_pass = self.megaupload_pass_entry.get_text()
         cuevana_user = self.cuevana_user_entry.get_text()
         cuevana_pass = self.cuevana_pass_entry.get_text()
         cache_dir = self.cache_dir_button.get_filename()
@@ -86,8 +90,6 @@ class SettingsDialog(object):
 
         # Save the new values to the config
         self.config.set_key("player_location", player_location)
-        self.config.set_key("mega_user", mega_user)
-        self.config.set_key("mega_pass", mega_pass)
         self.config.set_key("cuevana_user", cuevana_user)
         self.config.set_key("cuevana_pass", cuevana_pass)
         self.config.set_key("cache_dir", cache_dir)
@@ -96,17 +98,18 @@ class SettingsDialog(object):
         self.config.set_key("filename_template", filename_template)
         self.config.save()
 
+        # Accounts:
+        accounts = []
+        for host in HOSTS_INPUTS:
+            user = self.builder.get_object(HOSTS_INPUTS[host][0]).get_text()
+            passwd = self.builder.get_object(HOSTS_INPUTS[host][1]).get_text()
+
+            accounts.append((host, {"username": user, "password": passwd}))
+
+        self.config.set_key("accounts", accounts)
+
         # Relog
-        self._update_accounts()
+        self.gui_manager.login_accounts()
 
         # Hide the dialog
         self.settings_dialog.hide()
-
-    def _update_accounts(self):
-        """Logs into the accounts with the config settings."""
-
-        for host in HOSTS:
-            username = self.config.get_key(HOSTS[host][0])
-            password = self.config.get_key(HOSTS[host][1])
-
-            self.accounts[host].login(username, password)
