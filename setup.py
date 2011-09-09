@@ -50,8 +50,8 @@ def setup_linux():
         url = "http://www.github.com/j0hn/guicavane/",
         packages = ["guicavane", "guicavane.Downloaders",
                     "guicavane.Accounts", "pycavane"],
-        package_data = {"guicavane": ["glade/*.glade", "images/*.png",
-            "images/hosts/*.png"]},
+        package_data = {"guicavane": ["Glade/*.glade", "Images/*.png",
+            "Images/hosts/*.png"]},
         scripts = ["bin/guicavane"],
         cmdclass = {"install": CustomInstall}
     )
@@ -62,7 +62,7 @@ def setup_windows():
     outdata_win = {
         "script": "bin\\guicavane",
         "dest_base": "guicavane",
-        "icon_resources": [(1, "guicavane\\images\\logo.ico")]
+        "icon_resources": [(1, "guicavane\\Images\\logo.ico")]
     }
 
     outdata_con = outdata_win.copy()
@@ -85,13 +85,13 @@ def setup_windows():
     }
 
     files = []
-    files.append(("glade", 
-        ["guicavane\\glade\\" + x for x in os.listdir("guicavane\\glade")]))
-    files.append(("images", 
-        ["guicavane\\images\\" + x for x in os.listdir("guicavane\\images") if \
-            not os.path.isdir("guicavane\\images\\" + x)]))
-    files.append(("images\\hosts\\", 
-        ["guicavane\\images\\hosts\\" + x for x in os.listdir("guicavane\\images\\hosts\\")]))
+    files.append(("Glade",
+        ["guicavane\\Glade\\" + x for x in os.listdir("guicavane\\Glade")]))
+    files.append(("Images",
+        ["guicavane\\Images\\" + x for x in os.listdir("guicavane\\Images") if \
+            not os.path.isdir("guicavane\\Images\\" + x)]))
+    files.append(("Images\\hosts\\",
+        ["guicavane\\Images\\hosts\\" + x for x in os.listdir("guicavane\\Images\\hosts\\")]))
 
     setup(
         name = "Guicavane",
