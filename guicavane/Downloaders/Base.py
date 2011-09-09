@@ -33,7 +33,7 @@ class BaseDownloader(object):
         # Cookie headers
         accounts = gui_manager.accounts
         self.account = accounts.get(self.name.lower())
-        if self.account:
+        if self.account and self.account.cookiejar:
             url_open.add_cookies(self.account.cookiejar)
 
     def add_range(self, url_open):
