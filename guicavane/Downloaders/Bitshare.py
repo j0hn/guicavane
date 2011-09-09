@@ -9,8 +9,8 @@ import re
 import time
 import gobject
 
+from guicavane.Util import UrlOpen
 from Base import BaseDownloader, DownloadError
-from guicavane.util import UrlOpen
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
 from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
 

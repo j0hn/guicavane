@@ -37,12 +37,11 @@ def retry(callback):
 
 
 class UrlOpen(object):
-    """
-    An url opener with cookies support.
-    """
+    """ An url opener with cookies support. """
 
     def __init__(self):
-        self.build_opener()
+        self.cookiejar = cookielib.CookieJar()
+        self.opener = self.build_opener()
 
     @retry
     def __call__(self, url, data=None, filename=None, handle=False):
@@ -64,14 +63,14 @@ class UrlOpen(object):
         ret = ''
 
         while True:
-            buffer = rc.read(1024)
-            if buffer == '':
+            buff = rc.read(1024)
+            if buff == '':
                 break
 
             if local:
-                local.write(buffer)
+                local.write(buff)
             else:
-                ret += buffer
+                ret += buff
 
         if local:
             local.close()
@@ -80,26 +79,20 @@ class UrlOpen(object):
         return ret
 
     def build_opener(self):
-        """
-        Setup cookies in urllib2.
-        """
+        """ Setup cookies in urllib2. """
 
-        self.cookiejar = cookielib.CookieJar()
         handler = urllib2.HTTPCookieProcessor(self.cookiejar)
-        self.opener = urllib2.build_opener(handler)
+        return urllib2.build_opener(handler)
 
     def add_cookies(self, cookies):
-        """
-        Add new cookies.
-        """
-        for c in cookies:
-            self.cookiejar.set_cookie(c)
+        """ Add new cookies. """
+
+        for cookie in cookies:
+            self.cookiejar.set_cookie(cookie)
 
     def add_headers(self, headers):
-        """
-        Add new headers.
-        `headers' argument has to be a diccionary.
-        """
+        """ Add new headers. headers argument has to be a diccionary. """
+
         base_headers = dict(self.opener.addheaders)
         base_headers.update(headers)
         self.opener.addheaders = base_headers.items()
