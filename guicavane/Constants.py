@@ -11,22 +11,13 @@ import os
 import sys
 import gtk
 
-# Directory separator
-SEP = os.sep
-
-# Directories
-if sys.platform == "win32":
-    MAIN_DIR = os.path.dirname(os.path.abspath(sys.argv[0]))
-    IMAGES_DIR = MAIN_DIR + SEP + "images"
-else:
-    MAIN_DIR = os.path.dirname(__file__)
-    IMAGES_DIR = MAIN_DIR.rsplit(SEP, 1)[0] + SEP + "images"
-
-GUI_DIR = MAIN_DIR + SEP + "gui"
+from Paths import GUI_DIR, IMAGES_DIR, SEP
 
 # Gui Files
 MAIN_GUI_FILE = GUI_DIR + SEP + "main.glade"
 SETTINGS_GUI_FILE = GUI_DIR + SEP + "settings.glade"
+HOSTS_GUI_FILE = GUI_DIR + SEP + "hosts.glade"
+CAPTCHA_GUI_FILE = GUI_DIR + SEP + "captcha.glade"
 
 # Modes
 MODE_SHOWS = "Shows"
@@ -38,7 +29,14 @@ MODES = [MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES]
 # Index of the columns on the tree views
 FILE_VIEW_COLUMN_PIXBUF = 0
 FILE_VIEW_COLUMN_TEXT = 1
-NAME_COLUMN_TEXT = 0
+FILE_VIEW_COLUMN_OBJECT = 2
+
+NAME_LIST_COLUMN_TEXT = 0
+NAME_LIST_COLUMN_OBJECT = 1
+
+HOSTS_VIEW_COLUMN_PIXBUF = 0
+HOSTS_VIEW_COLUMN_TEXT = 1
+HOSTS_VIEW_COLUMN_OBJECT = 2
 
 
 # Icons
@@ -54,5 +52,5 @@ IMAGE_FILE_MOVIE_MARK = gtk.Image()
 IMAGE_FILE_MOVIE_MARK.set_from_file(IMAGES_DIR + SEP + "video_file_mark.png")
 ICON_FILE_MOVIE_MARK = IMAGE_FILE_MOVIE_MARK.get_pixbuf()
 
-IMAGE_CASE_EMPTY = "images/case_empty.png"
-IMAGE_CASE = "images/case.png"
+IMAGE_CASE_EMPTY = IMAGES_DIR + SEP + "case_empty.png"
+IMAGE_CASE = IMAGES_DIR + SEP + "case.png"

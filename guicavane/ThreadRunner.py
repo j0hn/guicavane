@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Gtk Thread Runner.
+ThreadRunner.
 
 This module provides the class GtkThreadRunner that is used
 to run a function on a thread and return the result when it's done
@@ -42,16 +42,14 @@ class GtkThreadRunner(threading.Thread):
         """
 
         try:
-            result = self.func(*self.args, **self.kwargs)
+            result = (False, self.func(*self.args, **self.kwargs))
         except Exception, ex:
-            result = ex
+            result = (True, ex)
 
         self.result.put(result)
 
     def check(self):
-        """
-        Check if func finished.
-        """
+        """ Check if func finished. """
 
         try:
             result = self.result.get(False, 0.1)
@@ -59,4 +57,5 @@ class GtkThreadRunner(threading.Thread):
             return True
 
         self.callback(result)
+
         return False

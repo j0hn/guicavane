@@ -6,6 +6,12 @@ import urllib
 import urllib2
 import cookielib
 import functools
+from StringIO import StringIO
+from unicodedata import normalize
+
+from cached import Cached
+
+cached = Cached.get()
 
 HEADERS = {
     'User-Agent': 'User-Agent:Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.1 '
@@ -14,6 +20,25 @@ HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;'}
 
 RETRY_TIMES = 5
+
+
+def normalize_string(string):
+    """
+    Take a string and return a cleaned string ready to use for cuevana
+    """
+
+    repl_list = [(" ", "-"), (".", ""), (",", ""),
+                 ("'", ""), ("?", ""), ("$", ""),
+                 ("#", ""), ("*", ""), ("!", ""),
+                 (":", "")]
+
+    uni_str = unicode(string, "utf-8")
+    clean_str = normalize("NFKD", uni_str).encode("ASCII", "ignore").lower()
+
+    for combo in repl_list:
+        clean_str = clean_str.replace(combo[0], combo[1])
+
+    return clean_str
 
 
 def retry(callback):
@@ -28,6 +53,8 @@ def retry(callback):
             try:
                 return callback(*args, **kwargs)
             except Exception, error:
+                # Try to fix problens with squid
+                urllib.urlcleanup()
                 tried += 1
                 time.sleep(1)
         error = 'Can\'t download\nerror: "%s"\n args: %s' % \
@@ -42,10 +69,16 @@ class UrlOpen(object):
     """
 
     def __init__(self):
-        self.build_opener()
+        self.setup_cookies()
 
     @retry
-    def __call__(self, url, data=None, filename=None, handle=False):
+    def __call__(self, url, data=None, filename=None, handle=False, cache=True):
+        cache_key = url+str(data)
+
+        cache_data = cached(cache_key)
+        if cache and cache_data:
+            return cache_data
+
         if data:
             request = urllib2.Request(url, urllib.urlencode(data), HEADERS)
         else:
@@ -57,48 +90,38 @@ class UrlOpen(object):
         if handle:
             return rc
 
-        local = None
         if filename:
             local = open(filename, 'wb')
-
-        ret = ''
+        else:
+            local = StringIO()
 
         while True:
             buffer = rc.read(1024)
             if buffer == '':
                 break
 
-            if local:
-                local.write(buffer)
-            else:
-                ret += buffer
+            local.write(buffer)
 
-        if local:
+        if filename:
             local.close()
             return
 
-        return ret
+        local.seek(0)
 
-    def build_opener(self):
+        data = local.read()
+        if cache:
+            # just cache if not a file
+            cached(cache_key, data)
+
+        return data
+
+    def setup_cookies(self):
         """
         Setup cookies in urllib2.
         """
 
-        self.cookiejar = cookielib.CookieJar()
-        handler = urllib2.HTTPCookieProcessor(self.cookiejar)
+        jar = cookielib.CookieJar()
+        handler = urllib2.HTTPCookieProcessor(jar)
         self.opener = urllib2.build_opener(handler)
 
-    def add_cookie(self, cookie):
-        """
-        Add new cookie.
-        """
-        self.cookiejar.set_cookie(cookie)
-
-    def add_headers(self, headers):
-        """
-        Add new headers.
-        `headers' argument has to be a diccionary.
-        """
-        base_headers = dict(self.opener.addheaders)
-        base_headers.update(headers)
-        self.opener.addheaders = base_headers.items()
+url_open = UrlOpen()

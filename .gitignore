@@ -1,1 +1,5 @@
 *.pyc
+windows/*.exe
+windows/build/
+.*.swp
+build/

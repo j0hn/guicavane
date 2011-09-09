@@ -1,1 +1,1 @@
-from gui_handler import *
+from GuiManager import *

@@ -13,7 +13,17 @@ import gtk
 import sys
 import gobject
 
-from guicavane import GUIHandler
+INSTALLED_BASE_DIR = "@ INSTALLED_BASE_DIR @"
+
+if os.path.exists(INSTALLED_BASE_DIR):
+    project_basedir = INSTALLED_BASE_DIR
+else:
+    project_basedir = os.path.abspath(os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0]))))
+
+sys.path.insert(0, project_basedir)
+os.chdir(project_basedir)
+
+from guicavane import GuiManager
 
 
 def main():
@@ -21,13 +31,8 @@ def main():
     Creates the window and starts gtk main loop.
     """
 
-    # Allow correctly opening from outside
-    path = os.path.dirname(sys.argv[0])
-    if path:
-        os.chdir(path)
-
     # Create the program
-    handler = GUIHandler()
+    handler = GuiManager()
 
     if sys.platform == "win32":
         gobject.threads_init()
@@ -38,7 +43,7 @@ def main():
     try:
         gtk.main()
     except KeyboardInterrupt:
-        handler.save_config()
+        pass
 
 if __name__ == "__main__":
     main()

@@ -1,40 +1,47 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# coding: utf-8
 
 """
-Login.
-
-Module that provides a handler for megaupload accounts.
+Megaupload Downloader.
 """
 
-from urllib2 import HTTPCookieProcessor
-from util import UrlOpen
+import re
 
-ACCOUNT_WAIT = {None: 45,
-                'Regular' : 25,
-                'Premium' : 0}
+from guicavane.Util import UrlOpen
+from Base import BaseAccount
 
-URL_OPEN = UrlOpen()
 
 LOGIN_PAGE = "http://www.megaupload.com?c=login"
 ACCOUNT_PAGE = "http://www.megaupload.com?c=account"
+URL_OPEN = UrlOpen()
 
 
-class MegaAccount():
-    """
-    Megauplod account handler.
-    """
+class Megaupload(BaseAccount):
+    """ Megaupload's Account. """
+
+    name = "Megaupload"
+    account_wait = {None: 45,
+                    'Regular' : 25,
+                    'Premium' : 0}
+
     def __init__(self):
-        self.verified = False
-        self.logged = False
-        self.cookiejar = None
-        self._account_type = None
+        BaseAccount.__init__(self)
 
     def login(self, username, password):
         """
         Verifies the account.
         On succefull login, stores the cookie.
         """
+
+        if self._username == username and \
+            self._password == password:
+            return
+
+        self.verified = False
+
+        self._username = username
+        self._password = password
+
         data = {"login" : 1,
                 "redir" : 1,
                 "username" : username,
@@ -43,7 +50,7 @@ class MegaAccount():
         rc = URL_OPEN(LOGIN_PAGE, data=data)
         if username in rc:
             self.logged = True
-            self.cookie = list(URL_OPEN.cookiejar)[0]
+            self.cookiejar = URL_OPEN.cookiejar
 
         else:
             self.logged = False
@@ -51,7 +58,7 @@ class MegaAccount():
         self.verified = True
 
     @property
-    def member(self):
+    def account_type(self):
         """
         Account type: 'Regular', 'Premium' or None (if not logged).
         """
@@ -64,8 +71,9 @@ class MegaAccount():
         return self._account_type
 
     @property
-    def wait(self):
+    def wait_time(self):
         """
         Megaupload waiting time for the given account.
         """
-        return ACCOUNT_WAIT[self.member]
+        return self.account_wait[self.account_type]
+
