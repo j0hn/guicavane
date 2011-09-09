@@ -24,7 +24,7 @@ CONFIG_FILE = os.path.join(CONFIG_DIR, "guicavane.conf")
 
 MARKS_FILE = os.path.join(CONFIG_DIR, "marks.dat")
 
-IMAGES_DIR = os.path.join(MAIN_DIR, "images")
+IMAGES_DIR = os.path.join(MAIN_DIR, "Images")
 HOSTS_IMAGES_DIR = os.path.join(IMAGES_DIR, "hosts")
 
-GUI_DIR = os.path.join(MAIN_DIR, "glade")
+GUI_DIR = os.path.join(MAIN_DIR, "Glade")
