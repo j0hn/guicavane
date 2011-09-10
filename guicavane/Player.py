@@ -106,6 +106,7 @@ class Player(object):
             time.sleep(1)
 
         # Show the progress bar box
+        gobject.idle_add(self.gui_manager.progress.set_fraction, 0.0)
         gobject.idle_add(self.gui_manager.progress_box.show)
         gobject.idle_add(self.gui_manager.set_status_message, "Filling cache...")
 
@@ -179,7 +180,7 @@ class Player(object):
         self.downloader.stop_downloading = True
 
         # Hide the progress
-        gobject.idle_add(self.gui_manager.progress.hide)
+        gobject.idle_add(self.gui_manager.progress_box.hide)
 
         downloaded_size = self.downloader.downloaded_size
         file_size = self.downloader.file_size
