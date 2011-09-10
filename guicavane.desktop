@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Name=guicavane
+GenericName=Graphical User Interface for www.cuevana.tv
+Exec=guicavane
+Icon=/usr/share/guicavane/guicavane/Images/logo.png
+Type=Application
+Categories=AudioVideo
