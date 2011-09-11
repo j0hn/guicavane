@@ -57,9 +57,6 @@ class Hotfile(BaseDownloader):
     def start_regular(self):
         page_data = MAIN_URL_OPEN(self.url)
 
-        if page_data.count("You reached your hourly traffic limit."):
-            raise DownloadError("Hotfile is saturated. Please try again later")
-
         waiting_time = int(WAIT_RE.search(page_data).group(1))
         tm = TM_RE.search(page_data).group(1)
         tmhash = TMHASH_RE.search(page_data).group(1)
@@ -81,7 +78,6 @@ class Hotfile(BaseDownloader):
 
         # Get the challenge id for the captcha image
         page_data = CAPTCHA_URL_OPEN(RECAPTCHA_CHALLENGE_URL + captcha_id)
-        print "captcha_id2"
         self.captcha_id2 = CAPTCHA_ID2_RE.search(page_data).group(1)
 
         # Download the captcha image
