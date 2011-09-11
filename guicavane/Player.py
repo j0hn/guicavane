@@ -102,6 +102,7 @@ class Player(object):
         self.file_object.get_subtitle(filename=self.file_path.replace(".mp4", ""))
 
         # Wait for the file to exists
+        gobject.idle_add(self.gui_manager.set_status_message, "Wait please...")
         while not os.path.exists(self.file_path):
             time.sleep(1)
 
