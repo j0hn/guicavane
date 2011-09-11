@@ -193,7 +193,7 @@ class Player(object):
         """ Returns the file path of the file. """
 
         if isinstance(self.file_object, api.Movie):
-            return file_object.name.replace(os.sep, "_")
+            return self.file_object.name.replace(os.sep, "_")
 
         # If isn't a movie it must be an episode
         assert isinstance(self.file_object, api.Episode)
