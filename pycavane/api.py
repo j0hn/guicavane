@@ -74,7 +74,12 @@ class Episode(object):
         if filename:
             filename += '.srt'
 
-        return url_open(urls.sub_show % (self.id, lang), filename=filename)
+        try:
+            result = url_open(urls.sub_show % (self.id, lang), filename=filename)
+        except:
+            raise Exception("Subtitle not found")
+
+        return result
 
     @property
     def name(self):
@@ -233,7 +238,12 @@ class Movie(object):
         if filename:
             filename += '.srt'
 
-        return url_open(urls.sub_movie % (self.id, lang), filename=filename)
+        try:
+            result = url_open(urls.sub_movie % (self.id, lang), filename=filename)
+        except:
+            raise Exception("Subtitle not found")
+
+        return result
 
     @property
     def description(self):

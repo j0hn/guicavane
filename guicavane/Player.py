@@ -99,7 +99,10 @@ class Player(object):
 
         # Download the subtitle
         gobject.idle_add(self.gui_manager.set_status_message, "Downloading subtitles...")
-        self.file_object.get_subtitle(filename=self.file_path.replace(".mp4", ""))
+        try:
+            self.file_object.get_subtitle(filename=self.file_path.replace(".mp4", ""))
+        except:
+            gobject.idle_add(self.gui_manager.set_status_message, "Subtitle not found")
 
         # Wait for the file to exists
         gobject.idle_add(self.gui_manager.set_status_message, "Wait please...")
@@ -124,8 +127,12 @@ class Player(object):
                 gobject.idle_add(self.gui_manager.progress.pulse)
                 time.sleep(0.5)
 
-    def open_player(self, *args):
+    def open_player(self, (is_error, result)):
         """ Fires up a new process with the player runing. """
+
+        if is_error:
+            self.gui_manager.report_error("Error pre downloading: %s" % result)
+            return
 
         if self.download_only:
             message = "Downloading: %s"
