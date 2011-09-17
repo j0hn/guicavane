@@ -136,7 +136,8 @@ class Episode(object):
         """ Returns the link to this episode on cuevana. """
 
         name = self.normalized_name
-        return urls.cuevana_url_show % (self.id, self.show, name)
+        show = normalize_string(self.show)
+        return urls.cuevana_url_show % (self.id, show, name)
 
     @property
     def normalized_name(self):
