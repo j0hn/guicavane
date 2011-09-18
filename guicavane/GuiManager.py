@@ -267,6 +267,15 @@ class GuiManager(object):
 
             self.file_viewer_model.append([icon, episode_name, episode])
 
+    def refresh_marks(self):
+        marks = self.marks.get_all()
+
+        for row in self.file_viewer_model:
+            iteration = self.file_viewer_model.get_iter(row.path)
+            obj = row[FILE_VIEW_COLUMN_OBJECT]
+            if not obj is None and obj.id in marks:
+                self.file_viewer_model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE_MARK)
+
     def display_movies(self, (is_error, result)):
         """ Fills the file viewer with the movies from the search results. """
 

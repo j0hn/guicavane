@@ -201,10 +201,11 @@ class Player(object):
                 gobject.idle_add(self.gui_manager.progress.pulse)
                 time.sleep(1)
 
-            if self.download_only:
-                stop = downloaded_size >= self.downloader.file_size
-            else:
-                stop = self.player_process.poll() != None
+            stop = downloaded_size >= self.downloader.file_size
+
+            if not self.download_only:
+                stop |= self.player_process.poll() != None
+
             last_downloaded = downloaded_size
 
     def _update_progress(self):
@@ -232,7 +233,8 @@ class Player(object):
 
         if downloaded_size >= file_size:
             if self.config.get_key("automatic_marks"):
-                self.gui_manager.mark_selected()
+                self.gui_manager.marks.add(self.file_object.id)
+                self.gui_manager.refresh_marks()
 
     def get_filename(self):
         """ Returns the file path of the file. """
