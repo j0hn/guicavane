@@ -55,6 +55,7 @@ class Player(object):
         avaliable_downloaders = Downloaders.get_avaliable()
 
         hosts = self.file_object.file_hosts
+        hosts["dummy"] = ""
 
         for host in hosts:
             if host in avaliable_downloaders:
@@ -155,20 +156,56 @@ class Player(object):
         """ Updates the GUI with downloading data. """
 
         stop = False
+        speed_list = []
+        last_downloaded = 0
 
         while not stop:
             downloaded_size = self.downloader.downloaded_size
+
+            speed_list.append((downloaded_size - last_downloaded) / 1024.0)
+            last_downloaded = downloaded_size
+
+            list_offset = len(speed_list) - 30 if len(speed_list) > 30 else 0
+            speed_list = speed_list[list_offset:]
+            speed_avarage = sum(speed_list) / len(speed_list)
+
+            if speed_avarage > 0:
+                remaining_size = (self.downloader.file_size - downloaded_size) / 1024.0
+                remaining_time = (remaining_size / speed_avarage) / 60
+            else:
+                remaining_time = 0
+
+            if remaining_time >= 1:  # if it's more than a minute
+                if remaining_time == 1:
+                    remaining_message = "%d minute left" % remaining_time
+                else:
+                    remaining_message = "%d minutes left" % remaining_time
+            else:
+                if (remaining_time * 60) > 10:
+                    remaining_message = "%d seconds left" % (remaining_time * 60)
+                elif remaining_time != 0:
+                    remaining_message = "a few seconds left"
+                else:
+                    remaining_message = ""
+
+            if downloaded_size < self.downloader.file_size:
+                gobject.idle_add(self.gui_manager.progress_label.set_text, \
+                    "%.2fKB/s - %s" % (speed_avarage, remaining_message))
+            else:
+                gobject.idle_add(self.gui_manager.progress_label.set_text, "")
+
             if self.downloader.file_size != 0:
                 self._update_progress()
                 time.sleep(1)
             else:
                 gobject.idle_add(self.gui_manager.progress.pulse)
-                time.sleep(0.5)
+                time.sleep(1)
 
             if self.download_only:
                 stop = downloaded_size >= self.downloader.file_size
             else:
                 stop = self.player_process.poll() != None
+            last_downloaded = downloaded_size
 
     def _update_progress(self):
         """ Updates the progress bar using the downloaded size and the
