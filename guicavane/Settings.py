@@ -12,7 +12,6 @@ from Constants import SETTINGS_GUI_FILE
 # accounts information
 HOSTS_INPUTS = {
     "megaupload": ("megaupload_username", "megaupload_password"),
-    "bitshare": ("bitshare_username", "bitshare_password"),
 }
 
 
