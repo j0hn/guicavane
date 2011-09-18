@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Megaupload Downloader.
+Dummy Downloader.
 """
 
 import os
