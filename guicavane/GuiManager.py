@@ -6,6 +6,7 @@ GuiManager. Takes care of the gui events.
 """
 
 import os
+import sys
 import gtk
 import urllib
 import webbrowser
@@ -19,6 +20,9 @@ from Accounts import ACCOUNTS
 from Settings import SettingsDialog
 from ThreadRunner import GtkThreadRunner
 
+if "-d" in sys.argv or "--dummy" in sys.argv:
+    testdir = os.path.join(os.getcwd(), "pycavane", "tests")
+    pycavane.api.setup("guicavane", "guicavane", cache_dir=testdir, cache_lifetime=13**37)
 
 class GuiManager(object):
     """ Main class, loads the gui and handles all events. """
