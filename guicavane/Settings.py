@@ -88,7 +88,9 @@ class SettingsDialog(object):
         filename_template = self.filename_template.get_text()
 
         # Save the new values to the config
-        self.config.set_key("player_location", player_location)
+        if player_location != None:
+            self.config.set_key("player_location", player_location)
+
         self.config.set_key("cuevana_user", cuevana_user)
         self.config.set_key("cuevana_pass", cuevana_pass)
         self.config.set_key("cache_dir", cache_dir)
