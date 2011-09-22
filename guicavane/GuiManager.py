@@ -72,7 +72,7 @@ class GuiManager(object):
         # Start on last mode
         try:
             last_mode = self.config.get_key("last_mode")
-            getattr(self, "set_mode_%s" % last_mode.lower())()
+            getattr(self, "set_mode_%s" % last_mode.lower().replace(" ", "_"))()
             self.mode_combo.set_active(MODES.index(last_mode))
         except:
             self.set_mode_shows()
@@ -188,6 +188,13 @@ class GuiManager(object):
         for favorite in self.config.get_key("favorites"):
             show = pycavane.api.Show.search(favorite).next()
             self.name_list_model.append([show.name, show])
+
+    def set_mode_latest_movies(self):
+        """ Sets the curret mode to latest movies. """
+
+        self.sidebar.hide()
+        self.background_task(pycavane.api.Movie.get_latest,
+            self.display_movies, status_message="Loading latest movies...")
 
     def update_favorites(self, favorites):
         for fav in favorites:
@@ -317,7 +324,7 @@ class GuiManager(object):
         self.file_viewer_model.clear()
 
         # Call the corresponding set_mode method
-        getattr(self, "set_mode_%s" % last_mode.lower())()
+        getattr(self, "set_mode_%s" % last_mode.lower().replace(" ", "_"))()
 
     def _on_show_selected(self, tree_view, path, column):
         """ Called when the user selects a show from the name list. """

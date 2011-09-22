@@ -220,6 +220,11 @@ class Movie(object):
                             '(?P<name>.*?) \((?P<year>[0-9]*)\)</a>' \
                             '</div>.*?<div class=\'txt\'>' \
                             '(?P<description>.*?)<div', re.DOTALL)
+    _latest_movies_re = re.compile('<div class=\'tit\'>' \
+                                   '<a href=\'/peliculas/(?P<id>[0-9]*)/.*?\'>' \
+                                   '(?P<name>.*?)</a>.*?' \
+                                   '<div class=\'font11\'>(?P<description>.*?)' \
+                                   '<div class=\'reparto\'>', re.DOTALL)
     _description_re = re.compile('<td class="infolabel" valign="top">Sinopsis</td>.*?' \
                                  '<td>(.+?)</td>', re.DOTALL)
     _hosts_re = re.compile("goSource\('([a-zA-Z0-9]*?)','([a-zA-Z]*?)'\)")
@@ -313,6 +318,19 @@ class Movie(object):
             movie_dict['description'] = movie_dict['description'].strip()
 
             yield Movie(**movie_dict)
+
+    @classmethod
+    def get_latest(self):
+        """ Returns a list with all the latest
+        movies. """
+
+        data = url_open(urls.latest_movies)
+        for movie in self._latest_movies_re.finditer(data):
+            movie_dict = movie.groupdict()
+            movie_dict['description'] = movie_dict['description'].strip()
+
+            yield Movie(**movie_dict)
+
 
     def __repr__(self):
         return '<Movie id: "%s" name: "%s">' % (self.id, self.name)

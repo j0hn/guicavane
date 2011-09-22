@@ -23,7 +23,8 @@ CAPTCHA_GUI_FILE = GUI_DIR + SEP + "captcha.glade"
 MODE_SHOWS = "Shows"
 MODE_MOVIES = "Movies"
 MODE_FAVORITES = "Favorites"
-MODES = [MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES]
+MODE_LATEST_MOVIES = "Latest Movies"
+MODES = [MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES, MODE_LATEST_MOVIES]
 # NOTE: MODES must be in the same order as they appear in the combobox
 
 # Index of the columns on the tree views
