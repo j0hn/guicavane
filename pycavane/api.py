@@ -225,8 +225,13 @@ class Movie(object):
                                    '(?P<name>.*?)</a>.*?' \
                                    '<div class=\'font11\'>(?P<description>.*?)' \
                                    '<div class=\'reparto\'>', re.DOTALL)
+    _name_re = re.compile( r'<div class="tit">(.*?)</div>')
+    _image_re = re.compile('<div class="headimg"><img src="(.*?)"')
     _description_re = re.compile('<td class="infolabel" valign="top">Sinopsis</td>.*?' \
                                  '<td>(.+?)</td>', re.DOTALL)
+    _cast_re = re.compile('<a href=\'/buscar/\?q=.*?&cat=actor\'>(.*?)</a>')
+    _genere_re = re.compile('<b>Género:</b>(.*?)<br />')
+    _language_re = re.compile('<b>Idioma:</b>(.*?)<br />')
     _hosts_re = re.compile("goSource\('([a-zA-Z0-9]*?)','([a-zA-Z]*?)'\)")
 
     __info = ""
@@ -278,10 +283,16 @@ class Movie(object):
 
         page_data = url_open(urls.movie_info % (self.id, self.normalized_name))
 
+        name = self._name_re.findall(page_data)[0].strip()
+        image = self._image_re.findall(page_data)[0]
         description = self._description_re.findall(page_data)[0].strip()
-        # TODO: scrap the rest of the info
+        cast = self._cast_re.findall(page_data)
+        genere = self._genere_re.findall(page_data)[0].strip()
+        language = self._language_re.findall(page_data)[0].strip()
 
-        self.__info = {'description': description}
+        self.__info = {'name': name, 'image': image, 'description': description,
+                'cast': cast, 'genere': genere, 'language': language}
+
         return self.__info
 
     @property

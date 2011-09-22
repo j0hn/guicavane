@@ -564,21 +564,20 @@ class GuiManager(object):
         path, _ = self.file_viewer.get_cursor()
         file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
 
-        if isinstance(file_object, pycavane.api.Episode):
-            empty_case = gtk.gdk.pixbuf_new_from_file(IMAGE_CASE_EMPTY)
-            self.info_image.set_from_pixbuf(empty_case)
+        empty_case = gtk.gdk.pixbuf_new_from_file(IMAGE_CASE_EMPTY)
+        self.info_image.set_from_pixbuf(empty_case)
 
-            self.background_task(self.download_show_image, self.set_info_image,
-                                 file_object)
+        self.background_task(self.download_show_image, self.set_info_image,
+                             file_object)
 
-            full_description = file_object.info["description"] + "\n\n" \
-                "<b>Cast:</b> " + ", ".join(file_object.info["cast"]) + "\n" \
-                "<b>Genere:</b> " + file_object.info["genere"] + "\n" \
-                "<b>Language:</b> " + file_object.info["language"]
+        full_description = file_object.info["description"] + "\n\n" \
+            "<b>Cast:</b> " + ", ".join(file_object.info["cast"]) + "\n" \
+            "<b>Genere:</b> " + file_object.info["genere"] + "\n" \
+            "<b>Language:</b> " + file_object.info["language"]
 
-            self.info_title.set_label(file_object.info["name"])
-            self.info_label.set_label(full_description)
-            self.info_window.show()
+        self.info_title.set_label(file_object.info["name"])
+        self.info_label.set_label(full_description)
+        self.info_window.show()
 
     def _on_info_window_close(self, *args):
         """ Called when the info window is closed. """
@@ -591,9 +590,13 @@ class GuiManager(object):
         self.unfreeze()
 
         images_dir = self.config.get_key("images_dir")
-        show_name = self.current_show.name.lower()
-        show_name = show_name.replace(" ", "_") + ".jpg"
-        image_path = os.path.join(images_dir, show_name)
+        if isinstance(file_object, pycavane.api.Episode):
+            name = file_object.show.lower()
+        else:
+            name = file_object.name.lower()
+
+        name = name.replace(" ", "_") + ".jpg"
+        image_path = os.path.join(images_dir, name)
 
         if not os.path.exists(image_path):
             url_open = urllib.urlopen(file_object.info["image"])
@@ -609,6 +612,7 @@ class GuiManager(object):
 
         if is_error:
             self.set_status_message("Problem downloading show image")
+            print result
             return
 
         image_path = result
