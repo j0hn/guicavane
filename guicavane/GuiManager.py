@@ -196,6 +196,13 @@ class GuiManager(object):
         self.background_task(pycavane.api.Movie.get_latest,
             self.display_movies, status_message="Loading latest movies...")
 
+    def set_mode_recomended_movies(self):
+        """ Sets the curret mode to recomended movies. """
+
+        self.sidebar.hide()
+        self.background_task(pycavane.api.Movie.get_recomended,
+            self.display_movies, status_message="Loading latest movies...")
+
     def update_favorites(self, favorites):
         for fav in favorites:
             if fav not in self.config.get_key("favorites"):
