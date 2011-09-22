@@ -34,7 +34,7 @@ class SettingsDialog(object):
             "settings_dialog", "player_location_button", "player_arguments_entry",
             "megaupload_user_entry", "megaupload_pass_entry", "cuevana_user_entry",
             "cuevana_pass_entry", "cache_dir_button", "automatic_marks",
-            "filename_template",
+            "filename_template", "automatic_megaupload",
         ]
 
         for glade_object in glade_objects:
@@ -51,6 +51,7 @@ class SettingsDialog(object):
         cache_dir = self.config.get_key("cache_dir")
         automatic_marks = self.config.get_key("automatic_marks")
         filename_template = self.config.get_key("filename_template")
+        automatic_megaupload = self.config.get_key("automatic_megaupload")
 
         # Set the values
         self.player_location_button.set_filename(player_location)
@@ -60,6 +61,7 @@ class SettingsDialog(object):
         self.cache_dir_button.set_filename(cache_dir)
         self.automatic_marks.set_active(automatic_marks)
         self.filename_template.set_text(filename_template)
+        self.automatic_megaupload.set_active(automatic_megaupload)
 
         # Accounts
         accounts = self.config.get_key("accounts")
@@ -86,6 +88,7 @@ class SettingsDialog(object):
         cache_dir = self.cache_dir_button.get_filename()
         automatic_marks = self.automatic_marks.get_active()
         filename_template = self.filename_template.get_text()
+        automatic_megaupload = self.automatic_megaupload.get_active()
 
         # Save the new values to the config
         self.config.set_key("player_location", player_location)
@@ -95,6 +98,7 @@ class SettingsDialog(object):
         self.config.set_key("automatic_marks", automatic_marks)
         self.config.set_key("player_arguments", player_arguments)
         self.config.set_key("filename_template", filename_template)
+        self.config.set_key("automatic_megaupload", automatic_megaupload)
         self.config.save()
 
         # Accounts:

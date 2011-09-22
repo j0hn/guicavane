@@ -228,6 +228,17 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
         <signal name="activate" handler="open_in_cuevana" swapped="no"/>
       </object>
     </child>
+    <child>
+      <object class="GtkImageMenuItem" id="choose_host">
+        <property name="label" translatable="yes">Choose Host</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_action_appearance">False</property>
+        <property name="image">image1</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="_on_choose_host" swapped="no"/>
+      </object>
+    </child>
   </object>
   <object class="GtkListStore" id="file_viewer_model">
     <columns>
@@ -238,6 +249,11 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
       <!-- column-name object_instance -->
       <column type="PyObject"/>
     </columns>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-connect</property>
   </object>
   <object class="GtkImage" id="imageAdd">
     <property name="visible">True</property>

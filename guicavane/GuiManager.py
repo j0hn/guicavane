@@ -492,6 +492,13 @@ class GuiManager(object):
             self.name_filter.grab_focus()
             self.name_filter.set_position(len(self.name_filter.get_text()))
 
+    def _on_choose_host(self, widget):
+        """ Called when the user presses choose host from the context menu. """
+
+        path, _ = self.file_viewer.get_cursor()
+        file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
+        Player(self, file_object, choose_host=True)
+
     def mark_selected(self, *args):
         """ Called when the user clicks on Mark item in the context menu. """
 

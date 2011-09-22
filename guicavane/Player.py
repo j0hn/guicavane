@@ -22,11 +22,13 @@ class Player(object):
     playing the file.
     """
 
-    def __init__(self, gui_manager, file_object, file_path=None, download_only=False):
+    def __init__(self, gui_manager, file_object,
+                 file_path=None, download_only=False, choose_host=False):
         self.gui_manager = gui_manager
         self.config = self.gui_manager.config
         self.file_object = file_object
         self.download_only = download_only
+        self.choose_host = choose_host
 
         self.file_path = file_path
         if not self.file_path:
@@ -82,12 +84,21 @@ class Player(object):
             self.downloader = result[0]
             self.downloader.process_url(self.play, self.file_path)
         else:
-            for downloader in result:
-                icon = downloader.icon
-                name = downloader.name
-                self.hosts_icon_view_model.append([icon, name, downloader])
+            megaupload = [x for x in result if x.name == "Megaupload"]
+            if not self.choose_host and len(megaupload) != 0 and \
+                   self.config.get_key("automatic_megaupload"):
 
-            self.hosts_window.show_all()
+                gobject.idle_add(self.gui_manager.set_status_message,
+                    "Automatically starting with megaupload")
+                self.downloader = megaupload[0]
+                self.downloader.process_url(self.play, self.file_path)
+            else:
+                for downloader in result:
+                    icon = downloader.icon
+                    name = downloader.name
+                    self.hosts_icon_view_model.append([icon, name, downloader])
+
+                self.hosts_window.show_all()
 
     def play(self):
         """ Starts the playing of the file on file_path. """
