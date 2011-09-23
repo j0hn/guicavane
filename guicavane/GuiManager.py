@@ -8,6 +8,7 @@ GuiManager. Takes care of the gui events.
 import os
 import sys
 import gtk
+import base64
 import urllib
 import webbrowser
 
@@ -86,7 +87,7 @@ class GuiManager(object):
         for account in accounts:
             account_name = account[0]
             username = account[1]["username"]
-            password = account[1]["password"]
+            password = base64.b64decode(account[1]["password"])
 
             try:
                 account_obj = ACCOUNTS[account_name]

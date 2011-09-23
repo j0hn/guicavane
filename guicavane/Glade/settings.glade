@@ -386,6 +386,7 @@ You can also skip this right clicking on the movie or episode and choosing 'Choo
                             <property name="secondary_icon_activatable">False</property>
                             <property name="primary_icon_sensitive">True</property>
                             <property name="secondary_icon_sensitive">True</property>
+                            <signal name="activate" handler="_on_save_settings" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">True</property>

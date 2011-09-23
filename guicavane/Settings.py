@@ -6,6 +6,7 @@ Settings. Manages the gui of the settings.
 """
 
 import gtk
+import base64
 from Constants import SETTINGS_GUI_FILE
 
 # Dict with host -> (username_input, password_input) to retrive the
@@ -46,12 +47,16 @@ class SettingsDialog(object):
         # Get the config values
         player_location = self.config.get_key("player_location")
         player_arguments = self.config.get_key("player_arguments")
-        cuevana_user = self.config.get_key("cuevana_user")
-        cuevana_pass = self.config.get_key("cuevana_pass")
         cache_dir = self.config.get_key("cache_dir")
         automatic_marks = self.config.get_key("automatic_marks")
         filename_template = self.config.get_key("filename_template")
         automatic_megaupload = self.config.get_key("automatic_megaupload")
+        try:
+            cuevana_user = self.config.get_key("cuevana_user")
+            cuevana_pass = base64.b64decode(self.config.get_key("cuevana_pass"))
+        except:
+            cuevana_user = ""
+            cuevana_pass = ""
 
         # Set the values
         self.player_location_button.set_filename(player_location)
@@ -70,8 +75,12 @@ class SettingsDialog(object):
                 user_input = self.builder.get_object(HOSTS_INPUTS[host][0])
                 passwd_input = self.builder.get_object(HOSTS_INPUTS[host][1])
 
-                user_input.set_text(data["username"])
-                passwd_input.set_text(data["password"])
+                try:
+                    user_input.set_text(data["username"])
+                    passwd_input.set_text(base64.b64decode(data["password"]))
+                except:
+                    user_input.set_text("")
+                    passwd_input.set_text("")
 
         # Show the dialog and hide on close
         self.settings_dialog.run()
@@ -83,12 +92,12 @@ class SettingsDialog(object):
         # Get the values
         player_location = self.player_location_button.get_filename()
         player_arguments = self.player_arguments_entry.get_text()
-        cuevana_user = self.cuevana_user_entry.get_text()
-        cuevana_pass = self.cuevana_pass_entry.get_text()
         cache_dir = self.cache_dir_button.get_filename()
         automatic_marks = self.automatic_marks.get_active()
         filename_template = self.filename_template.get_text()
         automatic_megaupload = self.automatic_megaupload.get_active()
+        cuevana_user = self.cuevana_user_entry.get_text()
+        cuevana_pass = base64.b64encode(self.cuevana_pass_entry.get_text())
 
         # Save the new values to the config
         self.config.set_key("player_location", player_location)
@@ -107,7 +116,8 @@ class SettingsDialog(object):
             user = self.builder.get_object(HOSTS_INPUTS[host][0]).get_text()
             passwd = self.builder.get_object(HOSTS_INPUTS[host][1]).get_text()
 
-            accounts.append((host, {"username": user, "password": passwd}))
+            accounts.append((host, {"username": user,
+                "password": base64.b64encode(passwd)}))
 
         self.config.set_key("accounts", accounts)
 
