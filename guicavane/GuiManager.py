@@ -203,7 +203,7 @@ class GuiManager(object):
 
         self.sidebar.hide()
         self.background_task(pycavane.api.Movie.get_recomended,
-            self.display_movies, status_message="Loading latest movies...")
+            self.display_movies, status_message="Loading recomended movies...")
 
     def update_favorites(self, favorites):
         for fav_name in favorites:
