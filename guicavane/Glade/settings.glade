@@ -341,14 +341,16 @@ You can also skip this right clicking on the movie or episode and choosing 'Choo
           </packing>
         </child>
         <child>
-          <object class="GtkExpander" id="accounts_expander">
+          <object class="GtkFrame" id="accounts_frame">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
+            <property name="label_xalign">0</property>
+            <property name="shadow_type">out</property>
             <child>
               <object class="GtkVBox" id="accounts_vbox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="border_width">10</property>
+                <property name="border_width">5</property>
                 <child>
                   <object class="GtkExpander" id="cuevana_account">
                     <property name="visible">True</property>
@@ -424,6 +426,7 @@ You can also skip this right clicking on the movie or episode and choosing 'Choo
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="invisible_char">•</property>
+                            <property name="invisible_char_set">True</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="secondary_icon_activatable">False</property>
                             <property name="primary_icon_sensitive">True</property>
@@ -441,6 +444,7 @@ You can also skip this right clicking on the movie or episode and choosing 'Choo
                             <property name="can_focus">True</property>
                             <property name="visibility">False</property>
                             <property name="invisible_char">•</property>
+                            <property name="invisible_char_set">True</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="secondary_icon_activatable">False</property>
                             <property name="primary_icon_sensitive">True</property>
