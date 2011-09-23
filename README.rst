@@ -37,7 +37,7 @@ the settings dialog.
 
 Current Version
 ---------------
-1.5.0
+1.5.2
 
 Features List
 -------------
@@ -51,3 +51,5 @@ Features List
 * Support for megaupload regular and premium account
 * Multiple hosts to download (e.g Megaupload, Bitshare, Filefactory and more)
 * Resume downloads on unespected close
+* Latest movies list
+* Recomended movies list
