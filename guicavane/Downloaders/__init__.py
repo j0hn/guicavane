@@ -1,10 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import sys
+
+from Dummy import Dummy
 from Megaupload import Megaupload
 from Bitshare import Bitshare
 from Filefactory import Filefactory
 from Hotfile import Hotfile
+
+DUMMY_ENABLE = False
+if "-d" in sys.argv or "--dummy" in sys.argv:
+    DUMMY_ENABLE = True
 
 AVALIABLE_HOSTS = {
     "megaupload": Megaupload,
@@ -12,6 +19,9 @@ AVALIABLE_HOSTS = {
     "filefactory": Filefactory,
     "hotfile": Hotfile,
 }
+
+if DUMMY_ENABLE:
+    AVALIABLE_HOSTS["dummy"] = Dummy
 
 def get_avaliable():
     return AVALIABLE_HOSTS.keys()

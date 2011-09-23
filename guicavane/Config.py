@@ -16,7 +16,6 @@ DEFAULT_VALUES = {
     "player_location": VLC_LOCATION,
     "cache_dir": TEMP_DIR,
     "last_mode": "Shows",
-    "favorites": [],
     "last_download_directory": HOME_DIR,
     "images_dir": IMAGES_DIR,
     "cuevana_user": "",
@@ -25,6 +24,7 @@ DEFAULT_VALUES = {
     "player_arguments": "",
     "filename_template": "<show> S<season>E<episode> - <name>",
     "accounts": [("megaupload", {"username": "", "password": ""})],
+    "automatic_megaupload": False,
 }
 
 if not os.path.exists(CONFIG_DIR):

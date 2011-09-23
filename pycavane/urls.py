@@ -18,6 +18,8 @@ sub_show = host + '/download_sub?file=s/sub/%s_%s.srt'
 sub_movie = host + '/download_sub?file=sub/%s_%s.srt'
 
 search = host + '/buscar/?q=%s&cat=titulo'
+latest_movies = host + '/peliculas/'
+recomended_movies = host
 
 cuevana_url_show = host + "/series/%s/%s/%s/"
 cuevana_url_movie = host + "/peliculas/%s/%s/"

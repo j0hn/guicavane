@@ -11,7 +11,7 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="has_separator">True</property>
     <property name="program_name">Guicavane</property>
-    <property name="version">1.5.0</property>
+    <property name="version">1.5.2</property>
     <property name="copyright" translatable="yes">j0hn &lt;j0hn.com.ar@gmail.com&gt;</property>
     <property name="comments" translatable="yes">A Graphical User Interface for 
 the website www.cuevana.tv
@@ -26,7 +26,8 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</property>
     <property name="authors">j0hn &lt;j0hn.com.ar@gmail.com&gt; - Lead developer
-Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
+Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer
+Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
     <property name="logo">../Images/logo_big.png</property>
     <property name="wrap_license">True</property>
     <child internal-child="vbox">
@@ -228,6 +229,17 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
         <signal name="activate" handler="open_in_cuevana" swapped="no"/>
       </object>
     </child>
+    <child>
+      <object class="GtkImageMenuItem" id="choose_host">
+        <property name="label" translatable="yes">Choose Host</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="use_action_appearance">False</property>
+        <property name="image">image1</property>
+        <property name="use_stock">False</property>
+        <signal name="activate" handler="_on_choose_host" swapped="no"/>
+      </object>
+    </child>
   </object>
   <object class="GtkListStore" id="file_viewer_model">
     <columns>
@@ -238,6 +250,11 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
       <!-- column-name object_instance -->
       <column type="PyObject"/>
     </columns>
+  </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-connect</property>
   </object>
   <object class="GtkImage" id="imageAdd">
     <property name="visible">True</property>
@@ -905,6 +922,12 @@ Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
       </row>
       <row>
         <col id="0" translatable="yes">Favorites</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Latest Movies</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Recomended Movies</col>
       </row>
     </data>
   </object>
