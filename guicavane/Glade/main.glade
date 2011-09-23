@@ -26,7 +26,8 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</property>
     <property name="authors">j0hn &lt;j0hn.com.ar@gmail.com&gt; - Lead developer
-Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer</property>
+Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer
+Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
     <property name="logo">../Images/logo_big.png</property>
     <property name="wrap_license">True</property>
     <child internal-child="vbox">
