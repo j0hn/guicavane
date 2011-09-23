@@ -13,12 +13,13 @@ import webbrowser
 
 import pycavane
 from Constants import *
-from Marks import Marks
+from SList import SList
 from Config import Config
 from Player import Player
 from Accounts import ACCOUNTS
 from Settings import SettingsDialog
 from ThreadRunner import GtkThreadRunner
+from Paths import MARKS_FILE, FAVORITES_FILE
 
 if "-d" in sys.argv or "--dummy" in sys.argv:
     testdir = os.path.join(os.getcwd(), "pycavane", "tests")
@@ -34,9 +35,9 @@ class GuiManager(object):
         self.current_show = None
         self.current_season = None
 
-        # Config, Marks, Accounts and Settings
         self.config = Config()
-        self.marks = Marks()
+        self.marks = SList(MARKS_FILE)
+        self.favorites = SList(FAVORITES_FILE)
         self.accounts = ACCOUNTS
         self.settings_dialog = SettingsDialog(self)
 
@@ -185,7 +186,7 @@ class GuiManager(object):
         self.path_label.set_text("")
         self.name_filter.set_text("")
         self.name_list_model.clear()
-        for favorite in self.config.get_key("favorites"):
+        for favorite in self.favorites.get_all():
             show = pycavane.api.Show.search(favorite).next()
             self.name_list_model.append([show.name, show])
 
@@ -204,9 +205,9 @@ class GuiManager(object):
             self.display_movies, status_message="Loading latest movies...")
 
     def update_favorites(self, favorites):
-        for fav in favorites:
-            if fav not in self.config.get_key("favorites"):
-                self.config.append_key("favorites", fav)
+        for fav_name in favorites:
+            if fav_name not in self.favorites.get_all():
+                self.favorites.add(fav_name)
 
         if self.get_mode() == MODE_FAVORITES:
             self.set_mode_favorites()
@@ -409,8 +410,8 @@ class GuiManager(object):
         model = self.name_list.get_model()
         selected = model[path][NAME_LIST_COLUMN_TEXT]
 
-        if selected not in self.config.get_key("favorites"):
-            self.config.append_key("favorites", selected)
+        if selected not in self.favorites.get_all():
+            self.favorites.add(selected)
 
         #self.background_task(self.pycavane.add_favorite,
         #                     self.on_finish_favorite, selected, False)
@@ -422,8 +423,8 @@ class GuiManager(object):
         model = self.name_list.get_model()
         selected = model[path][NAME_LIST_COLUMN_TEXT]
 
-        if selected in self.config.get_key("favorites"):
-            self.config.remove_key("favorites", selected)
+        if selected in self.favorites.get_all():
+            self.favorites.remove(selected)
             self.set_mode_favorites()
 
         #self.background_task(self.pycavane.del_favorite,

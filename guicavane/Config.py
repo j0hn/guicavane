@@ -16,7 +16,6 @@ DEFAULT_VALUES = {
     "player_location": VLC_LOCATION,
     "cache_dir": TEMP_DIR,
     "last_mode": "Shows",
-    "favorites": [],
     "last_download_directory": HOME_DIR,
     "images_dir": IMAGES_DIR,
     "cuevana_user": "",
