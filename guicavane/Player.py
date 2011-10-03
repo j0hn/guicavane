@@ -56,7 +56,11 @@ class Player(object):
         result = []
         avaliable_downloaders = Downloaders.get_avaliable()
 
-        hosts = self.file_object.file_hosts
+        try:
+            hosts = self.file_object.file_hosts
+        except:
+            hosts = {}
+
         hosts["dummy"] = ""
 
         for host in hosts:
@@ -251,7 +255,7 @@ class Player(object):
         """ Returns the file path of the file. """
 
         if isinstance(self.file_object, api.Movie):
-            return self.file_object.name.replace(os.sep, "_")
+            return self.file_object.name.replace(os.sep, "_") + ".mp4"
 
         # If isn't a movie it must be an episode
         assert isinstance(self.file_object, api.Episode)
