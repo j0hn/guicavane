@@ -94,7 +94,7 @@ class Megaupload(BaseDownloader):
         self.download_to(handler, self.file_path)
 
     def _on_download_finish(self, (is_error, result)):
-        if is_error:
+        if is_error and not "Requested Range Not Satisfiable" in str(result):
             self.gui_manager.report_error("Download finish with error: %s" % result)
 
         self.gui_manager.unfreeze()
