@@ -212,7 +212,7 @@ class Player(object):
                 gobject.idle_add(self.gui_manager.progress.pulse)
                 time.sleep(1)
 
-            stop = downloaded_size >= self.downloader.file_size
+            stop = downloaded_size == self.downloader.file_size
 
             if not self.download_only:
                 stop |= self.player_process.poll() != None
