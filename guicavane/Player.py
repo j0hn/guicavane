@@ -261,7 +261,8 @@ class Player(object):
         result = result.replace("<season>", "%.2d" % int(self.file_object.season))
         result = result.replace("<episode>", "%s" % str(self.file_object.number))
         result = result.replace("<name>", self.file_object.name)
-        result = result.replace(os.sep, "_")
+        for char in '\/:?*"<>|%.':
+            result = result.replace(char, "_")
         result = result + ".mp4"
 
         return result
