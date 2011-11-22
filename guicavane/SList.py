@@ -70,3 +70,8 @@ class SList(object):
         """ Returns a the list. """
 
         return self.slist
+
+    def clear(self):
+        """ Clears the list. """
+
+        self.slist = []

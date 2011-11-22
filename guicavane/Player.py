@@ -82,7 +82,7 @@ class Player(object):
         if len(result) == 0:
             self.gui_manager.report_error("No host found")
             self.gui_manager.unfreeze()
-        elif len(result) == 1:
+        elif len(result) == 1 and not self.choose_host:
             gobject.idle_add(self.gui_manager.set_status_message,
                 "Only one host found, starting download...")
             self.downloader = result[0]
@@ -216,7 +216,7 @@ class Player(object):
                 gobject.idle_add(self.gui_manager.progress.pulse)
                 time.sleep(1)
 
-            stop = downloaded_size >= self.downloader.file_size
+            stop = downloaded_size == self.downloader.file_size
 
             if not self.download_only:
                 stop |= self.player_process.poll() != None
