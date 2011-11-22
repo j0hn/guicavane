@@ -10,11 +10,11 @@ Contributor: j0hn <j0hn.com.ar@gmail.com>
 """
 
 import re
-
-from util import url_open, normalize_string
-from cached import Cached
+import json
 
 import urls
+from util import url_open, normalize_string
+from cached import Cached
 
 
 def setup(username=None, password=None,
@@ -52,62 +52,71 @@ class Episode(object):
     _language_re = re.compile('<b>Idioma:</b>(.*?)<br />')
     _season_number_re = re.compile('<b>Temporada:</b> (.*?)<br />')
 
+
+    ###########
+
+    _sources_re = re.compile('sources = ({.*?}), sel_source')
+
+
     __info = None
     __hosts = None
     __name = ''
 
-    def __init__(self, id, number, name):
+    def __init__(self, id, number, name, season):
         self.id = id
-        self.__name = name
+        self.name = name
         self.number = number
+        self.season = season.number
+        self.show = season.show.name
 
-        info_keys = ['image', 'description', 'cast', 'genere',
-                     'language', 'show', 'season']
+        # info_keys = ['image', 'description', 'cast', 'genere',
+        #              'language', 'show', 'season']
 
-        for info_key in info_keys:
-            setattr(self.__class__, info_key,
-                    property(lambda self, i=info_key:self.info[i]))
+        # for info_key in info_keys:
+        #     setattr(self.__class__, info_key,
+        #             property(lambda self, i=info_key:self.info[i]))
 
-    def get_subtitle(self, lang='ES', filename=None):
+    def get_subtitle(self, lang='ES', quality=None, filename=None):
         """ Downloads the subtitle of the episode. """
 
         if filename:
             filename += '.srt'
 
+        if quality:
+            url = urls.sub_show_quality % (self.id, lang, quality)
+        else:
+            url = urls.sub_show % (self.id, lang)
+
         try:
-            result = url_open(urls.sub_show % (self.id, lang), filename=filename)
+            result = url_open(url, filename=filename)
         except:
             raise Exception("Subtitle not found")
 
         return result
 
     @property
-    def name(self):
-        #if self.__name.endswith('...'):
-        #    return self.info['name']
-        return self.__name
-
-    @property
     def info(self):
         """ set info data in __info dict and return it. """
 
-        if self.__info:
-            return self.__info
+        raise NotImplementedError()
 
-        page_data = url_open(urls.show_info % self.id)
+        # if self.__info:
+        #     return self.__info
 
-        name = self._name_re.findall(page_data)[0].strip()
-        show = self._show_re.findall(page_data)[0].strip()
-        image = urls.host + self._image_re.findall(page_data)[0]
-        description = self._description_re.findall(page_data)[0].strip()
-        cast = self._cast_re.findall(page_data)
-        genere = self._genere_re.findall(page_data)[0].strip()
-        language = self._language_re.findall(page_data)[0].strip()
-        season = self._season_number_re.findall(page_data)[0].strip()
+        # page_data = url_open(urls.show_info % self.id)
 
-        self.__info = {'name': name, 'show': show, 'image': image, 'description': description,
-                'cast': cast, 'genere': genere, 'language': language, 'season': season}
-        return self.__info
+        # name = self._name_re.findall(page_data)[0].strip()
+        # show = self._show_re.findall(page_data)[0].strip()
+        # image = urls.host + self._image_re.findall(page_data)[0]
+        # description = self._description_re.findall(page_data)[0].strip()
+        # cast = self._cast_re.findall(page_data)
+        # genere = self._genere_re.findall(page_data)[0].strip()
+        # language = self._language_re.findall(page_data)[0].strip()
+        # season = self._season_number_re.findall(page_data)[0].strip()
+
+        # self.__info = {'name': name, 'show': show, 'image': image, 'description': description,
+        #         'cast': cast, 'genere': genere, 'language': language, 'season': season}
+        # return self.__info
 
     @property
     def file_hosts(self):
@@ -115,19 +124,23 @@ class Episode(object):
 
         if self.__hosts:
             return self.__hosts
-
         self.__hosts = {}
 
         data = url_open(urls.player_season % self.id)
-        for id, name in self._hosts_re.findall(data):
-            data = [('key', id), ('host', name),
-                    ('vars', '&id=%s&subs=,ES,EN&tipo=&amp;sub_pre=ES' % self.id)]
-            url = url_open(urls.source_get, data=data)
+        sources = json.loads(self._sources_re.search(data).group(1))
+
+        for host in sources["360"]["2"]:
+
+            data = [("id", self.id), ("tipo", "serie"),
+                    ("def", "360"), ("audio", "2"),
+                    ("host", host)]
+
+            hostdata = url_open(urls.source_get, data=data)
 
             # before http are ugly chars
-            url = url[url.find('http:'):].split('&id')[0]
+            url = hostdata[hostdata.find('http:'):].split('&id')[0]
 
-            self.__hosts[name] = url
+            self.__hosts[host] = url
 
         return self.__hosts
 
@@ -146,11 +159,7 @@ class Episode(object):
 
     @classmethod
     def search(self, season):
-        """ Returns a list with Episodes of of season. """
-
-        data = url_open(urls.episodes % season.id)
-        for episode in self._search_re.finditer(data):
-            yield Episode(**episode.groupdict())
+        raise NotImplementedError()
 
     def __repr__(self):
         return '<Episode: id: "%s" number: "%s" name: "%s">' % \
@@ -158,35 +167,42 @@ class Episode(object):
 
 
 class Season(object):
-    _search_re = re.compile('<li onclick=\'listSeries'\
-            '\(2,"(?P<id>[0-9]*)"\)\'>(?P<name>.*?)</li>')
+    _json_re = re.compile("serieList\({l:({.*?}),e", re.DOTALL)
 
-    def __init__(self, id, name):
-        self.id = id
-        self.name = name
+    def __init__(self, number, episodes, show):
+        self.id = number
+        self.number = number
+        self.name = "Temporada %s" % number
+        self._episodes = episodes
+        self.show = show
 
     @property
     def episodes(self):
-        return Episode.search(self)
+        for ep in self._episodes:
+            yield Episode(ep["id"], ep["num"], ep["tit"], self)
 
     @classmethod
     def search(self, show):
         """ Returs a list with the seasons from show. """
 
-        data = url_open(urls.seasons % show.id)
-        for season in self._search_re.finditer(data):
-            yield Season(**season.groupdict())
+        data = url_open(urls.seasons % (show.id, show.urlname))
+        jsondata = json.loads(self._json_re.search(data).group(1))
+
+        for data in jsondata:
+            yield Season(data, jsondata[data], show)
 
     def __repr__(self):
         return '<Season: id: "%s" name: "%s">' % (self.id, self.name)
 
 
 class Show(object):
-    _search_re = re.compile('serieslist.push\(\{id:(?P<id>[0-9]*),nombre:'\
-                          '"(?P<name>.*?)"\}\);')
+    _json_re = re.compile("c.listSerie\('',(.*?)\);", re.DOTALL)
 
-    def __init__(self, id, name):
-        self.id = id
+    def __init__(self, url, name):
+        url = url.split("/")
+
+        self.id = url[2]
+        self.urlname = url[3]
         self.name = name
 
     @property
@@ -205,13 +221,17 @@ class Show(object):
 
         name = name.lower()
 
-        for show in self._search_re.finditer(url_open(urls.shows)):
-            show_dict = show.groupdict()
-            if not name or name in show_dict['name'].lower():
-                yield Show(**show_dict)
+        data = url_open(urls.shows)
+        jsondata = json.loads(self._json_re.search(data).group(1))
+
+        for show in jsondata:
+            yield Show(show["url"], show["tit"])
+
+    def __unicode__(self):
+        return u'<Show: id: "%s" name: "%s">' % (self.id, self.name)
 
     def __repr__(self):
-        return '<Show: id: "%s" name: "%s">' % (self.id, self.name)
+        return repr(unicode(self))
 
 
 class Movie(object):

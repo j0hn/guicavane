@@ -366,8 +366,7 @@ class GuiManager(object):
             self.path_label.set_text("%s / %s" % \
                     (self.current_show.name, self.current_season.name))
 
-            self.background_task(pycavane.api.Episode.search,
-                                 self.display_episodes, file_object)
+            self.display_episodes((False, [x for x in file_object.episodes]))
         elif isinstance(file_object, pycavane.api.Episode):
             Player(self, file_object)
         elif file_object == None:
