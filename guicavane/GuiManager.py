@@ -282,7 +282,7 @@ class GuiManager(object):
             episode_name = "%s - %s" % (episode.number, episode.name)
 
             icon = ICON_FILE_MOVIE
-            if episode.id in marks:
+            if str(episode.id) in marks:
                 icon = ICON_FILE_MOVIE_MARK
 
             self.file_viewer_model.append([icon, episode_name, episode])

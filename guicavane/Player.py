@@ -58,7 +58,8 @@ class Player(object):
 
         try:
             hosts = self.file_object.file_hosts
-        except:
+        except Exception, error:
+            print "Warning: no host found due to: '%s'" % error
             hosts = {}
 
         hosts["dummy"] = ""
