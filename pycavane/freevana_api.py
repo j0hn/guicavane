@@ -119,6 +119,7 @@ class Season(BaseSeason):
 
 class Show(BaseShow):
     _query_all = "SELECT id, name FROM series ORDER BY name ASC"
+    _query_one = "SELECT id, name FROM series WHERE name = '%s'"
 
     def __init__(self, id, name):
         self.id = id
@@ -135,7 +136,12 @@ class Show(BaseShow):
     @classmethod
     def search(self, name=''):
         cur = DB_CONN.cursor()
-        result = cur.execute(self._query_all)
+
+        if name:
+            result = cur.execute(self._query_one % name)
+        else:
+            result = cur.execute(self._query_all)
+
         for row in result:
             yield Show(*row)
 
