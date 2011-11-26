@@ -149,4 +149,45 @@ class Show(BaseShow):
         return '<Show: id: "%s" name: "%s">' % (self.id, self.name)
 
 class Movie(BaseMovie):
-    pass
+    _query_search = "SELECT id, name FROM movies WHERE name LIKE '%%%s%%'"
+    _query_sources = "SELECT source, url FROM movie_sources " \
+                     "WHERE definition = '360' AND movie_id = '%s'"
+    def __init__(self, id, name, year=None, description=""):
+        self.id = id
+        self.name = name
+
+    def get_subtitle(self, lang='ES', filename=None):
+        if filename:
+            filename += '.srt'
+
+        try:
+            result = url_open(urls.sub_movie % (self.id, lang), filename=filename)
+        except:
+            raise Exception("Subtitle not found")
+
+        return result
+
+    @property
+    def file_hosts(self):
+        hosts = {}
+
+        cur = DB_CONN.cursor()
+
+        hostmap = {'megaupload': 'http://www.megaupload.com/?d=',
+                   'bitshare': 'http://bitshare.com/?f=',
+                   'filefactory': 'http://www.filefactory.com/file/'
+                   }
+
+        result = cur.execute(self._query_sources % self.id)
+        for row in result:
+            hosts[row[0]] = row[1]
+
+        return hosts
+
+    @classmethod
+    def search(self, query=""):
+        cur = DB_CONN.cursor()
+        result = cur.execute(self._query_search % query)
+
+        for row in result:
+            yield Movie(row[0], row[1])
