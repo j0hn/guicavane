@@ -225,7 +225,8 @@ class Show(object):
         jsondata = json.loads(self._json_re.search(data).group(1))
 
         for show in jsondata:
-            yield Show(show["url"], show["tit"])
+            if not name or name in show['tit'].lower():
+                yield Show(show["url"], show["tit"])
 
     def __unicode__(self):
         return u'<Show: id: "%s" name: "%s">' % (self.id, self.name)
