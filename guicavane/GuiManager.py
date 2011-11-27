@@ -200,7 +200,12 @@ class GuiManager(object):
         self.name_filter.set_text("")
         self.name_list_model.clear()
         for favorite in self.favorites.get_all():
-            show = self.api.Show.search(favorite).next()
+            try:
+                show = self.api.Show.search(favorite).next()
+            except StopIteration:
+                print "Warning: didin't find %s in show list" % favorite
+                continue
+
             self.name_list_model.append([show.name, show])
 
     def set_mode_latest_movies(self):
@@ -371,7 +376,7 @@ class GuiManager(object):
         self.file_viewer_model.clear()
 
         # Call the corresponding set_mode method
-        self.set_mode_shows()
+        self._on_mode_change()
 
     def _on_show_selected(self, tree_view, path, column):
         """ Called when the user selects a show from the name list. """

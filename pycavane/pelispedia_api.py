@@ -56,7 +56,7 @@ class Episode(object):
             filename += '.srt'
 
         id = self.id.split('/play/')[1].split('/', 1)[0]
-        print 
+        print
         print urls.sub_show % id
         print "asdas adsas dads asd asdada<<<<<<<<<<<<<<<<<<<<<<<<<"
         try:
@@ -126,6 +126,8 @@ class Show(BaseShow):
         Returns a list with all the
         currently avaliable Shows
         """
+
+        name = name.lower()
 
         data = url_open(urls.shows)
         data = data.split('<select name="s" id="serie" size="15">')[1]

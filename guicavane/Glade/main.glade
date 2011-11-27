@@ -492,7 +492,6 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="spacing">10</property>
-
                 <child>
                   <object class="GtkLabel" id="mode_label">
                     <property name="visible">True</property>
@@ -505,7 +504,6 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
-
                 <child>
                   <object class="GtkComboBox" id="mode_combo">
                     <property name="visible">True</property>
@@ -526,7 +524,6 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
-
                 <child>
                   <object class="GtkLabel" id="site_label">
                     <property name="visible">True</property>
@@ -536,10 +533,9 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="position">0</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
-
                 <child>
                   <object class="GtkComboBox" id="site_combo">
                     <property name="visible">True</property>
@@ -557,7 +553,7 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>
@@ -967,25 +963,6 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
       </row>
     </data>
   </object>
-
-  <object class="GtkListStore" id="site_liststore">
-    <columns>
-      <!-- column-name label -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Cuevana</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Pelispedia</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Moviezet</col>
-      </row>
-    </data>
-  </object>
-
   <object class="GtkMenu" id="name_favorites_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1002,7 +979,6 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
       </object>
     </child>
   </object>
-
   <object class="GtkListStore" id="name_list_model">
     <columns>
       <!-- column-name name -->
@@ -1026,5 +1002,22 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
         <signal name="activate" handler="_on_add_favorite" swapped="no"/>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="site_liststore">
+    <columns>
+      <!-- column-name label -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">Cuevana</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Pelispedia</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">Freevana</col>
+      </row>
+    </data>
   </object>
 </interface>

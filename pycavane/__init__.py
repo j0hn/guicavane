@@ -1,3 +1,4 @@
 import cuevana_api
 import pelispedia_api
 import moviezet_api
+import freevana_api
