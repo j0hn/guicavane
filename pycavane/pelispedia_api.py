@@ -139,4 +139,27 @@ class Show(BaseShow):
         return '<Show: id: "%s" name: "%s">' % (self.id, self.name)
 
 class Movie(BaseMovie):
-    pass
+    _search_re = re.compile('<div class="titletip"><b><a '\
+            'href="http://www.pelispedia.com/movies/play/'\
+            '(?P<id>.*?)">(?P<name>.*?)</a></b></div>')
+    def __init__(self, id, name, year=None, description=""):
+        self.id = id
+        self.name = name
+        self.year = year
+        self.__description = description
+
+    @classmethod
+    def search(self, query=""):
+        """ Returns a list with all the matched
+        movies searched using the query. """
+
+        query = query.lower().replace(' ', '+')
+
+        data = url_open(urls.movies % query)
+
+        for movie in self._search_re.finditer(data):
+            movie_dict = movie.groupdict()
+            yield Movie(**movie_dict)
+
+    def __repr__(self):
+        return '<Movie id: "%s" name: "%s">' % (self.id, self.name)
