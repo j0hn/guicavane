@@ -48,7 +48,6 @@ class Episode(object):
             id = hostmap.get(hostname, '') + id
             self.__hosts[hostname] = id
 
-        print self.__hosts
         return self.__hosts
 
     def get_subtitle(self, lang='ES', filename=None):
@@ -56,9 +55,7 @@ class Episode(object):
             filename += '.srt'
 
         id = self.id.split('/play/')[1].split('/', 1)[0]
-        print
-        print urls.sub_show % id
-        print "asdas adsas dads asd asdada<<<<<<<<<<<<<<<<<<<<<<<<<"
+
         try:
             result = url_open(urls.sub_show % id, filename=filename)
         except:
