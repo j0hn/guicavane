@@ -12,7 +12,7 @@ import gobject
 import subprocess
 
 import Downloaders
-from pycavane import api
+import pycavane
 from Constants import HOSTS_GUI_FILE, HOSTS_VIEW_COLUMN_OBJECT
 
 
@@ -26,6 +26,8 @@ class Player(object):
                  file_path=None, download_only=False, choose_host=False):
         self.gui_manager = gui_manager
         self.config = self.gui_manager.config
+
+        self.api = getattr(pycavane, self.config.get_key("site") + "_api")
         self.file_object = file_object
         self.download_only = download_only
         self.choose_host = choose_host
@@ -254,11 +256,11 @@ class Player(object):
     def get_filename(self):
         """ Returns the file path of the file. """
 
-        if isinstance(self.file_object, api.Movie):
+        if isinstance(self.file_object, self.api.Movie):
             return self.file_object.name.replace(os.sep, "_") + ".mp4"
 
         # If isn't a movie it must be an episode
-        assert isinstance(self.file_object, api.Episode)
+        assert isinstance(self.file_object, self.api.Episode)
 
         result = self.config.get_key("filename_template")
         result = result.replace("<show>", self.file_object.show)

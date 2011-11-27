@@ -37,6 +37,8 @@ class GuiManager(object):
         self.current_season = None
 
         self.config = Config()
+        self.api = getattr(pycavane, self.config.get_key("site") + "_api")
+
         self.marks = SList(MARKS_FILE)
         self.favorites = SList(FAVORITES_FILE)
         self.accounts = ACCOUNTS
@@ -52,7 +54,7 @@ class GuiManager(object):
             "main_window", "statusbar_label", "progress_box", "progress",
             "progress_label", "name_filter", "name_filter_clear", "name_list",
             "name_list_model", "file_viewer", "file_viewer_model",
-            "mode_combo", "search_entry", "search_button", "search_clear",
+            "mode_combo", "site_combo", "search_entry", "search_button", "search_clear",
             "sidebar", "sidebar_vbox", "path_label", "info_window",
             "info_title", "info_label", "info_image", "file_viewer_menu",
             "error_label", "error_dialog", "header_hbox", "main_hpaned",
@@ -70,6 +72,14 @@ class GuiManager(object):
 
         # Now we show the window
         self.main_window.show_all()
+
+        ## Start on last site
+        #try:
+        #    last_site = self.config.get_key("last_site")
+        #    getattr(self, "set_site_%s" % last_site.lower().replace(" ", "_"))()
+        #    self.site_combo.set_active(SITES.index(last_site))
+        #except:
+        #    pass
 
         # Start on last mode
         try:
@@ -167,7 +177,7 @@ class GuiManager(object):
         self.name_filter.set_text("")
         self.path_label.set_text("")
         self.name_list_model.clear()
-        self.background_task(pycavane.api.Show.search, self.display_shows,
+        self.background_task(self.api.Show.search, self.display_shows,
                              status_message="Obtaining shows list")
 
     def set_mode_movies(self):
@@ -188,21 +198,21 @@ class GuiManager(object):
         self.name_filter.set_text("")
         self.name_list_model.clear()
         for favorite in self.favorites.get_all():
-            show = pycavane.api.Show.search(favorite).next()
+            show = self.api.Show.search(favorite).next()
             self.name_list_model.append([show.name, show])
 
     def set_mode_latest_movies(self):
         """ Sets the curret mode to latest movies. """
 
         self.sidebar.hide()
-        self.background_task(pycavane.api.Movie.get_latest,
+        self.background_task(self.api.Movie.get_latest,
             self.display_movies, status_message="Loading latest movies...")
 
     def set_mode_recomended_movies(self):
         """ Sets the curret mode to recomended movies. """
 
         self.sidebar.hide()
-        self.background_task(pycavane.api.Movie.get_recomended,
+        self.background_task(self.api.Movie.get_recomended,
             self.display_movies, status_message="Loading recomended movies...")
 
     def update_favorites(self, favorites):
@@ -225,6 +235,19 @@ class GuiManager(object):
         assert mode_text in MODES
 
         return mode_text
+
+    def get_site(self):
+        """ Returns the current site. i.e the value of the mode combobox.
+        The result will be the constant SITE_* (see constants definitions). """
+
+        model = self.site_combo.get_model()
+        active = self.site_combo.get_active()
+        mode_text = model[active][0]
+
+        # Poscondition
+        #assert mode_text in MODES
+
+        return mode_text.lower()
 
     def report_error(self, message):
         """ Shows up an error dialog to the user. """
@@ -335,6 +358,18 @@ class GuiManager(object):
         # Call the corresponding set_mode method
         getattr(self, "set_mode_%s" % last_mode.lower().replace(" ", "_"))()
 
+    def _on_site_change(self, *args):
+        """ Called when the mode combobox changes value. """
+
+        site_mode = self.get_site()
+        self.config.set_key("site", site_mode)
+        self.api = getattr(pycavane, site_mode + "_api")
+
+        self.file_viewer_model.clear()
+
+        # Call the corresponding set_mode method
+        self.set_mode_shows()
+
     def _on_show_selected(self, tree_view, path, column):
         """ Called when the user selects a show from the name list. """
 
@@ -346,7 +381,7 @@ class GuiManager(object):
         self.current_show = selected_show
         self.path_label.set_text(selected_show.name)
 
-        self.background_task(pycavane.api.Season.search, self.display_seasons,
+        self.background_task(self.api.Season.search, self.display_seasons,
                 selected_show, status_message="Loading show %s..." % \
                 selected_show.name)
 
@@ -358,19 +393,19 @@ class GuiManager(object):
 
         mode = self.get_mode()
 
-        if isinstance(file_object, pycavane.api.Movie):
+        if isinstance(file_object, self.api.Movie):
             Player(self, file_object)
-        elif isinstance(file_object, pycavane.api.Season):
+        elif isinstance(file_object, self.api.Season):
             self.current_season = file_object
 
             self.path_label.set_text("%s / %s" % \
                     (self.current_show.name, self.current_season.name))
 
             self.display_episodes((False, [x for x in file_object.episodes]))
-        elif isinstance(file_object, pycavane.api.Episode):
+        elif isinstance(file_object, self.api.Episode):
             Player(self, file_object)
         elif file_object == None:
-            self.background_task(pycavane.api.Season.search, self.display_seasons,
+            self.background_task(self.api.Season.search, self.display_seasons,
                 self.current_show, status_message="Loading show %s..." % \
                 self.current_show.name)
 
@@ -438,8 +473,8 @@ class GuiManager(object):
             model = view.get_model()
             file_object = model[path][FILE_VIEW_COLUMN_OBJECT]
 
-            if isinstance(file_object, pycavane.api.Episode) or \
-               isinstance(file_object, pycavane.api.Movie):
+            if isinstance(file_object, self.api.Episode) or \
+               isinstance(file_object, self.api.Movie):
                 self.file_viewer_menu.popup(None, None, None, event.button, event.time)
 
     def _on_menu_play_clicked(self, *args):
@@ -543,11 +578,12 @@ class GuiManager(object):
         self.mode_combo.set_active(MODES.index(MODE_MOVIES))
 
         query = self.search_entry.get_text()
-        self.background_task(pycavane.api.Movie.search,
+        self.background_task(self.api.Movie.search,
                     self.display_movies, query,
                     status_message="Searching movies with title %s..." % query)
 
     def search_movies(self, query):
+        # WTF
         search = self.pycavane.search_title(query)
         next_movies_pages_search = 3
 
