@@ -140,8 +140,10 @@ class Show(BaseShow):
 
 class Movie(BaseMovie):
     _search_re = re.compile('<div class="titletip"><b><a '\
-            'href="http://www.pelispedia.com/movies/play/'\
-            '(?P<id>.*?)">(?P<name>.*?)</a></b></div>')
+            'href="(?P<id>http://www.pelispedia.com/movies/play/'\
+            '.*?)">(?P<name>.*?)</a></b></div>')
+    _hosts_re = re.compile('var (?P<host>mega[0-9]) = "(?P<id>.*?)";')
+    _host_names_re = re.compile('class="server" alt="(?P<name>.*?)"')
     def __init__(self, id, name, year=None, description=""):
         self.id = id
         self.name = name
@@ -160,6 +162,44 @@ class Movie(BaseMovie):
         for movie in self._search_re.finditer(data):
             movie_dict = movie.groupdict()
             yield Movie(**movie_dict)
+
+    @property
+    def file_hosts(self):
+        self.__hosts = {}
+
+        data = url_open(self.id)
+        hostnames = self._host_names_re.findall(data)
+
+        hostmap = {'megaupload': 'http://www.megaupload.com/?d=',
+                   'bitshare': 'http://bitshare.com/?f=',
+                   'filefactory': 'http://www.filefactory.com/file/'
+                   }
+
+        for name, id in self._hosts_re.findall(data):
+            print name
+            self.__hosts['megaupload'] = hostmap.get('megaupload')+id
+            break
+            if not hostnames:
+                break
+            hostname = hostnames.pop()
+            id = hostmap.get(hostname, '') + id
+            self.__hosts[hostname] = id
+
+        return self.__hosts
+
+    def get_subtitle(self, lang='ES', filename=None):
+        if filename:
+            filename += '.srt'
+
+        id1, id2 = self.id.split('/play/')[1].split('/', 1)[0].split("-")
+        id = "%s-%s" % (id2, id1)
+
+        try:
+            result = url_open(urls.sub_movie % id, filename=filename)
+        except:
+            raise Exception("Subtitle not found")
+
+        return result
 
     def __repr__(self):
         return '<Movie id: "%s" name: "%s">' % (self.id, self.name)

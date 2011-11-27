@@ -6,3 +6,4 @@ seasons = shows + 'remote'
 episodes = seasons
 
 sub_show = host + '/series/subs?s=%s'
+sub_movie = host + '/movies/subs?s=%s'
