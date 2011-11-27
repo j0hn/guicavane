@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
+# pylint: disable-msg=E1101
 
 """
 Settings. Manages the gui of the settings.
@@ -32,8 +33,9 @@ class SettingsDialog(object):
 
         # Widgets
         glade_objects = [
-            "settings_dialog", "player_location_button", "player_arguments_entry",
-            "megaupload_user_entry", "megaupload_pass_entry", "cuevana_user_entry",
+            "settings_dialog", "player_location_button",
+            "player_arguments_entry", "megaupload_user_entry",
+            "megaupload_pass_entry", "cuevana_user_entry",
             "cuevana_pass_entry", "cache_dir_button", "automatic_marks",
             "filename_template", "automatic_megaupload",
         ]

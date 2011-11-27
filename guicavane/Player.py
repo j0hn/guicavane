@@ -45,7 +45,8 @@ class Player(object):
                          "hosts_icon_view_model"]
 
         for glade_object in glade_objects:
-            setattr(self, glade_object, self.hosts_builder.get_object(glade_object))
+            setattr(self, glade_object,
+                self.hosts_builder.get_object(glade_object))
 
         self.gui_manager.background_task(self.get_hosts, self.display_hosts,
             status_message="Fetching hosts...", unfreeze=False)
@@ -66,7 +67,8 @@ class Player(object):
 
         for host in hosts:
             if host in avaliable_downloaders:
-                result.append(Downloaders.get(host, self.gui_manager, hosts[host]))
+                result.append(Downloaders.get(host, self.gui_manager,
+                                              hosts[host]))
 
         return result
 
@@ -115,11 +117,15 @@ class Player(object):
         """ Downloads some content to start safely the player. """
 
         # Download the subtitle
-        gobject.idle_add(self.gui_manager.set_status_message, "Downloading subtitles...")
+        gobject.idle_add(self.gui_manager.set_status_message,
+            "Downloading subtitles...")
+
         try:
-            self.file_object.get_subtitle(filename=self.file_path.replace(".mp4", ""))
+            self.file_object.get_subtitle(
+                filename=self.file_path.replace(".mp4", ""))
         except:
-            gobject.idle_add(self.gui_manager.set_status_message, "Subtitle not found")
+            gobject.idle_add(self.gui_manager.set_status_message,
+                "Subtitle not found")
 
         # Wait for the file to exists
         gobject.idle_add(self.gui_manager.set_status_message, "Wait please...")
