@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
+# pylint: disable-msg=E1101,W0613
 
 """
 GuiManager. Takes care of the gui events.
@@ -24,7 +25,9 @@ from Paths import MARKS_FILE, FAVORITES_FILE
 
 if "-d" in sys.argv or "--dummy" in sys.argv:
     testdir = os.path.join(os.getcwd(), "pycavane", "tests")
-    pycavane.api.setup("guicavane", "guicavane", cache_dir=testdir, cache_lifetime=13**37)
+    pycavane.api.setup("guicavane", "guicavane",
+        cache_dir=testdir, cache_lifetime=13**37)
+
 
 class GuiManager(object):
     """ Main class, loads the gui and handles all events. """
@@ -160,7 +163,6 @@ class GuiManager(object):
             def real_callback((is_error, result)):
                 if is_error:
                     print "Error: %s" % result
-
 
         GtkThreadRunner(real_callback, func, *args, **kwargs)
 
@@ -305,7 +307,7 @@ class GuiManager(object):
             episode_name = "%s - %s" % (episode.number, episode.name)
 
             icon = ICON_FILE_MOVIE
-            if episode.id in marks:
+            if str(episode.id) in marks:
                 icon = ICON_FILE_MOVIE_MARK
 
             self.file_viewer_model.append([icon, episode_name, episode])
@@ -317,7 +319,8 @@ class GuiManager(object):
             iteration = self.file_viewer_model.get_iter(row.path)
             obj = row[FILE_VIEW_COLUMN_OBJECT]
             if not obj is None and obj.id in marks:
-                self.file_viewer_model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE_MARK)
+                self.file_viewer_model.set_value(iteration,
+                    FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE_MARK)
 
     def display_movies(self, (is_error, result)):
         """ Fills the file viewer with the movies from the search results. """
@@ -405,9 +408,9 @@ class GuiManager(object):
         elif isinstance(file_object, self.api.Episode):
             Player(self, file_object)
         elif file_object == None:
-            self.background_task(self.api.Season.search, self.display_seasons,
-                self.current_show, status_message="Loading show %s..." % \
-                self.current_show.name)
+            self.background_task(self.api.Season.search,
+                self.display_seasons, self.current_show,
+                status_message="Loading show %s..." % self.current_show.name)
 
     def _on_name_filter_change(self, *args):
         """ Called when the textbox to filter names changes. """
@@ -475,7 +478,8 @@ class GuiManager(object):
 
             if isinstance(file_object, self.api.Episode) or \
                isinstance(file_object, self.api.Movie):
-                self.file_viewer_menu.popup(None, None, None, event.button, event.time)
+                self.file_viewer_menu.popup(None, None, None,
+                    event.button, event.time)
 
     def _on_menu_play_clicked(self, *args):
         """ Called when the user click on the play context menu item. """
@@ -581,20 +585,6 @@ class GuiManager(object):
         self.background_task(self.api.Movie.search,
                     self.display_movies, query,
                     status_message="Searching movies with title %s..." % query)
-
-    def search_movies(self, query):
-        # WTF
-        search = self.pycavane.search_title(query)
-        next_movies_pages_search = 3
-
-        movies = search[0]
-        for i in range(1, next_movies_pages_search + 1):
-            next_movies = self.pycavane.get_next_movies(i)
-            next_matched = [x for x in next_movies if \
-                            x[1].lower().count(query.lower()) > 0]
-            movies += next_matched
-
-        return (movies, search[1])
 
     def _on_about_clicked(self, *args):
         """ Opens the about dialog. """

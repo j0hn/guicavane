@@ -225,7 +225,8 @@ class Show(object):
         jsondata = json.loads(self._json_re.search(data).group(1))
 
         for show in jsondata:
-            yield Show(show["url"], show["tit"])
+            if not name or name in show['tit'].lower():
+                yield Show(show["url"], show["tit"])
 
     def __unicode__(self):
         return u'<Show: id: "%s" name: "%s">' % (self.id, self.name)
@@ -256,6 +257,11 @@ class Movie(object):
     _language_re = re.compile('<b>Idioma:</b>(.*?)<br />')
     _hosts_re = re.compile("goSource\('([a-zA-Z0-9]*?)','([a-zA-Z]*?)'\)")
 
+    #############
+
+    _search_re = re.compile("\$\('#list'\).list\({l:(.*?), set:\[")
+    _sources_re = re.compile('sources = ({.*?}), sel_source')
+
     __info = ""
     __hosts = None
 
@@ -265,14 +271,19 @@ class Movie(object):
         self.year = year
         self.__description = description
 
-    def get_subtitle(self, lang='ES', filename=None):
+    def get_subtitle(self, lang='ES', quality=None, filename=None):
         """ Downloads the subtitle of the movie. """
 
         if filename:
             filename += '.srt'
 
+        if quality:
+            url = urls.sub_movie_quality % (self.id, lang, quality)
+        else:
+            url = urls.sub_movie % (self.id, lang)
+
         try:
-            result = url_open(urls.sub_movie % (self.id, lang), filename=filename)
+            result = url_open(url, filename=filename)
         except:
             raise Exception("Subtitle not found")
 
@@ -323,19 +334,23 @@ class Movie(object):
 
         if self.__hosts:
             return self.__hosts
-
         self.__hosts = {}
 
         data = url_open(urls.player_movie % self.id)
-        for id, name in self._hosts_re.findall(data):
-            data = [('key', id), ('host', name),
-                    ('vars', '&id=%s&subs=,ES,EN&tipo=&amp;sub_pre=ES' % self.id)]
-            url = url_open(urls.source_get, data=data)
+        sources = json.loads(self._sources_re.search(data).group(1))
+
+        for host in sources["360"]["2"]:
+
+            data = [("id", self.id), ("tipo", "pelicula"),
+                    ("def", "360"), ("audio", "2"),
+                    ("host", host)]
+
+            hostdata = url_open(urls.source_get, data=data)
 
             # before http are ugly chars
-            url = url[url.find('http:'):].split('&id')[0]
+            url = hostdata[hostdata.find('http:'):].split('&id')[0]
 
-            self.__hosts[name] = url
+            self.__hosts[host] = url
 
         return self.__hosts
 
@@ -346,11 +361,14 @@ class Movie(object):
 
         query = query.lower().replace(' ', '+')
 
-        for movie in self._search_re.finditer(url_open(urls.search % query)):
-            movie_dict = movie.groupdict()
-            movie_dict['description'] = movie_dict['description'].strip()
+        data = url_open(urls.search % query)
+        data = json.loads(self._search_re.search(data).group(1))
 
-            yield Movie(**movie_dict)
+        for movie in data:
+            if not "#!/peliculas" in movie["url"]:
+                continue
+
+            yield Movie(movie["id"], movie["tit"])
 
     @classmethod
     def get_latest(self):
