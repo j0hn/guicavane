@@ -308,11 +308,15 @@ class GuiManager(object):
         # Add the 'up' folder
         self.file_viewer_model.append([ICON_FOLDER, "..", None])
 
+
         for episode in result:
             episode_name = "%s - %s" % (episode.number, episode.name)
 
+            mark_string = "%s-%s-%s" % (self.current_show.name,
+                self.current_season.name, episode.name)
+
             icon = ICON_FILE_MOVIE
-            if str(episode.id) in marks:
+            if str(episode.id) in marks or mark_string in marks:
                 icon = ICON_FILE_MOVIE_MARK
 
             self.file_viewer_model.append([icon, episode_name, episode])
@@ -552,7 +556,10 @@ class GuiManager(object):
         episode = model.get_value(iteration, FILE_VIEW_COLUMN_OBJECT)
         model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE_MARK)
 
-        self.marks.add(episode.id)
+        mark_string = "%s-%s-%s" % (self.current_show.name,
+            self.current_season.name, episode.name)
+
+        self.marks.add(mark_string)
 
     def unmark_selected(self, *args):
         """ Called when the user clicks on Mark item in the context menu. """
@@ -563,9 +570,16 @@ class GuiManager(object):
         model, iteration = selection.get_selected()
         episode = model.get_value(iteration, FILE_VIEW_COLUMN_OBJECT)
 
+        mark_string = "%s-%s-%s" % (self.current_show.name,
+            self.current_season.name, episode.name)
+
         if episode.id in marks:
             model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE)
             self.marks.remove(episode.id)
+
+        if mark_string in marks:
+            model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE)
+            self.marks.remove(mark_string)
 
     def open_in_cuevana(self, *args):
         """ Open selected episode or movie on cuevana website. """
