@@ -413,7 +413,11 @@ class GuiManager(object):
             self.path_label.set_text("%s / %s" % \
                     (self.current_show.name, self.current_season.name))
 
-            self.display_episodes((False, [x for x in file_object.episodes]))
+            def fetch_episodes():
+                return [x for x in file_object.episodes]
+
+            self.background_task(fetch_episodes, self.display_episodes)
+
         elif isinstance(file_object, self.api.Episode):
             Player(self, file_object)
         elif file_object == None:
