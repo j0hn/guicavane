@@ -41,6 +41,12 @@ class GuiManager(object):
 
         self.config = Config()
 
+        # API
+        try:
+            self.api = getattr(pycavane, self.config.get_key("site") + "_api")
+        except Exception, error:
+            self.api = pycavane.cuevana_api
+
         self.marks = SList(MARKS_FILE)
         self.favorites = SList(FAVORITES_FILE)
         self.accounts = ACCOUNTS
@@ -75,14 +81,6 @@ class GuiManager(object):
         # Now we show the window
         self.main_window.show_all()
 
-        # API
-        try:
-            self.api = getattr(pycavane, self.config.get_key("site") + "_api")
-            last_site = self.config.get_key("site")
-            self.site_combo.set_active(SITES.index(last_site))
-        except Exception, error:
-            self.api = pycavane.cuevana_api
-
         # Start on last mode
         try:
             last_mode = self.config.get_key("last_mode")
@@ -90,6 +88,10 @@ class GuiManager(object):
             self.mode_combo.set_active(MODES.index(last_mode))
         except:
             self.set_mode_shows()
+
+        # Set last site active
+        last_site = self.config.get_key("site")
+        self.site_combo.set_active(SITES.index(last_site))
 
         # Login
         self.background_task(self.login_accounts, freeze=False)
