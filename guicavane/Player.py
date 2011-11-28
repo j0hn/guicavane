@@ -32,6 +32,10 @@ class Player(object):
         self.download_only = download_only
         self.choose_host = choose_host
 
+        self._speed_list = []
+        self._last_downloaded_size = 0
+        self.speed = 0
+
         self.file_path = file_path
         if not self.file_path:
             self.file_path = self.config.get_key("cache_dir")
@@ -123,6 +127,7 @@ class Player(object):
             "Downloading subtitles...")
 
         try:
+            a = 1/0
             self.file_object.get_subtitle(
                 filename=self.file_path.replace(".mp4", ""))
         except:
@@ -145,6 +150,7 @@ class Player(object):
 
             while self.downloader.downloaded_size < percent:
                 self._update_progress()
+                self.update_speed()
                 time.sleep(1)
         else:
             # Waits 2MB, just an arbitrary amount
@@ -176,26 +182,28 @@ class Player(object):
 
         self.gui_manager.background_task(self.update, self.on_finish)
 
+    def update_speed(self):
+        downloaded_size = self.downloader.downloaded_size
+        self._speed_list.append((downloaded_size - self._last_downloaded_size) / 1024.0)
+
+        list_offset = len(self._speed_list) - 30 if len(self._speed_list) > 30 else 0
+        self._speed_list = self._speed_list[list_offset:]
+        self.speed = sum(self._speed_list) / len(self._speed_list)
+
     def update(self):
         """ Updates the GUI with downloading data. """
 
         stop = False
-        speed_list = []
-        last_downloaded = 0
 
         while not stop:
             downloaded_size = self.downloader.downloaded_size
+            self._last_downloaded_size = downloaded_size
 
-            speed_list.append((downloaded_size - last_downloaded) / 1024.0)
-            last_downloaded = downloaded_size
+            self.update_speed()
 
-            list_offset = len(speed_list) - 30 if len(speed_list) > 30 else 0
-            speed_list = speed_list[list_offset:]
-            speed_avarage = sum(speed_list) / len(speed_list)
-
-            if speed_avarage > 0:
+            if self.speed > 0:
                 remaining_size = (self.downloader.file_size - downloaded_size) / 1024.0
-                remaining_time = (remaining_size / speed_avarage) / 60
+                remaining_time = (remaining_size / self.speed) / 60
             else:
                 remaining_time = 0
 
@@ -214,7 +222,7 @@ class Player(object):
 
             if downloaded_size < self.downloader.file_size:
                 gobject.idle_add(self.gui_manager.progress_label.set_text, \
-                    "%.2fKB/s - %s" % (speed_avarage, remaining_message))
+                    "%.2fKB/s - %s" % (self.speed, remaining_message))
             else:
                 gobject.idle_add(self.gui_manager.progress_label.set_text, "")
 
@@ -230,7 +238,7 @@ class Player(object):
             if not self.download_only:
                 stop |= self.player_process.poll() != None
 
-            last_downloaded = downloaded_size
+            self._last_downloaded_size = downloaded_size
 
     def _update_progress(self):
         """ Updates the progress bar using the downloaded size and the
@@ -251,6 +259,7 @@ class Player(object):
 
         # Hide the progress
         gobject.idle_add(self.gui_manager.progress_box.hide)
+        gobject.idle_add(self.gui_manager.set_status_message, "")
 
         downloaded_size = self.downloader.downloaded_size
         file_size = self.downloader.file_size
