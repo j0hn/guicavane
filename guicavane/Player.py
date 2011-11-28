@@ -127,7 +127,6 @@ class Player(object):
             "Downloading subtitles...")
 
         try:
-            a = 1/0
             self.file_object.get_subtitle(
                 filename=self.file_path.replace(".mp4", ""))
         except:
