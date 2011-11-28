@@ -6,7 +6,7 @@ import pelispedia_urls as urls
 from util import url_open, normalize_string
 
 
-class Episode(object):
+class Episode(BaseMovie):
     _search_re =  re.compile("<option value='(?P<id>.*?)'>(?P<number>[0-9]*?)"\
                              " - (?P<name>.*?)</option>")
     _hosts_re = re.compile('var (?P<host>mega[0-9]) = "(?P<id>.*?)";')
