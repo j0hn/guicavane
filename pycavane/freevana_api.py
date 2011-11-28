@@ -52,17 +52,11 @@ class Episode(object):
 
         cur = DB_CONN.cursor()
 
-        hostmap = {'megaupload': 'http://www.megaupload.com/?d=',
-                   'bitshare': 'http://bitshare.com/?f=',
-                   'filefactory': 'http://www.filefactory.com/file/'
-                   }
-
         result = cur.execute(self._query_sources % self.id)
         for row in result:
             hosts[row[0]] = row[1]
 
         return hosts
-
 
     def get_subtitle(self, lang='ES', filename=None):
         if filename:
@@ -172,11 +166,6 @@ class Movie(BaseMovie):
         hosts = {}
 
         cur = DB_CONN.cursor()
-
-        hostmap = {'megaupload': 'http://www.megaupload.com/?d=',
-                   'bitshare': 'http://bitshare.com/?f=',
-                   'filefactory': 'http://www.filefactory.com/file/'
-                   }
 
         result = cur.execute(self._query_sources % self.id)
         for row in result:
