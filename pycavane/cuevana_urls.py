@@ -4,7 +4,7 @@ static_host = 'http://sc.cuevana.tv'
 movies = host + '/peliculas/lista/letra=%s&page=%s'
 movie_info = host + '/peliculas/%s/%s/'
 shows = host + '/web/series'
-show_info = host + '/list_search_info.php?episodio=%s'
+show_info = host + '/web/series?&%s&%s&%s'
 seasons = host + '/web/series?&%s&%s'
 episodes = host + '/list_search_id.php?temporada=%s'
 

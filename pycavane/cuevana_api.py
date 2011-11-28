@@ -12,7 +12,7 @@ Contributor: j0hn <j0hn.com.ar@gmail.com>
 import re
 import json
 
-import urls
+import cuevana_urls as urls
 from util import url_open, normalize_string
 from cached import Cached
 
@@ -35,46 +35,33 @@ def setup(username=None, password=None,
 
 
 class Episode(object):
-    _search_re = re.compile('<li onclick=\'listSeries\(3,"(?P<id>[0-9]*)"\)\'>'\
-                            '<span class=\'nume\'>(?P<number>.*?)'\
-                            '</span>\s?(?P<name>.*?)</li>')
-
-    _hosts_re = re.compile("goSource\('([a-zA-Z0-9]*?)','([a-zA-Z]*?)'\)")
-
-    _name_re = re.compile(
-            r'<div class="clearleft"></div>.*?</div>.*?: (.*?)</div>', re.DOTALL)
-    _show_re = re.compile(
-            r'<div class="clearleft"></div>.*?</div>(.*?): .*?</div>', re.DOTALL)
-    _image_re = re.compile('<img src="(.*?)" border="0" />')
-    _description_re = re.compile('<div>(.*)<div class="sep"></div>', re.DOTALL)
-    _cast_re = re.compile('<a href=\'/buscar/\?q=.*?&cat=actor\'>(.*?)</a>')
-    _genere_re = re.compile('<b>Género:</b>(.*?)<br />')
-    _language_re = re.compile('<b>Idioma:</b>(.*?)<br />')
-    _season_number_re = re.compile('<b>Temporada:</b> (.*?)<br />')
-
-
-    ###########
-
     _sources_re = re.compile('sources = ({.*?}), sel_source')
-
+    _image_re = re.compile('<div class="img"><img src="(.*?)" /></div>')
+    _description_re = re.compile('<h2>Sinopsis</h2>(.*?)<div class="sep">', re.DOTALL)
+    _cast_re = re.compile("<a href='#!/buscar/actor:.*?'>(.*?)</a>")
+    _genere_re = re.compile('<b>Género:</b>(.*?)</div>')
+    _language_re = re.compile('<b>Idioma:</b>(.*)</div>')
 
     __info = None
     __hosts = None
     __name = ''
 
-    def __init__(self, id, number, name, season):
+    def __init__(self, id, number, name, url, season):
         self.id = id
-        self.name = name
         self.number = number
+        self.name = name
+        self.url = url
         self.season = season.number
         self.show = season.show.name
+        self.show_obj = season.show
+        self.urlname = self.url.rsplit("/")[-1]
 
-        # info_keys = ['image', 'description', 'cast', 'genere',
-        #              'language', 'show', 'season']
+        info_keys = ['image', 'description', 'cast', 'genere',
+                     'language']
 
-        # for info_key in info_keys:
-        #     setattr(self.__class__, info_key,
-        #             property(lambda self, i=info_key:self.info[i]))
+        for info_key in info_keys:
+            setattr(self.__class__, info_key,
+                    property(lambda self, i=info_key:self.info[i]))
 
     def get_subtitle(self, lang='ES', quality=None, filename=None):
         """ Downloads the subtitle of the episode. """
@@ -98,25 +85,24 @@ class Episode(object):
     def info(self):
         """ set info data in __info dict and return it. """
 
-        raise NotImplementedError()
+        if self.__info:
+            return self.__info
 
-        # if self.__info:
-        #     return self.__info
+        page_data = url_open(urls.show_info % \
+            (self.id, self.show_obj.urlname, self.urlname))
 
-        # page_data = url_open(urls.show_info % self.id)
+        open("/home/j0hn/Desktop/debug.html", "w").write(page_data)
+        image = self._image_re.search(page_data).group(1)
+        description = self._description_re.search(page_data).group(1).strip()
+        cast = self._cast_re.findall(page_data)
+        genere = self._genere_re.search(page_data).group(1).strip()
+        language = self._language_re.search(page_data).group(1).strip()
 
-        # name = self._name_re.findall(page_data)[0].strip()
-        # show = self._show_re.findall(page_data)[0].strip()
-        # image = urls.host + self._image_re.findall(page_data)[0]
-        # description = self._description_re.findall(page_data)[0].strip()
-        # cast = self._cast_re.findall(page_data)
-        # genere = self._genere_re.findall(page_data)[0].strip()
-        # language = self._language_re.findall(page_data)[0].strip()
-        # season = self._season_number_re.findall(page_data)[0].strip()
+        self.__info = {'image': image, 'description': description,
+                'cast': cast, 'genere': genere, 'language': language,
+                'name': self.name, 'season': self.season}
 
-        # self.__info = {'name': name, 'show': show, 'image': image, 'description': description,
-        #         'cast': cast, 'genere': genere, 'language': language, 'season': season}
-        # return self.__info
+        return self.__info
 
     @property
     def file_hosts(self):
@@ -179,7 +165,7 @@ class Season(object):
     @property
     def episodes(self):
         for ep in self._episodes:
-            yield Episode(ep["id"], ep["num"], ep["tit"], self)
+            yield Episode(ep["id"], ep["num"], ep["tit"], ep["url"], self)
 
     @classmethod
     def search(self, show):

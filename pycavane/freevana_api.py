@@ -10,7 +10,7 @@ Author: j0hn <j0hn.com.ar@gmail.com>
 import os
 import sqlite3
 
-import urls
+import cuevana_urls as urls
 from util import url_open
 from base_api import Episode as BaseEpisode, \
                      Show as BaseShow, \
