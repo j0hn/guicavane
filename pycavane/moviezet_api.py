@@ -12,6 +12,16 @@ from base_api import Episode as BaseEpisode, \
                      Season as BaseSeason, \
                      Movie as BaseMovie
 
+HOSTMAP = {'megaupload': 'http://www.megaupload.com/?d=',
+           'kickupload': 'http://www.kickupload.com/files/',
+           'bitshare': 'http://bitshare.com/?f=',
+           'filefactory': 'http://www.filefactory.com/file/'
+           }
+HOSTNAMES = {'mega': 'megaupload',
+            'kick': 'kickupload',
+            'bits': 'bitshare',
+            'file': 'filefactory'}
+
 
 class Episode(BaseEpisode):
     _search_re =  re.compile('<a href="(?P<id>.*?)" title="(?P<number>[0-9]*?)"'\
@@ -51,15 +61,11 @@ class Episode(BaseEpisode):
 
         data = url_open(watch_url)
 
-        hostmap = {'mega': 'http://www.megaupload.com/?d=',
-                   'bitshare': 'http://bitshare.com/?f=',
-                   'filefactory': 'http://www.filefactory.com/file/'
-                   }
-
         for host in self._hosts_re.finditer(data):
             host_dict = host.groupdict()
-            url = hostmap.get(host_dict["host"]) + host_dict["id"]
-            self.__hosts["megaupload"] = url
+            hostname = HOSTNAMES[host_dict["host"]]
+            url = HOSTMAP[hostname] + host_dict["id"]
+            self.__hosts[hostname] = url
 
         return self.__hosts
 
