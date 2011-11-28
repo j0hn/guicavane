@@ -196,7 +196,6 @@ class Player(object):
 
         while not stop:
             downloaded_size = self.downloader.downloaded_size
-            self._last_downloaded_size = downloaded_size
 
             self.update_speed()
 
