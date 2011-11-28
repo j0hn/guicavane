@@ -25,7 +25,7 @@ from Paths import MARKS_FILE, FAVORITES_FILE
 
 if "-d" in sys.argv or "--dummy" in sys.argv:
     testdir = os.path.join(os.getcwd(), "pycavane", "tests")
-    pycavane.api.setup("guicavane", "guicavane",
+    pycavane.cuevana_api.setup("guicavane", "guicavane",
         cache_dir=testdir, cache_lifetime=13**37)
 
 
@@ -40,7 +40,6 @@ class GuiManager(object):
         self.current_season = None
 
         self.config = Config()
-        self.api = getattr(pycavane, self.config.get_key("site") + "_api")
 
         self.marks = SList(MARKS_FILE)
         self.favorites = SList(FAVORITES_FILE)
@@ -76,13 +75,13 @@ class GuiManager(object):
         # Now we show the window
         self.main_window.show_all()
 
-        ## Start on last site
-        #try:
-        #    last_site = self.config.get_key("last_site")
-        #    getattr(self, "set_site_%s" % last_site.lower().replace(" ", "_"))()
-        #    self.site_combo.set_active(SITES.index(last_site))
-        #except:
-        #    pass
+        # API
+        try:
+            self.api = getattr(pycavane, self.config.get_key("site") + "_api")
+            last_site = self.config.get_key("site")
+            self.site_combo.set_active(SITES.index(last_site))
+        except Exception, error:
+            self.api = pycavane.cuevana_api
 
         # Start on last mode
         try:
@@ -654,7 +653,7 @@ class GuiManager(object):
         self.unfreeze()
 
         images_dir = self.config.get_key("images_dir")
-        if isinstance(file_object, pycavane.api.Episode):
+        if isinstance(file_object, self.api.Episode):
             name = file_object.show.lower()
         else:
             name = file_object.name.lower()
