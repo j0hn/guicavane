@@ -13,18 +13,21 @@ from base_api import Episode as BaseEpisode, \
                      Movie as BaseMovie
 
 
-class Episode(object):
+class Episode(BaseEpisode):
     _search_re =  re.compile('<a href="(?P<id>.*?)" title="(?P<number>[0-9]*?)"'\
                              '.*?</b>(?P<name>.*?)</a>')
     _watch_url = re.compile('<a class="watch-show" href="(.*?)">')
 
     #<a href="#7698" title="1"><b>1.</b> It's alive</a></li>
 
-    _hosts_re = re.compile('var (?P<host>mega[0-9]) = "(?P<id>.*?)";')
-    _host_names_re = re.compile('class="server" alt="(?P<name>.*?)"')
+    _hosts_re = re.compile('<a href="/getvid.php\?id=(?P<id>(.*?))&'\
+                           'name=(.*?)&server=(?P<host>.*?)".*?>')
+    __hosts = None
 
-    def __init__(self, id, number, name):
+    def __init__(self, id, number, name, show, season):
         self.id = id
+        self.season = season
+        self.show = show
         self.__name = name
         self.number = number
 
@@ -38,42 +41,36 @@ class Episode(object):
 
     @property
     def file_hosts(self):
-        data = url_open(urls.episode % (urllib.quote(self.show.name), self.season.id, self.number))
-        watch_url = self._watch_url.findall(data)[0]
-
+        if self.__hosts:
+            return self.__hosts
         self.__hosts = {}
 
-        data = url_open(watch_url)
-        hostnames = self._host_names_re.findall(data)
+        data = url_open(urls.episode % (urllib.quote(self.show),
+                                        self.season, self.number))
+        watch_url = self._watch_url.findall(data)[0]
 
-        hostmap = {'megaupload': 'http://www.megaupload.com/?d=',
+        data = url_open(watch_url)
+
+        hostmap = {'mega': 'http://www.megaupload.com/?d=',
                    'bitshare': 'http://bitshare.com/?f=',
                    'filefactory': 'http://www.filefactory.com/file/'
                    }
 
-        for name, id in self._hosts_re.findall(data):
-            self.__hosts['megaupload'] = hostmap.get('megaupload')+id
-            break
-            if not hostnames:
-                break
-            hostname = hostnames.pop()
-            id = hostmap.get(hostname, '') + id
-            self.__hosts[hostname] = id
+        for host in self._hosts_re.finditer(data):
+            host_dict = host.groupdict()
+            url = hostmap.get(host_dict["host"]) + host_dict["id"]
+            self.__hosts["megaupload"] = url
 
-        print self.__hosts
         return self.__hosts
 
     def get_subtitle(self, lang='ES', filename=None):
         if filename:
             filename += '.srt'
 
-        id = self.id.split('/play/')[1].split('/', 1)[0]
-        print
-        print urls.sub_show % id
-        print "asdas adsas dads asd asdada<<<<<<<<<<<<<<<<<<<<<<<<<"
+        url =  urls.sub_show % (self.id.replace("#", ""), lang)
         try:
-            result = url_open(urls.sub_show % id, filename=filename)
-        except:
+            result = url_open(url, filename=filename)
+        except Exception:
             raise Exception("Subtitle not found")
 
         return result
@@ -85,14 +82,14 @@ class Episode(object):
         of `season`.
         """
 
-        data = url_open(urls.episodes % (urllib.quote(season.show.name), season.id))
-        data = data.split('<ol id="episode-list">')[1]
+        url = urls.episodes % (urllib.quote(season.show), season.id)
+        data = url_open(url).split('<ol id="episode-list">')[1]
 
         for episode in self._search_re.finditer(data):
-            e =  Episode(**episode.groupdict())
-            e.show = season.show
-            e.season = season
-            yield e
+            episode_dict = episode.groupdict()
+            episode_dict.update(dict(show=season.show,
+                                      season=season.id))
+            yield Episode(**episode_dict)
 
     def __repr__(self):
         return '<Episode: id: "%s" number: "%s" name: "%s">' % \
@@ -102,10 +99,10 @@ class Episode(object):
 class Season(BaseSeason):
     _search_re = re.compile('<a(.*?)title="(?P<id>[0-9]*?)">'\
                             '(?P<name>.*?)</a>')
-    def __init__(self, id, name):
+    def __init__(self, id, name, show):
         self.id = id
         self.name = name
-        self.show = None
+        self.show = show
 
     @property
     def episodes(self):
@@ -117,9 +114,9 @@ class Season(BaseSeason):
         data = data.split('<ol id="season-list">')[1]
 
         for season in self._search_re.finditer(data):
-            s =  Season(**season.groupdict())
-            s.show = show
-            yield s
+            season_dict = season.groupdict()
+            season_dict["show"] = show.name
+            yield Season(**season_dict)
 
     def __repr__(self):
         return '<Season: id: "%s" name: "%s">' % (self.id, self.name)
@@ -144,13 +141,14 @@ class Show(BaseShow):
         currently avaliable Shows
         """
 
+        name = name.lower()
         data = url_open(urls.shows)
 
         for show in self._search_re.finditer(data):
             show_dict = show.groupdict()
             show_dict["id"] = int(md5(show_dict["name"]).hexdigest(), 16)
-
-            yield Show(**show_dict)
+            if not name or name in  show_dict["name"].lower():
+                yield Show(**show_dict)
 
     def __repr__(self):
         return '<Show: name: "%s">' % self.name

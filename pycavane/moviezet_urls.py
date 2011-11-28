@@ -6,5 +6,4 @@ episodes = seasons + '&season=%s'
 
 episode = episodes + '&episode=%s'
 
-sub_show = host + '/series/subs?s=%s'
-
+sub_show = host + '/files/s/sub/%s_%s.srt'
