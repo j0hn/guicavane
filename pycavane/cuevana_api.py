@@ -91,7 +91,6 @@ class Episode(object):
         page_data = url_open(urls.show_info % \
             (self.id, self.show_obj.urlname, self.urlname))
 
-        open("/home/j0hn/Desktop/debug.html", "w").write(page_data)
         image = self._image_re.search(page_data).group(1)
         description = self._description_re.search(page_data).group(1).strip()
         cast = self._cast_re.findall(page_data)
