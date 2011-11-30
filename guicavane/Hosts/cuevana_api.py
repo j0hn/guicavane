@@ -15,6 +15,7 @@ import cuevana_urls as urls
 from base import *
 from util import url_open, normalize_string
 
+DISPLAY_NAME = "Cuevana"
 
 class Episode(BaseEpisode):
     _sources_re = re.compile('sources = ({.*?}), sel_source')
@@ -235,31 +236,3 @@ class Movie(BaseMovie):
                 continue
 
             yield Movie(movie["id"], movie["tit"], movie["url"])
-
-    @classmethod
-    def get_latest(self):
-        """ Returns a list with all the latest
-        movies. """
-
-        data = url_open(urls.latest_movies)
-        for movie in self._latest_re.finditer(data):
-            movie_dict = movie.groupdict()
-            movie_dict['description'] = movie_dict['description'].strip()
-
-            yield Movie(**movie_dict)
-
-    @classmethod
-    def get_recomended(self):
-        """ Returns a list with all the recomended
-        movies. """
-
-        data = url_open(urls.recomended_movies)
-        data = data.split("<h3>Películas destacadas</h3>")[1].split("<h3>Episodios destacados</h3>")[0]
-        for movie in self._recomended_re.finditer(data):
-            movie_dict = movie.groupdict()
-            movie_dict["name"] = movie_dict["name"].strip()
-
-            yield Movie(**movie_dict)
-
-    def __repr__(self):
-        return '<Movie id: "%s" name: "%s">' % (self.id, self.name)
