@@ -2,7 +2,8 @@
 # coding: utf-8
 
 """
-Freevana api
+Freevana API.
+Cuevana API using offline database provided by the project freevana.
 
 Author: j0hn <j0hn.com.ar@gmail.com>
 """
@@ -11,12 +12,10 @@ import os
 import sqlite3
 
 import cuevana_urls as urls
+from base import *
 from util import url_open
-from base_api import Episode as BaseEpisode, \
-                     Show as BaseShow, \
-                     Season as BaseSeason, \
-                     Movie as BaseMovie
 
+DISPLAY_NAME = "Freevana"
 
 # Download latest freevana database from: http://tirino.github.com/freevana/
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -30,25 +29,15 @@ DB_CONN = sqlite3.connect(DATABASE_PATH, check_same_thread=False)
 
 
 class Episode(object):
-    _query_all = "SELECT id, name, number FROM series_episodes " \
-                 "WHERE season_id = '%s'"
     _query_sources = "SELECT source, url FROM series_episode_sources " \
                      "WHERE definition = '360' AND series_episode_id = '%s'"
 
-    def __init__(self, id, name, number, show_name, season_name):
+    def __init__(self, id, name, number, season, show):
         self.id = id
-        self.__name = name
+        self.name = name
         self.number = number
-        self.show = show_name
-        self.season = int(season_name.replace("Temporada ", ""))
-
-    @property
-    def name(self):
-        return self.__name
-
-    @property
-    def info(self):
-        raise NotImplementedError
+        self.season = season
+        self.show = show
 
     @property
     def file_hosts(self):
@@ -58,66 +47,41 @@ class Episode(object):
 
         result = cur.execute(self._query_sources % self.id)
         for row in result:
-            hosts[row[0]] = row[1]
+            hosts[row[0]]["360"] = row[1]
 
         return hosts
 
-    def get_subtitle(self, lang='ES', filename=None):
-        if filename:
-            filename += '.srt'
+    def get_subtitle_url(self, lang="ES", quality=None):
+        if quality:
+            return urls.sub_show_quality % (self.id, lang, quality)
 
-        try:
-            result = url_open(urls.sub_show % (self.id, lang), filename=filename)
-        except:
-            raise Exception("Subtitle not found")
-
-        return result
-
-    @classmethod
-    def search(self, season):
-        cur = DB_CONN.cursor()
-        result = cur.execute(self._query_all % season.id)
-
-        for row in result:
-            show_name = season.show
-            season_name = season.name
-
-            row = list(row) + [show_name, season_name]
-            yield Episode(*row)
-
-    def __repr__(self):
-        return '<Episode: id: "%s" number: "%s" name: "%s">' % \
-                              (self.id, self.number, self.name)
+        return urls.sub_show % (self.id, lang)
 
 
 class Season(BaseSeason):
-    _query_all = "SELECT id, name FROM series_seasons " \
-                 "WHERE series_id = '%s' ORDER BY number ASC"
+    _query_all_episodes = "SELECT id, name, number FROM series_episodes " \
+                          "WHERE season_id = '%s'"
 
-    def __init__(self, id, name, show_name):
+    def __init__(self, id, name, number, show):
         self.id = id
         self.name = name
-        self.show = show_name
+        self.number = number
+        self.show = show
 
     @property
     def episodes(self):
-        return Episode.search(self)
-
-    @classmethod
-    def search(self, show):
         cur = DB_CONN.cursor()
-        result = cur.execute(self._query_all % show.id)
+        result = cur.execute(self._query_all_episodes % self.id)
 
         for row in result:
-            row = list(row) + [show.name]
-            yield Season(*row)
+            yield Episode(row[0], row[1], row[2], self, self.show)
 
-    def __repr__(self):
-        return '<Season: id: "%s" name: "%s">' % (self.id, self.name)
 
 class Show(BaseShow):
-    _query_all = "SELECT id, name FROM series ORDER BY name ASC"
-    _query_one = "SELECT id, name FROM series WHERE name = '%s'"
+    _query_all_show = "SELECT id, name FROM series ORDER BY name ASC"
+    _query_one_show = "SELECT id, name FROM series WHERE name = '%s'"
+    _query_all_seasons = "SELECT id, name, number FROM series_seasons " \
+                         "WHERE series_id = '%s' ORDER BY number ASC"
 
     def __init__(self, id, name):
         self.id = id
@@ -125,45 +89,39 @@ class Show(BaseShow):
 
     @property
     def seasons(self):
-        return Season.search(self)
+        cur = DB_CONN.cursor()
+        result = cur.execute(self._query_all_seasons % self.id)
 
-    @property
-    def description(self):
-        raise NotImplementedError
+        for row in result:
+            yield Season(row[0], row[1], row[2], self)
 
     @classmethod
     def search(self, name=''):
         cur = DB_CONN.cursor()
 
         if name:
-            result = cur.execute(self._query_one % name)
+            result = cur.execute(self._query_one_show % name)
         else:
-            result = cur.execute(self._query_all)
+            result = cur.execute(self._query_all_show)
 
         for row in result:
-            yield Show(*row)
+            yield Show(row[0], row[1])
 
-    def __repr__(self):
-        return '<Show: id: "%s" name: "%s">' % (self.id, self.name)
 
 class Movie(BaseMovie):
     _query_search = "SELECT id, name FROM movies WHERE name LIKE '%%%s%%'"
     _query_sources = "SELECT source, url FROM movie_sources " \
                      "WHERE definition = '360' AND movie_id = '%s'"
-    def __init__(self, id, name, year=None, description=""):
+
+    def __init__(self, id, name):
         self.id = id
         self.name = name
 
-    def get_subtitle(self, lang='ES', filename=None):
-        if filename:
-            filename += '.srt'
+    def get_subtitle_url(self, lang="ES", quality=None):
+        if quality:
+            return urls.sub_movie_quality % (self.id, lang, quality)
 
-        try:
-            result = url_open(urls.sub_movie % (self.id, lang), filename=filename)
-        except:
-            raise Exception("Subtitle not found")
-
-        return result
+        return urls.sub_movie % (self.id, lang)
 
     @property
     def file_hosts(self):
@@ -173,7 +131,7 @@ class Movie(BaseMovie):
 
         result = cur.execute(self._query_sources % self.id)
         for row in result:
-            hosts[row[0]] = row[1]
+            hosts[row[0]]["360"] = row[1]
 
         return hosts
 
