@@ -3,21 +3,57 @@ import re
 from base_api import Episode as BaseEpisode, Show as BaseShow, \
                      Season as BaseSeason, Movie as BaseMovie
 import pelispedia_urls as urls
-from util import url_open, normalize_string
+from util import url_open
+
+HOSTMAP = {'megaupload': 'http://www.megaupload.com/?d=',
+           'kickupload': 'http://www.kickupload.com/files/',
+           'bitshare': 'http://bitshare.com/?f=',
+           'filefactory': 'http://www.filefactory.com/file/',
+           'hotfile': 'http://hotfile.com/dl/',
+           }
+
+HOSTNAMES = {'mega1': 'megaupload',
+            'mega2': 'bitshare',
+            'mega3': 'filefactory',
+            'mega4': 'hotfile',
+            'mega5': 'wupload',
+            'mega6': 'glumbo',
+            'mega7': 'uploadhere',
+            'mega8': 'uploadking',
+            }
+
+class Hosts(object):
+    __hosts = None
+
+    @property
+    def file_hosts(self):
+        if self.__hosts:
+            return self.__hosts
+        self.__hosts = {}
+
+        data = url_open(self.id)
+        for name, _id in self._hosts_re.findall(data):
+            if not _id:
+                continue
+            hostname = HOSTNAMES[name]
+            if hostname not in HOSTMAP:
+                print hostname, "not implemented"
+                continue
+            self.__hosts[hostname] = HOSTMAP[hostname] + _id
+        return self.__hosts
 
 
-class Episode(BaseMovie):
+class Episode(Hosts, BaseEpisode):
     _search_re =  re.compile("<option value='(?P<id>.*?)'>(?P<number>[0-9]*?)"\
                              " - (?P<name>.*?)</option>")
     _hosts_re = re.compile('var (?P<host>mega[0-9]) = "(?P<id>.*?)";')
-    _host_names_re = re.compile('class="server" alt="(?P<name>.*?)"')
 
-    def __init__(self, id, number, name):
+    def __init__(self, id, number, name, show, season):
         self.id = id
         self.__name = name
         self.number = number
-        self.show = 'asd'
-        self.season = 10
+        self.show = show
+        self.season = season
 
     @property
     def name(self):
@@ -26,29 +62,6 @@ class Episode(BaseMovie):
     @property
     def info(self):
         raise NotImplementedError
-
-    @property
-    def file_hosts(self):
-        self.__hosts = {}
-
-        data = url_open(self.id)
-        hostnames = self._host_names_re.findall(data)
-
-        hostmap = {'megaupload': 'http://www.megaupload.com/?d=',
-                   'bitshare': 'http://bitshare.com/?f=',
-                   'filefactory': 'http://www.filefactory.com/file/'
-                   }
-
-        for name, id in self._hosts_re.findall(data):
-            self.__hosts['megaupload'] = hostmap.get('megaupload')+id
-            break
-            if not hostnames:
-                break
-            hostname = hostnames.pop()
-            id = hostmap.get(hostname, '') + id
-            self.__hosts[hostname] = id
-
-        return self.__hosts
 
     def get_subtitle(self, lang='ES', filename=None):
         if filename:
@@ -70,9 +83,13 @@ class Episode(BaseMovie):
         of `season`.
         """
 
-        data = url_open(urls.episodes, {'t': season.id})
+        data = url_open(urls.episodes, {'ss': season.show_id,
+                                        't': season.id})
         for episode in self._search_re.finditer(data):
-            yield Episode(**episode.groupdict())
+            episode_dict = episode.groupdict()
+            episode_dict["show"] = season.show
+            episode_dict["season"] = season.id
+            yield Episode(**episode_dict)
 
     def __repr__(self):
         return '<Episode: id: "%s" number: "%s" name: "%s">' % \
@@ -82,9 +99,11 @@ class Episode(BaseMovie):
 class Season(BaseSeason):
     _search_re = re.compile('<option value=\'(?P<id>[0-9]*?)\'>'\
                             '(?P<name>.*?)</option>')
-    def __init__(self, id, name):
+    def __init__(self, id, name, show, show_id):
         self.id = id
         self.name = name
+        self.show = show
+        self.show_id = show_id
 
     @property
     def episodes(self):
@@ -94,7 +113,10 @@ class Season(BaseSeason):
     def search(self, show):
         data = url_open(urls.seasons, {'s': show.id})
         for season in self._search_re.finditer(data):
-            yield Season(**season.groupdict())
+            season_dict = season.groupdict()
+            season_dict["show"] = show.name
+            season_dict["show_id"] = show.id
+            yield Season(**season_dict)
 
     def __repr__(self):
         return '<Season: id: "%s" name: "%s">' % (self.id, self.name)
@@ -138,7 +160,7 @@ class Show(BaseShow):
     def __repr__(self):
         return '<Show: id: "%s" name: "%s">' % (self.id, self.name)
 
-class Movie(BaseMovie):
+class Movie(BaseMovie, Hosts):
     _search_re = re.compile('<div class="titletip"><b><a '\
             'href="(?P<id>http://www.pelispedia.com/movies/play/'\
             '.*?)">(?P<name>.*?)</a></b></div>')
@@ -162,30 +184,6 @@ class Movie(BaseMovie):
         for movie in self._search_re.finditer(data):
             movie_dict = movie.groupdict()
             yield Movie(**movie_dict)
-
-    @property
-    def file_hosts(self):
-        self.__hosts = {}
-
-        data = url_open(self.id)
-        hostnames = self._host_names_re.findall(data)
-
-        hostmap = {'megaupload': 'http://www.megaupload.com/?d=',
-                   'bitshare': 'http://bitshare.com/?f=',
-                   'filefactory': 'http://www.filefactory.com/file/'
-                   }
-
-        for name, id in self._hosts_re.findall(data):
-            print name
-            self.__hosts['megaupload'] = hostmap.get('megaupload')+id
-            break
-            if not hostnames:
-                break
-            hostname = hostnames.pop()
-            id = hostmap.get(hostname, '') + id
-            self.__hosts[hostname] = id
-
-        return self.__hosts
 
     def get_subtitle(self, lang='ES', filename=None):
         if filename:
