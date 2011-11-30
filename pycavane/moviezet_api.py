@@ -24,11 +24,9 @@ HOSTNAMES = {'mega': 'megaupload',
 
 
 class Episode(BaseEpisode):
-    _search_re =  re.compile('<a href="(?P<id>.*?)" title="(?P<number>[0-9]*?)"'\
-                             '.*?</b>(?P<name>.*?)</a>')
+    _search_re =  re.compile('<a href="(?P<id>.*?)" title='\
+            '"(?P<number>[0-9]*?)".*?</b>(?P<name>.*?)</a>')
     _watch_url = re.compile('<a class="watch-show" href="(.*?)">')
-
-    #<a href="#7698" title="1"><b>1.</b> It's alive</a></li>
 
     _hosts_re = re.compile('<a href="/getvid.php\?id=(?P<id>(.*?))&'\
                            'name=(.*?)&server=(?P<host>.*?)".*?>')
@@ -38,12 +36,8 @@ class Episode(BaseEpisode):
         self.id = id
         self.season = season
         self.show = show
-        self.__name = name
+        self.name = name
         self.number = number
-
-    @property
-    def name(self):
-        return self.__name
 
     @property
     def info(self):
@@ -160,5 +154,61 @@ class Show(BaseShow):
         return '<Show: name: "%s">' % self.name
 
 class Movie(BaseMovie):
-    pass
+    _search_re =  re.compile('div class="movie-thumb">\n<a href="'\
+            '(?P<id>.*?)/" title="(?P<name>.*?)"><img src="http://www'\
+            '.moviezet.com/wp-content/uploads/(?P<img>.*?)".*?</a>')
+    _hosts_re = re.compile('<a href="/getvid.php\?id=(?P<id>(.*?))&'\
+                           'name=(.*?)&server=(?P<host>.*?)".*?>')
+    _id_re = re.compile("href='http://www.moviezet.com/\?p=(?P<id>.*?)'")
+    __hosts = None
 
+    def __init__(self, id, name, img, description=""):
+        self.id = id
+        if name.startswith("Ver ") and name.endswith(" Online"):
+            name = name[4:-7]
+        self.name = name
+        self.image = urls.thumb_url % img
+        self.__description = description
+
+    @classmethod
+    def search(self, query=""):
+        """ Returns a list with all the matched
+        movies searched using the query. """
+
+        query = query.lower().replace(' ', '+')
+
+        data = url_open(urls.movies_search % query)
+
+        for movie in self._search_re.finditer(data):
+            movie_dict = movie.groupdict()
+            yield Movie(**movie_dict)
+
+    @property
+    def file_hosts(self):
+        if self.__hosts:
+            return self.__hosts
+        self.__hosts = {}
+
+        data = url_open(urls.movie % self.id)
+
+        for host in self._hosts_re.finditer(data):
+            host_dict = host.groupdict()
+            hostname = HOSTNAMES[host_dict["host"]]
+            url = HOSTMAP[hostname] + host_dict["id"]
+            self.__hosts[hostname] = url
+
+        return self.__hosts
+
+    def get_subtitle(self, lang='ES', filename=None):
+        if filename:
+            filename += '.srt'
+
+        _id = self._id_re.findall(url_open(self.id))[0]
+
+        url =  urls.sub_show % (_id, lang)
+        try:
+            result = url_open(url, filename=filename)
+        except Exception:
+            raise Exception("Subtitle not found")
+
+        return result
