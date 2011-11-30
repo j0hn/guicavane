@@ -173,8 +173,8 @@ class Season(object):
         data = url_open(urls.seasons % (show.id, show.urlname))
         jsondata = json.loads(self._json_re.search(data).group(1))
 
-        for data in jsondata:
-            yield Season(data, jsondata[data], show)
+        for key in sorted(jsondata, key=lambda k:int(k)):
+            yield Season(key, jsondata[key], show)
 
     def __repr__(self):
         return '<Season: id: "%s" name: "%s">' % (self.id, self.name)
