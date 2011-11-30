@@ -8,8 +8,8 @@ APIS_DIR = os.path.dirname(os.path.abspath(__file__))
 apis = []
 files = os.listdir(APIS_DIR)
 for filename in files:
-    if filename.endswith("api.py") and filename != "base_api.py":
-        apis.append("pycavane." + filename.replace(".py", ""))
+    if filename.endswith("api.py"):
+        apis.append("guicavane.Hosts." + filename.replace(".py", ""))
 
 for api in apis:
     try:

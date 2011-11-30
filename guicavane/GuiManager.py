@@ -13,7 +13,7 @@ import base64
 import urllib
 import webbrowser
 
-import pycavane
+import Hosts
 from Constants import *
 from SList import SList
 from Config import Config
@@ -23,10 +23,10 @@ from Settings import SettingsDialog
 from ThreadRunner import GtkThreadRunner
 from Paths import MARKS_FILE, FAVORITES_FILE
 
-if "-d" in sys.argv or "--dummy" in sys.argv:
-    testdir = os.path.join(os.getcwd(), "pycavane", "tests")
-    pycavane.cuevana_api.setup("guicavane", "guicavane",
-        cache_dir=testdir, cache_lifetime=13**37)
+# if "-d" in sys.argv or "--dummy" in sys.argv:
+#     testdir = os.path.join(os.getcwd(), "pycavane", "tests")
+#     pycavane.cuevana_api.setup("guicavane", "guicavane",
+#         cache_dir=testdir, cache_lifetime=13**37)
 
 
 class GuiManager(object):
@@ -43,9 +43,9 @@ class GuiManager(object):
 
         # API
         try:
-            self.api = getattr(pycavane, self.config.get_key("site") + "_api")
+            self.api = getattr(Hosts, self.config.get_key("site") + "_api")
         except Exception, error:
-            self.api = pycavane.cuevana_api
+            self.api = Hosts.cuevana_api
 
         self.marks = SList(MARKS_FILE)
         self.favorites = SList(FAVORITES_FILE)
@@ -376,7 +376,7 @@ class GuiManager(object):
 
         site_mode = self.get_site()
         self.config.set_key("site", site_mode)
-        self.api = getattr(pycavane, site_mode + "_api")
+        self.api = getattr(Hosts, site_mode + "_api")
 
         self.file_viewer_model.clear()
 
@@ -394,9 +394,11 @@ class GuiManager(object):
         self.current_show = selected_show
         self.path_label.set_text(selected_show.name)
 
-        self.background_task(self.api.Season.search, self.display_seasons,
-                selected_show, status_message="Loading show %s..." % \
-                selected_show.name)
+        def fetch_seasons():
+            return [x for x in selected_show.seasons]
+
+        self.background_task(fetch_seasons, self.display_seasons,
+            status_message="Loading show %s..." % selected_show.name)
 
     def _on_file_viewer_open(self, widget, path, *args):
         """ Called when the user double clicks on a file
@@ -465,9 +467,6 @@ class GuiManager(object):
         if selected not in self.favorites.get_all():
             self.favorites.add(selected)
 
-        #self.background_task(self.pycavane.add_favorite,
-        #                     self.on_finish_favorite, selected, False)
-
     def _on_remove_favorite(self, *args):
         """ Removes the selected show from favorites. """
 
@@ -478,9 +477,6 @@ class GuiManager(object):
         if selected in self.favorites.get_all():
             self.favorites.remove(selected)
             self.set_mode_favorites()
-
-        #self.background_task(self.pycavane.del_favorite,
-        #                     self.on_finish_favorite, selected, False)
 
     def _on_file_button_press(self, view, event):
         """ Called when the user press any mouse button on the file viewer. """
@@ -640,7 +636,7 @@ class GuiManager(object):
             "<b>Genere:</b> " + file_object.info["genere"] + "\n" \
             "<b>Language:</b> " + file_object.info["language"]
 
-        self.info_title.set_label(file_object.info["name"])
+        self.info_title.set_label(file_object.name)
         self.info_label.set_label(full_description)
         self.info_window.show()
 
@@ -656,7 +652,7 @@ class GuiManager(object):
 
         images_dir = self.config.get_key("images_dir")
         if isinstance(file_object, self.api.Episode):
-            name = file_object.show.lower()
+            name = file_object.show.name.lower()
         else:
             name = file_object.name.lower()
 

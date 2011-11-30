@@ -12,7 +12,7 @@ import gobject
 import subprocess
 
 import Downloaders
-import pycavane
+import Hosts
 from Constants import HOSTS_GUI_FILE, HOSTS_VIEW_COLUMN_OBJECT
 
 
@@ -27,7 +27,7 @@ class Player(object):
         self.gui_manager = gui_manager
         self.config = self.gui_manager.config
 
-        self.api = getattr(pycavane, self.config.get_key("site") + "_api")
+        self.api = getattr(Hosts, self.config.get_key("site") + "_api")
         self.file_object = file_object
         self.download_only = download_only
         self.choose_host = choose_host
@@ -277,9 +277,11 @@ class Player(object):
         assert isinstance(self.file_object, self.api.Episode)
 
         result = self.config.get_key("filename_template")
-        result = result.replace("<show>", self.file_object.show)
-        result = result.replace("<season>", "%.2d" % int(self.file_object.season))
-        result = result.replace("<episode>", "%s" % str(self.file_object.number))
+        result = result.replace("<show>", self.file_object.show.name)
+        result = result.replace("<season>", "%.2d" % \
+            int(self.file_object.season.number))
+        result = result.replace("<episode>", "%s" % \
+            str(self.file_object.number))
         result = result.replace("<name>", self.file_object.name)
         for char in '\/:?*"<>|%.':
             result = result.replace(char, "_")
