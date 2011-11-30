@@ -37,7 +37,7 @@ the settings dialog.
 
 Current Version
 ---------------
-1.5.2
+1.6.0
 
 Features List
 -------------
@@ -53,3 +53,4 @@ Features List
 * Resume downloads on unespected close
 * Latest movies list
 * Recomended movies list
+* Multiple site support (cuevana, pelispedia, moviezet, cuevana using freevana)
