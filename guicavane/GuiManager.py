@@ -66,7 +66,7 @@ class GuiManager(object):
             "sidebar", "sidebar_vbox", "path_label", "info_window",
             "info_title", "info_label", "info_image", "file_viewer_menu",
             "error_label", "error_dialog", "header_hbox", "main_hpaned",
-            "about_dialog",
+            "about_dialog", "site_liststore",
         ]
 
         for glade_object in glade_objects:
@@ -89,9 +89,12 @@ class GuiManager(object):
         except:
             self.set_mode_shows()
 
+        # Fill sites combobox
+        self.fill_sites_combobox()
+
         # Set last site active
         last_site = self.config.get_key("site")
-        self.site_combo.set_active(SITES.index(last_site))
+        self.site_combo.set_active(0)  #FIXME: SITES.index(last_site))
 
         # Login
         self.background_task(self.login_accounts, freeze=False)
@@ -166,6 +169,17 @@ class GuiManager(object):
                     print "Error: %s" % result
 
         GtkThreadRunner(real_callback, func, *args, **kwargs)
+
+    def fill_sites_combobox(self):
+        """ Fills the sites combobox with the avaliable apis. """
+
+        apis = [x for x in dir(Hosts) if x.endswith("_api")]
+
+        for api in apis:
+            module = getattr(Hosts, api)
+            display_name = module.DISPLAY_NAME
+
+            self.site_liststore.append([display_name, module])
 
     def set_status_message(self, message):
         """ Sets the message shown in the statusbar.  """
@@ -250,12 +264,10 @@ class GuiManager(object):
 
         model = self.site_combo.get_model()
         active = self.site_combo.get_active()
-        mode_text = model[active][0]
+        site_text = model[active][SITES_COLUMN_TEXT]
+        site_module = model[active][SITES_COLUMN_OBJECT]
 
-        # Poscondition
-        #assert mode_text in MODES
-
-        return mode_text.lower()
+        return (site_text.lower(), site_module)
 
     def report_error(self, message):
         """ Shows up an error dialog to the user. """
@@ -374,9 +386,10 @@ class GuiManager(object):
     def _on_site_change(self, *args):
         """ Called when the mode combobox changes value. """
 
-        site_mode = self.get_site()
-        self.config.set_key("site", site_mode)
-        self.api = getattr(Hosts, site_mode + "_api")
+        site_text, site_module = self.get_site()
+
+        self.config.set_key("site", site_text)
+        self.api = site_module
 
         self.file_viewer_model.clear()
 

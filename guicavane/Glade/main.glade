@@ -987,6 +987,14 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
       <column type="PyObject"/>
     </columns>
   </object>
+  <object class="GtkListStore" id="site_liststore">
+    <columns>
+      <!-- column-name label -->
+      <column type="gchararray"/>
+      <!-- column-name module_reference -->
+      <column type="PyObject"/>
+    </columns>
+  </object>
   <object class="GtkMenu" id="name_shows_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1002,25 +1010,5 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
         <signal name="activate" handler="_on_add_favorite" swapped="no"/>
       </object>
     </child>
-  </object>
-  <object class="GtkListStore" id="site_liststore">
-    <columns>
-      <!-- column-name label -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Cuevana</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Pelispedia</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Freevana</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Moviezet</col>
-      </row>
-    </data>
   </object>
 </interface>
