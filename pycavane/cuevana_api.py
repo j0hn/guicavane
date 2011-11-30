@@ -74,10 +74,12 @@ class Episode(object):
         else:
             url = urls.sub_show % (self.id, lang)
 
+        url_open.set_timeout(10)
         try:
             result = url_open(url, filename=filename)
         except:
             raise Exception("Subtitle not found")
+        url_open.set_timeout(None)
 
         return result
 

@@ -3,6 +3,7 @@
 
 import time
 import urllib
+import socket
 import urllib2
 import cookielib
 import functools
@@ -112,6 +113,9 @@ class UrlOpen(object):
             cached(cache_key, data)
 
         return data
+
+    def set_timeout(self, value):
+        socket.setdefaulttimeout(value)
 
     def setup_cookies(self):
         """
