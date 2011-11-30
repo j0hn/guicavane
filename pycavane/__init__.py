@@ -11,4 +11,8 @@ for filename in files:
     if filename.endswith("api.py") and filename != "base_api.py":
         apis.append("pycavane." + filename.replace(".py", ""))
 
-modules = map(__import__, apis)
+for api in apis:
+    try:
+        __import__(api)
+    except Exception, error:
+        print "Warning: couldn't import %s api:\n%s" % (api, error)

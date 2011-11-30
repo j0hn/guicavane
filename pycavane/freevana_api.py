@@ -21,8 +21,12 @@ from base_api import Episode as BaseEpisode, \
 # Download latest freevana database from: http://tirino.github.com/freevana/
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 DATABASE_FILE = "freevana.db"
-DB_CONN = sqlite3.connect(os.path.join(BASE_PATH, DATABASE_FILE),
-                          check_same_thread=False)
+DATABASE_PATH = os.path.join(BASE_PATH, DATABASE_FILE)
+
+if not os.path.exists(DATABASE_PATH):
+    raise ImportError("Database file does not exists")
+
+DB_CONN = sqlite3.connect(DATABASE_PATH, check_same_thread=False)
 
 
 class Episode(object):
