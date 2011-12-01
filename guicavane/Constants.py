@@ -29,13 +29,6 @@ MODES = [MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES,
          MODE_LATEST_MOVIES, MODE_RECOMENDED_MOVIES]
 # NOTE: MODES must be in the same order as they appear in the combobox
 
-SITE_CUEVANA = "cuevana"
-SITE_PELISPEDIA = "pelispedia"
-SITE_FREEVANA = "freevana"
-SITE_MOVIEZET = "moviezet"
-SITES = [SITE_CUEVANA, SITE_PELISPEDIA, SITE_FREEVANA, SITE_MOVIEZET]
-# NOTE: SITES must be in the same order as they appear in the combobox
-
 # Index of the columns on the tree views
 FILE_VIEW_COLUMN_PIXBUF = 0
 FILE_VIEW_COLUMN_TEXT = 1

@@ -92,10 +92,6 @@ class GuiManager(object):
         # Fill sites combobox
         self.fill_sites_combobox()
 
-        # Set last site active
-        last_site = self.config.get_key("site")
-        self.site_combo.set_active(0)  #FIXME: SITES.index(last_site))
-
         # Login
         self.background_task(self.login_accounts, freeze=False)
 
@@ -177,6 +173,12 @@ class GuiManager(object):
             display_name = module.DISPLAY_NAME
 
             self.site_liststore.append([display_name, module])
+
+        # Set last site active
+        last_site = self.config.get_key("site")
+        api_names = [x.DISPLAY_NAME for x in Hosts.AVALIABLE_APIS]
+        if last_site in api_names:
+            self.site_combo.set_active(api_names.index(last_site))
 
     def set_status_message(self, message):
         """ Sets the message shown in the statusbar.  """
