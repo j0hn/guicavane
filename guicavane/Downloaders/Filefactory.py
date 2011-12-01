@@ -27,8 +27,8 @@ FILE_URL_RE = re.compile(r'name="redirect" value="(.*?)"/>')
 FILE_URL_RE = re.compile(r'<a href="(.*?)" id="downloadLinkTarget">')
 COUNTDOWN_RE = re.compile(r'<span class="countdown">(\d*?)</span>')
 
-MAIN_URL_OPEN = UrlOpen()
-CAPTCHA_URL_OPEN = UrlOpen()
+MAIN_URL_OPEN = UrlOpen(use_cache=False)
+CAPTCHA_URL_OPEN = UrlOpen(use_cache=False)
 
 
 class Filefactory(BaseDownloader):

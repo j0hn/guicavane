@@ -15,7 +15,7 @@ from Base import BaseDownloader, DownloadError
 
 
 MEGALINK_RE = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')
-URL_OPEN = UrlOpen()
+URL_OPEN = UrlOpen(use_cache=False)
 
 
 class Megaupload(BaseDownloader):

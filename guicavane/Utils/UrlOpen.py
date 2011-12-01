@@ -54,17 +54,18 @@ def retry(callback):
 class UrlOpen(object):
     """ An url opener with cookies support. """
 
-    def __init__(self):
+    def __init__(self, use_cache=True):
         self.cookiejar = cookielib.CookieJar()
         self.opener = self.build_opener()
         self.set_timeout(DEFAULT_REQUEST_TIMEOUT)
+        self.use_cache = use_cache
 
     @retry
     def __call__(self, url, data=None, filename=None, handle=False, cache=True):
         cache_key = url + str(data)
         cache_data = cached(cache_key)
 
-        if cache and cache_data:
+        if self.use_cache and cache and cache_data:
             return cache_data
 
         if data:

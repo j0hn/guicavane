@@ -26,8 +26,8 @@ RECAPTCHA_CHALLENGE_ID_RE = re.compile('<script type="text/javascript" ' \
                      'src="http://api.recaptcha.net/challenge\?k=(.+?) ">')
 RECAPTCHA_NEW_CHALLENGE_RE = re.compile("challenge : '(.+?)',")
 
-MAIN_URL_OPEN = UrlOpen()
-CAPTCHA_URL_OPEN = UrlOpen()
+MAIN_URL_OPEN = UrlOpen(use_cache=False)
+CAPTCHA_URL_OPEN = UrlOpen(use_cache=False)
 
 
 class Bitshare(BaseDownloader):
