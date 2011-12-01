@@ -37,7 +37,6 @@ class Episode(BaseEpisode):
 
     _hosts_re = re.compile('<a href="/getvid.php\?id=(?P<id>(.*?))&'\
                            'name=(.*?)&server=(?P<host>.*?)".*?>')
-    __hosts = {}
 
     def __init__(self, id, name, number, season, show):
         self.id = id
@@ -45,6 +44,8 @@ class Episode(BaseEpisode):
         self.number = number
         self.season = season
         self.show = show
+
+        self.__hosts = {}
 
     @property
     def file_hosts(self):
@@ -135,14 +136,14 @@ class Movie(BaseMovie):
                            'name=(.*?)&server=(?P<host>.*?)".*?>')
     _id_re = re.compile("href='http://www.moviezet.com/\?p=(?P<id>.*?)'")
 
-    __hosts = {}
-
     def __init__(self, id, name, url):
         self.id = id
         if name.startswith("Ver ") and name.endswith(" Online"):
             name = name[4:-7]
         self.name = name
         self.url = url
+
+        self.__hosts = {}
 
     @classmethod
     def search(self, query=""):

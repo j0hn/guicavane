@@ -47,17 +47,24 @@ class Episode(object):
         self.season = season
         self.show = show
 
+        self.__hosts = {}
+
     @property
     def file_hosts(self):
-        hosts = {}
+        # Cache
+        if self.__hosts:
+            return self.__hosts
 
         cur = DB_CONN.cursor()
 
         result = cur.execute(self._query_sources % self.id)
         for row in result:
-            hosts[row[0]]["360"] = row[1]
+            if row[0] not in self.__hosts:
+                self.__hosts[row[0]] = {}
 
-        return hosts
+            self.__hosts[row[0]]["360"] = row[1]
+
+        return self.__hosts
 
     def get_subtitle_url(self, lang="ES", quality=None):
         if quality:
@@ -125,6 +132,8 @@ class Movie(BaseMovie):
         self.id = id
         self.name = name
 
+        self.__hosts = {}
+
     def get_subtitle_url(self, lang="ES", quality=None):
         if quality:
             return sub_movie_quality % (self.id, lang, quality)
@@ -133,15 +142,19 @@ class Movie(BaseMovie):
 
     @property
     def file_hosts(self):
-        hosts = {}
+        if self.__hosts:
+            return self.__hosts
 
         cur = DB_CONN.cursor()
 
         result = cur.execute(self._query_sources % self.id)
         for row in result:
-            hosts[row[0]]["360"] = row[1]
+            if row[0] not in self.__hosts:
+                self.__hosts[row[0]] = {}
 
-        return hosts
+            self.__hosts[row[0]]["360"] = row[1]
+
+        return self.__hosts
 
     @classmethod
     def search(self, query=""):

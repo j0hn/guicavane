@@ -29,7 +29,6 @@ class Episode(BaseEpisode):
     _language_re = re.compile('<b>Idioma:</b>(.*)</div>')
 
     __info = None
-    __hosts = {}
 
     def __init__(self, id, name, number, season, show, url):
         self.id = id
@@ -40,6 +39,8 @@ class Episode(BaseEpisode):
         self.url = url
 
         self.urlname = self.url.rsplit("/", 1)[-1]
+
+        self.__hosts = {}
 
     def get_subtitle_url(self, lang="ES", quality=None):
         if quality:
@@ -161,13 +162,14 @@ class Movie(BaseMovie):
     _language_re = re.compile('<b>Idioma:</b>(.*?)</div>')
 
     __info = ""
-    __hosts = {}
 
     def __init__(self, id, name, url):
         self.id = id
         self.name = name
         self.url = url
         self.urlname = self.url.rsplit("/", 1)[-1]
+
+        self.__hosts = {}
 
     def get_subtitle_url(self, lang="ES", quality=None):
         if quality:

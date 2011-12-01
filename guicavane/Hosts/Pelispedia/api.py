@@ -37,7 +37,7 @@ url_open = UrlOpen()
 
 
 class Hosts(object):
-    __hosts = {}
+    __hosts = None
 
     @property
     def file_hosts(self):
@@ -45,6 +45,7 @@ class Hosts(object):
         # Cache
         if self.__hosts:
             return self.__hosts
+        self.__hosts = {}
 
         data = url_open(self.url)
 
