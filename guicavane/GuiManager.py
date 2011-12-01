@@ -636,9 +636,7 @@ class GuiManager(object):
         self.settings_dialog.show()
 
     def _on_info_clicked(self, *args):
-        """
-        Called when click on the context menu info item.
-        """
+        """ Called when click on the context menu info item. """
 
         path, _ = self.file_viewer.get_cursor()
         file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
@@ -647,15 +645,30 @@ class GuiManager(object):
         self.info_image.set_from_pixbuf(empty_case)
 
         self.background_task(self.download_show_image, self.set_info_image,
-                             file_object)
+                             file_object, freeze=False)
 
-        full_description = file_object.info["description"] + "\n\n" \
-            "<b>Cast:</b> " + ", ".join(file_object.info["cast"]) + "\n" \
-            "<b>Genere:</b> " + file_object.info["genere"] + "\n" \
-            "<b>Language:</b> " + file_object.info["language"]
+        def fetch_info():
+            full_description = file_object.info["description"] + "\n\n" \
+                "<b>Cast:</b> " + ", ".join(file_object.info["cast"]) + "\n" \
+                "<b>Genere:</b> " + file_object.info["genere"] + "\n" \
+                "<b>Language:</b> " + file_object.info["language"]
 
-        self.info_title.set_label(file_object.name)
-        self.info_label.set_label(full_description)
+            return file_object.name, full_description
+
+        self.background_task(fetch_info, self.set_info, freeze=True)
+
+    def set_info(self, (is_error, result)):
+        if is_error:
+            if isinstance(result, NotImplementedError):
+                message = "Information not supported for this site"
+            else:
+                message = "Error downloading information: %s" % result
+
+            self.report_error(message)
+            return
+
+        self.info_title.set_label(result[0])
+        self.info_label.set_label(result[1])
         self.info_window.show()
 
     def _on_info_window_close(self, *args):
