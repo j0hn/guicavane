@@ -437,8 +437,11 @@ class GuiManager(object):
         elif isinstance(file_object, self.api.Episode):
             Player(self, file_object)
         elif file_object == None:
-            self.background_task(self.api.Season.search,
-                self.display_seasons, self.current_show,
+
+            def fetch_seasons():
+                return [x for x in self.current_show.seasons]
+
+            self.background_task(fetch_seasons, self.display_seasons,
                 status_message="Loading show %s..." % self.current_show.name)
 
     def _on_name_filter_change(self, *args):
