@@ -43,7 +43,7 @@ class Episode(BaseEpisode):
         self.__hosts = {}
 
     def get_subtitle_url(self, lang="ES", quality=None):
-        if quality:
+        if quality and quality != "360":
             return urls.sub_show_quality % (self.id, lang, quality)
 
         return urls.sub_show % (self.id, lang)
@@ -172,7 +172,7 @@ class Movie(BaseMovie):
         self.__hosts = {}
 
     def get_subtitle_url(self, lang="ES", quality=None):
-        if quality:
+        if quality and quality != "360":
             return urls.sub_movie_quality % (self.id, lang, quality)
 
         return urls.sub_movie % (self.id, lang)

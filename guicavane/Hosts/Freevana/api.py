@@ -36,7 +36,7 @@ sub_movie_quality = static_host + '/files/sub/%s_%s_%s.srt'
 url_open = UrlOpen()
 
 
-class Episode(object):
+class Episode(BaseEpisode):
     _query_sources = "SELECT source, url FROM series_episode_sources " \
                      "WHERE definition = '360' AND series_episode_id = '%s'"
 
@@ -67,7 +67,7 @@ class Episode(object):
         return self.__hosts
 
     def get_subtitle_url(self, lang="ES", quality=None):
-        if quality:
+        if quality and quality != "360":
             return sub_show_quality % (self.id, lang, quality)
 
         return sub_show % (self.id, lang)
@@ -135,7 +135,7 @@ class Movie(BaseMovie):
         self.__hosts = {}
 
     def get_subtitle_url(self, lang="ES", quality=None):
-        if quality:
+        if quality and quality != "360":
             return sub_movie_quality % (self.id, lang, quality)
 
         return sub_movie % (self.id, lang)
