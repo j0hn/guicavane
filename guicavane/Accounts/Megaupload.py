@@ -7,7 +7,7 @@ Megaupload Downloader.
 
 import re
 
-from guicavane.Util import UrlOpen
+from guicavane.Utils.UrlOpen import UrlOpen
 from Base import BaseAccount
 
 

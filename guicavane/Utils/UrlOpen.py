@@ -10,34 +10,16 @@ import functools
 from StringIO import StringIO
 from unicodedata import normalize
 
-from cached import Cached
+from Cached import Cached
 
-cached = Cached.get()
 
 HEADERS = {
     'User-Agent': 'User-Agent:Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.1 '
                   '(KHTML, like Gecko) Chrome/13.0.772.0 Safari/535.1',
-    'Referer': 'http://www.cuevana.tv/',
     'Accept': 'text/html,application/xhtml+xml,application/xml;'}
 
 RETRY_TIMES = 5
-
-
-def normalize_string(string):
-    """
-    Take a string and return a cleaned string ready to use for cuevana
-    """
-
-    repl_list = [" ", ".", ",", "'", "?", "$", "#",
-                 "*", "!", ":", "(", ")"]
-
-    uni_str = unicode(string, "utf-8")
-    clean_str = normalize("NFKD", uni_str).encode("ASCII", "ignore").lower()
-
-    for rep_char in repl_list:
-        clean_str = clean_str.replace(rep_char, "")
-
-    return clean_str
+cached = Cached.get()
 
 
 def retry(callback):
@@ -52,7 +34,6 @@ def retry(callback):
             try:
                 return callback(*args, **kwargs)
             except Exception, error:
-                # Try to fix problens with squid
                 urllib.urlcleanup()
                 tried += 1
                 time.sleep(1)
@@ -63,15 +44,16 @@ def retry(callback):
 
 
 class UrlOpen(object):
-    """
-    An url opener with cookies support.
-    """
+    """ An url opener with cookies support. """
 
     def __init__(self):
-        self.setup_cookies()
+        self.cookiejar = cookielib.CookieJar()
+        self.opener = self.build_opener()
 
     @retry
     def __call__(self, url, data=None, filename=None, handle=False, cache=True):
+        print "requesting", url
+
         cache_key = url+str(data)
 
         cache_data = cached(cache_key)
@@ -114,16 +96,24 @@ class UrlOpen(object):
 
         return data
 
+    def build_opener(self):
+        """ Setup cookies in urllib2. """
+
+        handler = urllib2.HTTPCookieProcessor(self.cookiejar)
+        return urllib2.build_opener(handler)
+
     def set_timeout(self, value):
         socket.setdefaulttimeout(value)
 
-    def setup_cookies(self):
-        """
-        Setup cookies in urllib2.
-        """
+    def add_cookies(self, cookies):
+        """ Add new cookies. """
 
-        jar = cookielib.CookieJar()
-        handler = urllib2.HTTPCookieProcessor(jar)
-        self.opener = urllib2.build_opener(handler)
+        for cookie in cookies:
+            self.cookiejar.set_cookie(cookie)
 
-url_open = UrlOpen()
+    def add_headers(self, headers):
+        """ Add new headers. headers argument has to be a diccionary. """
+
+        base_headers = dict(self.opener.addheaders)
+        base_headers.update(headers)
+        self.opener.addheaders = base_headers.items()

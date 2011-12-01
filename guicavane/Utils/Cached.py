@@ -9,12 +9,13 @@ Module that provides a function to cache key, value data.
 
 import os
 import time
+
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 
-from singleton import Singleton
+from Singleton import Singleton
 
 
 class Cached(Singleton):

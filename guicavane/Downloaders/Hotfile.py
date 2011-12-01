@@ -10,7 +10,7 @@ import time
 import gobject
 
 from Base import BaseDownloader, DownloadError
-from guicavane.Util import UrlOpen
+from guicavane.Utils.UrlOpen import UrlOpen
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
 from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
 

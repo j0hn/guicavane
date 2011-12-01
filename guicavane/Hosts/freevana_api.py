@@ -13,7 +13,7 @@ import sqlite3
 
 import cuevana_urls as urls
 from base import *
-from util import url_open
+from guicavane.Utils.UrlOpen import UrlOpen
 
 DISPLAY_NAME = "Freevana"
 
@@ -26,6 +26,9 @@ if not os.path.exists(DATABASE_PATH):
     raise ImportError("Database file does not exists")
 
 DB_CONN = sqlite3.connect(DATABASE_PATH, check_same_thread=False)
+
+url_open = UrlOpen()
+url_open.set_timeout(10)
 
 
 class Episode(object):

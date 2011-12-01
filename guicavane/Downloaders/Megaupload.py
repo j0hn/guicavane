@@ -9,7 +9,7 @@ import re
 import time
 import gobject
 
-from guicavane.Util import UrlOpen
+from guicavane.Utils.UrlOpen import UrlOpen
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
 from Base import BaseDownloader, DownloadError
 

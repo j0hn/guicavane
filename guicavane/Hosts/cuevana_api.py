@@ -13,9 +13,12 @@ import json
 
 import cuevana_urls as urls
 from base import *
-from util import url_open, normalize_string
+from guicavane.Utils.UrlOpen import UrlOpen
 
 DISPLAY_NAME = "Cuevana"
+url_open = UrlOpen()
+url_open.set_timeout(10)
+
 
 class Episode(BaseEpisode):
     _sources_re = re.compile('sources = ({.*?}), sel_source')
