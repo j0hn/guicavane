@@ -26,6 +26,6 @@ MARKS_FILE = os.path.join(CONFIG_DIR, "marks.slist")
 FAVORITES_FILE = os.path.join(CONFIG_DIR, "favorites.slist")
 
 IMAGES_DIR = os.path.join(MAIN_DIR, "Images")
-HOSTS_IMAGES_DIR = os.path.join(IMAGES_DIR, "hosts")
+HOSTS_IMAGES_DIR = os.path.join(IMAGES_DIR, "Downloaders")
 
 GUI_DIR = os.path.join(MAIN_DIR, "Glade")
