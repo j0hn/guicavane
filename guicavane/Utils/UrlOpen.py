@@ -11,6 +11,7 @@ from StringIO import StringIO
 from unicodedata import normalize
 
 from Cached import Cached
+from guicavane.Constants import DEFAULT_REQUEST_TIMEOUT
 
 
 HEADERS = {
@@ -49,10 +50,10 @@ class UrlOpen(object):
     def __init__(self):
         self.cookiejar = cookielib.CookieJar()
         self.opener = self.build_opener()
+        self.set_timeout(DEFAULT_REQUEST_TIMEOUT)
 
     @retry
     def __call__(self, url, data=None, filename=None, handle=False, cache=True):
-        print "requesting", url
 
         cache_key = url+str(data)
 

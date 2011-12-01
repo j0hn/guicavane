@@ -17,7 +17,6 @@ from guicavane.Utils.UrlOpen import UrlOpen
 
 DISPLAY_NAME = "Cuevana"
 url_open = UrlOpen()
-url_open.set_timeout(10)
 
 
 class Episode(BaseEpisode):

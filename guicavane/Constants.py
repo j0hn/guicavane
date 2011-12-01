@@ -67,3 +67,6 @@ ICON_FILE_MOVIE_MARK = IMAGE_FILE_MOVIE_MARK.get_pixbuf()
 
 IMAGE_CASE_EMPTY = IMAGES_DIR + SEP + "case_empty.png"
 IMAGE_CASE = IMAGES_DIR + SEP + "case.png"
+
+# Url request timeout
+DEFAULT_REQUEST_TIMEOUT = 10  # None for use python's default

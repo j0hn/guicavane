@@ -28,7 +28,6 @@ if not os.path.exists(DATABASE_PATH):
 DB_CONN = sqlite3.connect(DATABASE_PATH, check_same_thread=False)
 
 url_open = UrlOpen()
-url_open.set_timeout(10)
 
 
 class Episode(object):
