@@ -13,13 +13,13 @@ import sqlite3
 
 from guicavane.Hosts.Base import *
 from guicavane.Utils.UrlOpen import UrlOpen
+from guicavane.Paths import CONFIG_DIR
 
 DISPLAY_NAME = "Freevana"
 
 # Download latest freevana database from: http://tirino.github.com/freevana/
-BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 DATABASE_FILE = "freevana.db"
-DATABASE_PATH = os.path.join(BASE_PATH, DATABASE_FILE)
+DATABASE_PATH = os.path.join(CONFIG_DIR, DATABASE_FILE)
 
 if not os.path.exists(DATABASE_PATH):
     raise ImportError("Database file does not exists")
@@ -27,7 +27,7 @@ if not os.path.exists(DATABASE_PATH):
 DB_CONN = sqlite3.connect(DATABASE_PATH, check_same_thread=False)
 
 # URLS
-host = 'http://www.cuevana.tv'
+static_host = 'http://sc.cuevana.tv'
 sub_show = static_host + '/files/s/sub/%s_%s.srt'
 sub_show_quality = static_host + '/files/s/sub/%s_%s_%s.srt'
 sub_movie = static_host + '/files/sub/%s_%s.srt'
