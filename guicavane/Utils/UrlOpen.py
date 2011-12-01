@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+"""
+UrlOpen
+
+Requests webpages using cache, cookies,
+headers and retry features.
+"""
+
 import time
 import urllib
 import socket
@@ -8,11 +15,9 @@ import urllib2
 import cookielib
 import functools
 from StringIO import StringIO
-from unicodedata import normalize
 
 from Cached import Cached
 from guicavane.Constants import DEFAULT_REQUEST_TIMEOUT
-
 
 HEADERS = {
     'User-Agent': 'User-Agent:Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.1 '
@@ -24,13 +29,12 @@ cached = Cached.get()
 
 
 def retry(callback):
-    """
-    Retry decorator.
-    """
+    """ Retry decorator. """
 
     @functools.wraps(callback)
     def deco(*args, **kwargs):
         tried = 0
+
         while tried < RETRY_TIMES:
             try:
                 return callback(*args, **kwargs)
@@ -38,9 +42,12 @@ def retry(callback):
                 urllib.urlcleanup()
                 tried += 1
                 time.sleep(1)
-        error = 'Can\'t download\nerror: "%s"\n args: %s' % \
-                            (error, str(args) + str(kwargs))
+
+        error = "Can't download. Error: '%s', args: '%s'" % \
+            (error, str(args) + str(kwargs))
+
         raise Exception(error)
+
     return deco
 
 
@@ -54,10 +61,9 @@ class UrlOpen(object):
 
     @retry
     def __call__(self, url, data=None, filename=None, handle=False, cache=True):
-
-        cache_key = url+str(data)
-
+        cache_key = url + str(data)
         cache_data = cached(cache_key)
+
         if cache and cache_data:
             return cache_data
 
@@ -73,12 +79,13 @@ class UrlOpen(object):
             return rc
 
         if filename:
-            local = open(filename, 'wb')
+            local = open(filename, "wb")
         else:
             local = StringIO()
 
         while True:
             buffer = rc.read(1024)
+
             if buffer == '':
                 break
 
@@ -91,6 +98,7 @@ class UrlOpen(object):
         local.seek(0)
 
         data = local.read()
+
         if cache:
             # just cache if not a file
             cached(cache_key, data)
@@ -104,6 +112,8 @@ class UrlOpen(object):
         return urllib2.build_opener(handler)
 
     def set_timeout(self, value):
+        """ Sets the max request timeout. """
+
         socket.setdefaulttimeout(value)
 
     def add_cookies(self, cookies):
