@@ -12,8 +12,8 @@ Authors: Roger Duran <rogerduran@gmail.com>
 import re
 import json
 
-import cuevana_urls as urls
-from base import *
+import urls
+from guicavane.Hosts.Base import *
 from guicavane.Utils.UrlOpen import UrlOpen
 
 DISPLAY_NAME = "Cuevana"

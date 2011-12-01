@@ -13,8 +13,8 @@ import re
 import urllib
 from hashlib import md5
 
-from base import *
-import moviezet_urls as urls
+from guicavane.Hosts.Base import *
+import urls
 from guicavane.Utils.UrlOpen import UrlOpen
 
 HOSTMAP = {'megaupload': 'http://www.megaupload.com/?d=',

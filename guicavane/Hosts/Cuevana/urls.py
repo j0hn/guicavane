@@ -21,8 +21,8 @@ source_get = host + '/player/source_get'
 # Subtitles
 sub_show = static_host + '/files/s/sub/%s_%s.srt'
 sub_show_quality = static_host + '/files/s/sub/%s_%s_%s.srt'
-sub_movie_quality = static_host + '/files/sub/%s_%s_%s.srt'
 sub_movie = static_host + '/files/sub/%s_%s.srt'
+sub_movie_quality = static_host + '/files/sub/%s_%s_%s.srt'
 
 # Misc
 search = host + '/web/buscar?&q=%s'

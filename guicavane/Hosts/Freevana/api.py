@@ -11,8 +11,7 @@ Author: j0hn <j0hn.com.ar@gmail.com>
 import os
 import sqlite3
 
-import cuevana_urls as urls
-from base import *
+from guicavane.Hosts.Base import *
 from guicavane.Utils.UrlOpen import UrlOpen
 
 DISPLAY_NAME = "Freevana"
@@ -26,6 +25,13 @@ if not os.path.exists(DATABASE_PATH):
     raise ImportError("Database file does not exists")
 
 DB_CONN = sqlite3.connect(DATABASE_PATH, check_same_thread=False)
+
+# URLS
+host = 'http://www.cuevana.tv'
+sub_show = static_host + '/files/s/sub/%s_%s.srt'
+sub_show_quality = static_host + '/files/s/sub/%s_%s_%s.srt'
+sub_movie = static_host + '/files/sub/%s_%s.srt'
+sub_movie_quality = static_host + '/files/sub/%s_%s_%s.srt'
 
 url_open = UrlOpen()
 
@@ -55,9 +61,9 @@ class Episode(object):
 
     def get_subtitle_url(self, lang="ES", quality=None):
         if quality:
-            return urls.sub_show_quality % (self.id, lang, quality)
+            return sub_show_quality % (self.id, lang, quality)
 
-        return urls.sub_show % (self.id, lang)
+        return sub_show % (self.id, lang)
 
 
 class Season(BaseSeason):
@@ -121,9 +127,9 @@ class Movie(BaseMovie):
 
     def get_subtitle_url(self, lang="ES", quality=None):
         if quality:
-            return urls.sub_movie_quality % (self.id, lang, quality)
+            return sub_movie_quality % (self.id, lang, quality)
 
-        return urls.sub_movie % (self.id, lang)
+        return sub_movie % (self.id, lang)
 
     @property
     def file_hosts(self):

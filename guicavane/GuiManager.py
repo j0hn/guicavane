@@ -43,9 +43,9 @@ class GuiManager(object):
 
         # API
         try:
-            self.api = getattr(Hosts, self.config.get_key("site") + "_api")
+            self.api = getattr(Hosts, self.config.get_key("site")).api
         except Exception, error:
-            self.api = Hosts.cuevana_api
+            self.api = Hosts.Cuevana.api
 
         self.marks = SList(MARKS_FILE)
         self.favorites = SList(FAVORITES_FILE)
@@ -173,10 +173,7 @@ class GuiManager(object):
     def fill_sites_combobox(self):
         """ Fills the sites combobox with the avaliable apis. """
 
-        apis = [x for x in dir(Hosts) if x.endswith("_api")]
-
-        for api in apis:
-            module = getattr(Hosts, api)
+        for module in Hosts.AVALIABLE_APIS:
             display_name = module.DISPLAY_NAME
 
             self.site_liststore.append([display_name, module])
@@ -267,7 +264,7 @@ class GuiManager(object):
         site_text = model[active][SITES_COLUMN_TEXT]
         site_module = model[active][SITES_COLUMN_OBJECT]
 
-        return (site_text.lower(), site_module)
+        return (site_text, site_module)
 
     def report_error(self, message):
         """ Shows up an error dialog to the user. """

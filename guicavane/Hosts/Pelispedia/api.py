@@ -10,8 +10,8 @@ Authors: Roger Duran <rogerduran@gmail.com>
 
 import re
 
-from base import *
-import pelispedia_urls as urls
+from guicavane.Hosts.Base import *
+import urls
 from guicavane.Utils.UrlOpen import UrlOpen
 
 HOSTMAP = {'megaupload': 'http://www.megaupload.com/?d=',
