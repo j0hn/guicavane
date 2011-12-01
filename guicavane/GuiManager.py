@@ -284,8 +284,9 @@ class GuiManager(object):
         self.file_viewer_model.clear()
 
         if is_error:
-            message = "Problem fetching shows, "
-            message += "please try again in a few minutes."
+            message = "Problem fetching shows:\n\n"
+            message += "details: %s" % result
+
             self.report_error(message)
             return
 
@@ -296,8 +297,9 @@ class GuiManager(object):
         """ Fills the file viewer with the seasons. """
 
         if is_error:
-            message = "Problem fetching seasons, "
-            message = "please try again in a few minutes."
+            message = "Problem fetching seasons:\n\n"
+            message += "details: %s" % result
+
             self.report_error(message)
             return
 
@@ -310,8 +312,9 @@ class GuiManager(object):
         """ Fills the file viewer with the episodes. """
 
         if is_error:
-            message = "Problem fetching episodes, "
-            message = "please try again in a few minutes."
+            message = "Problem fetching episodes:\n\n"
+            message += "details: %s" % result
+
             self.report_error(message)
             return
 

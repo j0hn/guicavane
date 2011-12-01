@@ -2,7 +2,8 @@
 # coding: utf-8
 
 """
-API for site www.cuevana.tv
+Cuevana API.
+API for website www.cuevana.tv
 
 Authors: Roger Duran <rogerduran@gmail.com>
          j0hn <j0hn.com.ar@gmail.com>
