@@ -58,6 +58,11 @@ class Bitshare(BaseDownloader):
         page_data = MAIN_URL_OPEN(self.url)
         self.download_id = self.url.split("?f=")[1]
 
+        if "Error - Archivo no disponible" in page_data:
+            raise Exception("File not avaliable anymore")
+        else:
+            print page_data
+
         try:
             self.ajaxdl = AJAXDL_RE.search(page_data).group(1)
         except:
