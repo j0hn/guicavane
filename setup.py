@@ -6,7 +6,7 @@ import sys
 from distutils.core import setup
 from distutils.command.install import install
 
-VERSION_NUMBER = "1.5.0"
+VERSION_NUMBER = "1.6.1"
 
 
 class CustomInstall(install):
@@ -40,6 +40,11 @@ class CustomInstall(install):
         self._custom_data_dir = data_dir
 
 def setup_linux():
+    hosts_dir = "guicavane/Hosts"
+    hosts = os.listdir(hosts_dir)
+    hosts = ["guicavane.Hosts." + x for x in hosts if os.path.isdir(
+        os.path.join(hosts_dir, x))]
+
     setup(
         name = "guicavane",
         version = VERSION_NUMBER,
@@ -48,10 +53,10 @@ def setup_linux():
         author_email = "j0hn.com.ar@gmail.com",
         description = "Graphical user interface for www.cuevana.tv",
         url = "http://www.github.com/j0hn/guicavane/",
-        packages = ["guicavane", "guicavane.Downloaders",
-                    "guicavane.Accounts", "pycavane"],
+        packages = ["guicavane", "guicavane.Downloaders", "guicavane.Utils",
+                    "guicavane.Accounts", "guicavane.Hosts"] + hosts,
         package_data = {"guicavane": ["Glade/*.glade", "Images/*.png",
-            "Images/hosts/*.png"]},
+            "Images/Downloaders/*.png"]},
         scripts = ["bin/guicavane"],
         cmdclass = {"install": CustomInstall}
     )
