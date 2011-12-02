@@ -66,11 +66,7 @@ class Player(object):
         result = {}
         avaliable_downloaders = Downloaders.get_avaliable()
 
-        try:
-            hosts = self.file_object.file_hosts
-        except Exception, error:
-            raise Exception("No host found due to: '%s'" % error)
-            hosts = {}
+        hosts = self.file_object.file_hosts
 
         hosts["dummy"] = ""
 
