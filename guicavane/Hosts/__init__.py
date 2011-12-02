@@ -2,9 +2,15 @@
 # coding: utf-8
 
 import os
+import sys
 import Cuevana  # FIXME: always avaliable because it's guicavane's default
+from guicavane.Paths import MAIN_DIR
 
-APIS_DIR = os.path.dirname(os.path.abspath(__file__))
+if sys.platform == "win32":
+    APIS_DIR = os.path.join(MAIN_DIR, "Hosts")
+else:
+    APIS_DIR = os.path.dirname(os.path.abspath(__file__))
+
 AVALIABLE_APIS = []
 
 apis = []

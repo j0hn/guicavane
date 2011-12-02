@@ -18,6 +18,7 @@ else:
 HOME_DIR = os.path.expanduser("~")
 
 TEMP_DIR = tempfile.gettempdir()
+CACHE_DIR = TEMP_DIR
 
 CONFIG_DIR = os.path.join(HOME_DIR, ".guicavane")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "guicavane.conf")

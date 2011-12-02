@@ -48,7 +48,7 @@ def setup_linux():
     setup(
         name = "guicavane",
         version = VERSION_NUMBER,
-        livense = "GPL-3",
+        license = "GPL-3",
         author = "Gonzalo García Berrotarán",
         author_email = "j0hn.com.ar@gmail.com",
         description = "Graphical user interface for www.cuevana.tv",
@@ -77,9 +77,10 @@ def setup_windows():
         'py2exe': {
             'packages': 'encodings, gtk, guicavane, guicavane.Downloaders',
             'includes': 'cairo, pangocairo, pango, atk, gobject, os, urllib,' \
-                        'urllib2, cookielib, pycavane, guicavane, ' \
-                        'guicavane.Downloaders, guicavane.Accounts, gio, ' \
-                        'unicodedata, webbrowser',
+                        'urllib2, cookielib, guicavane, ' \
+                        'gio, unicodedata, webbrowser, ' \
+                        'guicavane.Downloaders, guicavane.Accounts, ' \
+                        'guicavane.Utils',
             'excludes': ["pywin", "pywin.debugger", "pywin.debugger.dbgcon",
                          "pywin.dialogs", "pywin.dialogs.list", "Tkconstants",
                          "Tkinter", "tcl", "doctest", "macpath", "pdb",
@@ -89,17 +90,30 @@ def setup_windows():
         }
     }
 
+    
     files = []
     files.append(("Glade",
         ["guicavane\\Glade\\" + x for x in os.listdir("guicavane\\Glade")]))
     files.append(("Images",
         ["guicavane\\Images\\" + x for x in os.listdir("guicavane\\Images") if \
             not os.path.isdir("guicavane\\Images\\" + x)]))
-    files.append(("Images\\hosts\\",
-        ["guicavane\\Images\\hosts\\" + x for x in os.listdir("guicavane\\Images\\hosts\\")]))
-
+    files.append(("Images\\Downloaders\\",
+        ["guicavane\\Images\\Downloaders\\" + x for x in os.listdir("guicavane\\Images\\Downloaders\\")]))
+        
+    hosts_dir = "guicavane\\Hosts"
+    hosts = os.listdir(hosts_dir)
+    hosts = [os.path.join(hosts_dir, x) for x in hosts if os.path.isdir(
+        os.path.join(hosts_dir, x))]
+        
+    for host in hosts:
+        cleanhost = host.replace("guicavane\\", "")
+        files.append((cleanhost, [os.path.join(host, x) for x in os.listdir(host)]))
+    
     setup(
         name = "Guicavane",
+        license = "GPL-3",
+        author = "Gonzalo García Berrotarán",
+        author_email = "j0hn.com.ar@gmail.com",
         description = "Graphical user interface for www.cuevana.tv",
         version = VERSION_NUMBER,
         windows = [outdata_win],

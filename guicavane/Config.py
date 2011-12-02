@@ -25,7 +25,7 @@ DEFAULT_VALUES = {
     "filename_template": "<show> S<season>E<episode> - <name>",
     "accounts": [("megaupload", {"username": "", "password": ""})],
     "automatic_megaupload": False,
-    "site": "cuevana",
+    "site": "Cuevana",
 }
 
 if not os.path.exists(CONFIG_DIR):

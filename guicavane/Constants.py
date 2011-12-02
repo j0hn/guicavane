@@ -44,7 +44,6 @@ HOSTS_VIEW_COLUMN_OBJECT = 2
 SITES_COLUMN_TEXT = 0
 SITES_COLUMN_OBJECT = 1
 
-
 # Icons
 IMAGE_FOLDER = gtk.Image()
 IMAGE_FOLDER.set_from_file(IMAGES_DIR + SEP + "folder.png")
@@ -62,4 +61,4 @@ IMAGE_CASE_EMPTY = IMAGES_DIR + SEP + "case_empty.png"
 IMAGE_CASE = IMAGES_DIR + SEP + "case.png"
 
 # Url request timeout
-DEFAULT_REQUEST_TIMEOUT = 10  # None for use python's default
+DEFAULT_REQUEST_TIMEOUT = 15  # None for use python's default

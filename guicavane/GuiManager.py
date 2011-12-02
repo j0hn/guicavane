@@ -84,7 +84,6 @@ class GuiManager(object):
         # Start on last mode
         try:
             last_mode = self.config.get_key("last_mode")
-            getattr(self, "set_mode_%s" % last_mode.lower().replace(" ", "_"))()
             self.mode_combo.set_active(MODES.index(last_mode))
         except:
             self.set_mode_shows()
@@ -382,8 +381,12 @@ class GuiManager(object):
 
         self.file_viewer_model.clear()
 
+        def do_nothing(*args, **kwargs):
+            pass
+
         # Call the corresponding set_mode method
-        getattr(self, "set_mode_%s" % last_mode.lower().replace(" ", "_"))()
+        mode_callback = getattr(self, "set_mode_%s" % last_mode.lower().replace(" ", "_"))
+        self.background_task(mode_callback, do_nothing)
 
     def _on_site_change(self, *args):
         """ Called when the mode combobox changes value. """

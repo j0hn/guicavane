@@ -18,6 +18,7 @@ from StringIO import StringIO
 
 from Cached import Cached
 from guicavane.Constants import DEFAULT_REQUEST_TIMEOUT
+from guicavane.Paths import CACHE_DIR
 
 HEADERS = {
     'User-Agent': 'User-Agent:Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.1 '
@@ -26,6 +27,7 @@ HEADERS = {
 
 RETRY_TIMES = 5
 cached = Cached.get()
+cached.set_cache_dir(CACHE_DIR)
 
 
 def retry(callback):
