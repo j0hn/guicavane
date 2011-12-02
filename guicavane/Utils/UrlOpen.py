@@ -11,13 +11,15 @@ headers and retry features.
 import time
 import urllib
 import socket
+import httplib
 import urllib2
 import cookielib
 import functools
 from StringIO import StringIO
 
 from Cached import Cached
-from guicavane.Constants import DEFAULT_REQUEST_TIMEOUT
+from guicavane.Constants import DEFAULT_REQUEST_TIMEOUT, \
+                                USE_CUSTOM_DNS, CUSTOM_DNS
 from guicavane.Paths import CACHE_DIR
 
 HEADERS = {
@@ -51,6 +53,29 @@ def retry(callback):
         raise Exception(error)
 
     return deco
+
+
+def CustomResolver(host):
+    if USE_CUSTOM_DNS:
+        if host in CUSTOM_DNS:
+            return CUSTOM_DNS[host]
+
+    return host
+
+
+class CustomHTTPConnection(httplib.HTTPConnection):
+    def connect(self):
+        self.sock = socket.create_connection((CustomResolver(self.host),
+                                              self.port), self.timeout)
+
+
+class CustomHTTPHandler(urllib2.HTTPHandler, urllib2.HTTPCookieProcessor):
+    def __init__(self, cookiejar):
+        urllib2.HTTPHandler.__init__(self)
+        urllib2.HTTPCookieProcessor.__init__(self, cookiejar)
+
+    def http_open(self, req):
+        return self.do_open(CustomHTTPConnection, req)
 
 
 class UrlOpen(object):
@@ -111,7 +136,8 @@ class UrlOpen(object):
     def build_opener(self):
         """ Setup cookies in urllib2. """
 
-        handler = urllib2.HTTPCookieProcessor(self.cookiejar)
+        #handler = urllib2.HTTPCookieProcessor(self.cookiejar)
+        handler = CustomHTTPHandler(self.cookiejar)
         return urllib2.build_opener(handler)
 
     def set_timeout(self, value):

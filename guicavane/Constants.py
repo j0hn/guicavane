@@ -62,3 +62,9 @@ IMAGE_CASE = IMAGES_DIR + SEP + "case.png"
 
 # Url request timeout
 DEFAULT_REQUEST_TIMEOUT = 15  # None for use python's default
+
+# Custom DNS (for avoiding ISP blocking)
+USE_CUSTOM_DNS = False
+CUSTOM_DNS = {
+    "www.cuevana.tv": "184.107.187.234",
+}
