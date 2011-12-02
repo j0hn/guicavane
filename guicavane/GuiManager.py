@@ -211,15 +211,9 @@ class GuiManager(object):
         self.search_entry.set_text("")
         self.path_label.set_text("")
         self.name_filter.set_text("")
-        self.name_list_model.clear()
-        for favorite in self.favorites.get_all():
-            try:
-                show = self.api.Show.search(favorite).next()
-            except StopIteration:
-                print "Warning: didin't find %s in show list" % favorite
-                continue
 
-            self.name_list_model.append([show.name, show])
+        self.background_task(self.favorites.get_all, self.display_favorites,
+                             status_message="Loading favorites")
 
     def set_mode_latest_movies(self):
         """ Sets the curret mode to latest movies. """
@@ -274,6 +268,22 @@ class GuiManager(object):
         self.error_dialog.show_all()
         self.set_status_message("")
         self.unfreeze()
+
+    def display_favorites(self, (is_error, result)):
+        self.name_list_model.clear()
+
+        if is_error:
+            self.report_error("Error loading favorites: %s" % result)
+            return
+
+        for favorite in result:
+            try:
+                show = self.api.Show.search(favorite).next()
+            except StopIteration:
+                print "Warning: didin't find %s in show list" % favorite
+                continue
+
+            self.name_list_model.append([show.name, show])
 
     def display_shows(self, (is_error, result)):
         """ Displays the shows. """
@@ -378,15 +388,10 @@ class GuiManager(object):
 
         last_mode = self.get_mode()
         self.config.set_key("last_mode", last_mode)
-
         self.file_viewer_model.clear()
 
-        def do_nothing(*args, **kwargs):
-            pass
-
         # Call the corresponding set_mode method
-        mode_callback = getattr(self, "set_mode_%s" % last_mode.lower().replace(" ", "_"))
-        self.background_task(mode_callback, do_nothing)
+        getattr(self, "set_mode_%s" % last_mode.lower().replace(" ", "_"))()
 
     def _on_site_change(self, *args):
         """ Called when the mode combobox changes value. """
