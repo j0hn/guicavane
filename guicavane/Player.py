@@ -71,6 +71,7 @@ class Player(object):
         hosts["dummy"] = ""
 
         for host in hosts:
+            host = host.lower()
             if host in avaliable_downloaders:
                 result[host] = hosts[host]
 
@@ -90,6 +91,7 @@ class Player(object):
         if not result:
             self.gui_manager.report_error("No host found")
             self.gui_manager.unfreeze()
+            return
 
         # elif len(result) == 1 and not self.choose_host:
         #     gobject.idle_add(self.gui_manager.set_status_message,
