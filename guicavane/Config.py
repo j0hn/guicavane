@@ -22,6 +22,7 @@ DEFAULT_VALUES = {
     "cuevana_user": "",
     "cuevana_pass": "",
     "automatic_marks": True,
+    "use_custom_resolve": False,
     "player_arguments": "",
     "filename_template": "<show> S<season>E<episode> - <name>",
     "accounts": [("megaupload", {"username": "", "password": ""})],

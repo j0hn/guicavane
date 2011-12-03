@@ -18,9 +18,11 @@ import functools
 from StringIO import StringIO
 
 from Cached import Cached
-from guicavane.Constants import DEFAULT_REQUEST_TIMEOUT, \
-                                USE_CUSTOM_DNS, CUSTOM_DNS
+from guicavane.Constants import DEFAULT_REQUEST_TIMEOUT, CUSTOM_DNS
 from guicavane.Paths import CACHE_DIR
+from guicavane.Config import Config
+
+config = Config.get()
 
 HEADERS = {
     'User-Agent': 'User-Agent:Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.1 '
@@ -31,6 +33,8 @@ RETRY_TIMES = 5
 cached = Cached.get()
 cached.set_cache_dir(CACHE_DIR)
 
+class DownloadError(Exception):
+    pass
 
 def retry(callback):
     """ Retry decorator. """
@@ -50,16 +54,15 @@ def retry(callback):
         error = "Can't download. Error: '%s', args: '%s'" % \
             (error, str(args) + str(kwargs))
 
-        raise Exception(error)
+        raise DownloadError(error)
 
     return deco
 
 
 def CustomResolver(host):
-    if USE_CUSTOM_DNS:
+    if config.get_key("use_custom_resolve"):
         if host in CUSTOM_DNS:
-            return CUSTOM_DNS[host]
-
+            host = CUSTOM_DNS[host]
     return host
 
 
