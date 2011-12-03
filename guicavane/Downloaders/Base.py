@@ -8,9 +8,6 @@ Base Downloader. Every Downloader must be a subclass from this Downloader.
 import os
 import gtk
 
-from guicavane.Utils.UrlOpen import DownloadError
-
-
 class BaseDownloader(object):
     """ Base class for a Downloader. """
 
