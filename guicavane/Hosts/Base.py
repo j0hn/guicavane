@@ -143,20 +143,20 @@ class BaseMovie(BaseResource):
         raise NotImplementedError
 
     @classmethod
-    def search(self, query=""):
+    def search(cls, query=""):
         """ Returns a generator with all the matched
         Movies searched using the query. """
 
         raise NotImplementedError
 
     @classmethod
-    def get_latest(self):
+    def get_latest(cls):
         """ Returns a generator with all the latest movies. """
 
         raise NotImplementedError
 
     @classmethod
-    def get_recomended(self):
+    def get_recomended(cls):
         """ Returns a generator with all the recomended movies. """
 
         raise NotImplementedError
