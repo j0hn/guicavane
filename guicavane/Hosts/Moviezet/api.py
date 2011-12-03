@@ -22,9 +22,10 @@ HOSTMAP = {'megaupload': 'http://www.megaupload.com/?d=',
            'bitshare': 'http://bitshare.com/?f=',
            'filefactory': 'http://www.filefactory.com/file/'
            }
-HOSTNAMES = {'mega': 'megaupload',
+HOSTNAMES = {'megaus': 'megaupload',
+             'wup': 'wupload',
              'kick': 'kickupload',
-             'bits': 'bitshare',
+             'bit': 'bitshare',
              'file': 'filefactory'}
 
 DISPLAY_NAME = "Moviezet"
@@ -32,11 +33,39 @@ DISPLAY_NAME = "Moviezet"
 url_open = UrlOpen()
 
 
-class Episode(BaseEpisode):
-    _watch_url = re.compile('<a class="watch-show" href="(.*?)">')
+class Resource(BaseResource):
+    _hosts_re = re.compile('<p id="videoi".*?>(.*?)</p>')
 
-    _hosts_re = re.compile('<a href="/getvid.php\?id=(?P<id>(.*?))&'\
-                           'name=(.*?)&server=(?P<host>.*?)".*?>')
+    def _file_hosts(self, url):
+        hosts = {}
+
+        data = url_open(url)
+
+        hosts_data = self._hosts_re.search(data).group(1)
+        hosts_data = hosts_data[1:]  # Skipping the first '?'
+
+        hosts_dict = dict([i.split("=", 1) for i in hosts_data.split("&")])
+
+        for host in hosts_dict:
+            if host not in HOSTNAMES:
+                continue
+
+            hostname = HOSTNAMES[host]
+            url = hosts_dict[host]
+
+            if not url:
+                continue
+
+            if not hostname in hosts:
+                hosts[hostname] = {}
+
+            hosts[hostname]["360"] = url
+
+        return hosts
+
+
+class Episode(BaseEpisode, Resource):
+    _watch_url = re.compile('<a class="watch-show" href="(.*?)">')
 
     def __init__(self, id, name, number, season, show):
         self.id = id
@@ -45,30 +74,13 @@ class Episode(BaseEpisode):
         self.season = season
         self.show = show
 
-        self.__hosts = {}
-
     @property
     def file_hosts(self):
-        # Cache
-        if self.__hosts:
-            return self.__hosts
-
         data = url_open(urls.episode % (urllib.quote(self.show.name),
                                         self.season.id, self.number))
         watch_url = self._watch_url.findall(data)[0]
-        data = url_open(watch_url)
 
-        for host in self._hosts_re.finditer(data):
-            host_dict = host.groupdict()
-            hostname = HOSTNAMES[host_dict["host"]]
-            url = HOSTMAP[hostname] + host_dict["id"]
-
-            if not hostname in self.__hosts:
-                self.__hosts[hostname] = {}
-
-            self.__hosts[hostname]["360"] = url
-
-        return self.__hosts
+        return self._file_hosts(watch_url)
 
     def get_subtitle_url(self, lang="ES", quality=None):
         return urls.sub_show % (self.id.replace("#", ""), lang)
@@ -129,11 +141,9 @@ class Show(BaseShow):
                 yield Show(**show_dict)
 
 
-class Movie(BaseMovie):
+class Movie(BaseMovie, Resource):
     _search_re = re.compile('div class="movie-thumb">\n<a href="'\
             '(?P<url>.*?)/" title="(?P<name>.*?)">')
-    _hosts_re = re.compile('<a href="/getvid.php\?id=(?P<id>(.*?))&'\
-                           'name=(.*?)&server=(?P<host>.*?)".*?>')
     _id_re = re.compile("href='http://www.moviezet.com/\?p=(?P<id>.*?)'")
 
     def __init__(self, id, name, url):
@@ -142,8 +152,6 @@ class Movie(BaseMovie):
             name = name[4:-7]
         self.name = name
         self.url = url
-
-        self.__hosts = {}
 
     @classmethod
     def search(self, query=""):
@@ -157,23 +165,7 @@ class Movie(BaseMovie):
 
     @property
     def file_hosts(self):
-        # Cache
-        if self.__hosts:
-            return self.__hosts
-
-        data = url_open(urls.movie % self.id)
-
-        for host in self._hosts_re.finditer(data):
-            host_dict = host.groupdict()
-            hostname = HOSTNAMES[host_dict["host"]]
-            url = HOSTMAP[hostname] + host_dict["id"]
-
-            if hostname not in self.__hosts:
-                self.__hosts[hostname] = {}
-
-            self.__hosts[hostname]["360"] = url
-
-        return self.__hosts
+        return self._file_hosts(self.url)
 
     def get_subtitle_url(self, lang="ES", quality=None):
         self.id = self._id_re.search(url_open(self.url)).group(1)
