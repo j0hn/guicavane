@@ -105,7 +105,6 @@ class Hotfile(BaseDownloader):
                 "recaptcha_response_field": response_text}
 
         page_data = MAIN_URL_OPEN(self.url, data=data)
-        print page_data
         self.file_url = FILE_URL_RE.search(page_data).group(1)
 
     def _download_loop(self):

@@ -23,6 +23,10 @@ from Settings import SettingsDialog
 from ThreadRunner import GtkThreadRunner
 from Paths import MARKS_FILE, FAVORITES_FILE
 
+from Utils.Log import console
+
+log = console("GuiManager")
+
 # if "-d" in sys.argv or "--dummy" in sys.argv:
 #     testdir = os.path.join(os.getcwd(), "pycavane", "tests")
 #     pycavane.cuevana_api.setup("guicavane", "guicavane",
@@ -104,7 +108,7 @@ class GuiManager(object):
             try:
                 account_obj = ACCOUNTS[account_name]
             except KeyError:
-                print "Warning: account not recognized: %s" % account_name
+                log.warn("account not recognized: %s" % account_name)
                 continue
 
             if username and password:
@@ -161,7 +165,7 @@ class GuiManager(object):
         if callback == None:
             def real_callback((is_error, result)):
                 if is_error:
-                    print "Error: %s" % result
+                    log.err("Error: %s" % result)
 
         GtkThreadRunner(real_callback, func, *args, **kwargs)
 
@@ -280,7 +284,7 @@ class GuiManager(object):
             try:
                 show = self.api.Show.search(favorite).next()
             except StopIteration:
-                print "Warning: didin't find %s in show list" % favorite
+                log.warn("didin't find %s in show list" % favorite)
                 continue
 
             self.name_list_model.append([show.name, show])
@@ -727,8 +731,10 @@ class GuiManager(object):
         """ Sets the image of the current episode. """
 
         if is_error:
-            self.set_status_message("Problem downloading show image")
-            print result
+            msg = "Problem downloading show image"
+            self.set_status_message(msg)
+            log.err(msg)
+            log.err(result)
             return
 
         image_path = result

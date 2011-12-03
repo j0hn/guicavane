@@ -5,6 +5,9 @@ import os
 import sys
 import Cuevana  # FIXME: always avaliable because it's guicavane's default
 from guicavane.Paths import MAIN_DIR
+from guicavane.Utils.Log import console
+
+log = console("Hosts")
 
 if sys.platform == "win32":
     APIS_DIR = os.path.join(MAIN_DIR, "Hosts")
@@ -22,4 +25,6 @@ for api in apis:
     try:
         AVALIABLE_APIS.append(__import__(api, fromlist=[api]).api)
     except Exception, error:
-        print "Warning: couldn't import %s api: %s" % (api, error)
+        log.warn("Couldn't import %s api: %s" % (api, error))
+    else:
+        log.info('Adding api site "%s"' % api)

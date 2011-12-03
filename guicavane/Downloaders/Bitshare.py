@@ -15,6 +15,10 @@ from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
 
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
 
+from guicavane.Utils.Log import console
+
+log = console("Downloaders.Bitshare")
+
 
 AJAXDL_RE = re.compile('var ajaxdl = "(.*?)";')
 
@@ -60,19 +64,21 @@ class Bitshare(BaseDownloader):
         self.download_id = self.url.split("?f=")[1]
 
         if "Error - Archivo no disponible" in page_data:
-            raise Exception("File not avaliable anymore")
-        else:
-            print page_data
+            msg = "File not avaliable anymore"
+            log.warn(msg)
+            raise Exception(msg)
 
         try:
             self.ajaxdl = AJAXDL_RE.search(page_data).group(1)
         except:
-            raise DownloadError("ajaxid not found")
+            msg = "ajaxid not found"
+            log.warn(msg)
+            raise DownloadError(msg)
 
         try:
             self.recaptcha_challenge_id = RECAPTCHA_CHALLENGE_ID_RE.search(page_data).group(1)
         except:
-            print "Captcha id not found"
+            log.err("Captcha id not found")
             self.recaptcha_challenge_id = None
 
         request_url = REQUEST_URL % self.download_id
