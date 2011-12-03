@@ -9,8 +9,8 @@ seasons = host + '/web/series?&%s&%s'
 
 # Movies
 movie_info = host + '/web/peliculas?&%s&%s'
-latest_movies = host + '/peliculas/'
-recomended_movies = host
+latest_movies = host + '/web/peliculas?&recientes'
+recomended_movies = host + '/web/peliculas?&populares'
 
 # Sources
 sources = host + '/player/sources?id=%s'

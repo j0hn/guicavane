@@ -28,8 +28,6 @@ class Episode(BaseEpisode):
     _genere_re = re.compile('<b>Género:</b>(.*?)</div>')
     _language_re = re.compile('<b>Idioma:</b>(.*)</div>')
 
-    __info = None
-
     def __init__(self, id, name, number, season, show, url):
         self.id = id
         self.name = name
@@ -40,8 +38,6 @@ class Episode(BaseEpisode):
 
         self.urlname = self.url.rsplit("/", 1)[-1]
 
-        self.__hosts = {}
-
     def get_subtitle_url(self, lang="ES", quality=None):
         if quality and quality != "360":
             return urls.sub_show_quality % (self.id, lang, quality)
@@ -50,11 +46,6 @@ class Episode(BaseEpisode):
 
     @property
     def info(self):
-
-        # Cache
-        if self.__info:
-            return self.__info
-
         page_data = url_open(urls.show_info % \
             (self.id, self.show.urlname, self.urlname))
 
@@ -64,18 +55,14 @@ class Episode(BaseEpisode):
         genere = self._genere_re.search(page_data).group(1).strip()
         language = self._language_re.search(page_data).group(1).strip()
 
-        self.__info = {"image": image, "description": description,
+        info = {"image": image, "description": description,
                        "cast": cast, "genere": genere, "language": language}
 
-        return self.__info
+        return info
 
     @property
     def file_hosts(self):
-
-        # Cache
-        if self.__hosts:
-            return self.__hosts
-
+        hosts = {}
         data = url_open(urls.show_sources % self.id)
 
         try:
@@ -92,17 +79,15 @@ class Episode(BaseEpisode):
                 hostdata = url_open(urls.source_get, data=data)
                 url = hostdata[hostdata.find('http:'):].split('&id')[0]
 
-                if not host in self.__hosts:
-                    self.__hosts[host] = {}
+                if not host in hosts:
+                    hosts[host] = {}
 
-                self.__hosts[host][quality] = url
+                hosts[host][quality] = url
 
-        return self.__hosts
+        return hosts
 
     @property
     def original_url(self):
-        """ Returns the link to this episode on cuevana. """
-
         return urls.host + "/" + self.url
 
 
@@ -159,21 +144,20 @@ class Movie(BaseMovie):
     _search_re = re.compile("\$\('#list'\).list\({l:(.*?), set:\[")
     _sources_re = re.compile('sources = ({.*?}), sel_source')
 
+    _recomended_json_re = re.compile("\$\('#list'\).list\({l:(.*?]), page", re.DOTALL)
+    _latest_json_re = re.compile("\$\('#list'\).list\({l:(.*?]), page", re.DOTALL)
+
     _image_re = re.compile('<div class="img"><img src="(.*?)" />')
     _description_re = re.compile('<h2>Sinopsis</h2>(.*?)<div class="sep">', re.DOTALL)
     _cast_re = re.compile("<a href='#!/buscar/q:.*?'>(.*?)</a>")
     _genere_re = re.compile('<b>Género:</b>(.*?)</div>')
     _language_re = re.compile('<b>Idioma:</b>(.*?)</div>')
 
-    __info = ""
-
     def __init__(self, id, name, url):
         self.id = id
         self.name = name
         self.url = url
         self.urlname = self.url.rsplit("/", 1)[-1]
-
-        self.__hosts = {}
 
     def get_subtitle_url(self, lang="ES", quality=None):
         if quality and quality != "360":
@@ -187,11 +171,6 @@ class Movie(BaseMovie):
 
     @property
     def info(self):
-
-        # Cache
-        if self.__info:
-            return self.__info
-
         page_data = url_open(urls.movie_info % (self.id, self.urlname))
 
         image = self._image_re.search(page_data).group(1)
@@ -202,18 +181,14 @@ class Movie(BaseMovie):
         # Set because it's twice on the webpage
         cast = list(set(self._cast_re.findall(page_data)))
 
-        self.__info = {"image": image, "description": description,
+        info = {"image": image, "description": description,
                        "cast": cast, "genere": genere, "language": language}
 
-        return self.__info
+        return info
 
     @property
     def file_hosts(self):
-
-        # Cache
-        if self.__hosts:
-            return self.__hosts
-
+        hosts = {}
         data = url_open(urls.movie_sources % self.id)
         sources = json.loads(self._sources_re.search(data).group(1))
 
@@ -226,22 +201,56 @@ class Movie(BaseMovie):
                 hostdata = url_open(urls.source_get, data=data)
                 url = hostdata[hostdata.find('http:'):].split('&id')[0]
 
-                if not host in self.__hosts:
-                    self.__hosts[host] = {}
+                if not host in hosts:
+                    hosts[host] = {}
 
-                self.__hosts[host][quality] = url
+                hosts[host][quality] = url
 
-        return self.__hosts
+        return hosts
 
     @classmethod
-    def search(self, query=""):
+    def search(cls, query=""):
         query = query.lower().replace(' ', '+')
 
         data = url_open(urls.search % query)
-        data = json.loads(self._search_re.search(data).group(1))
+        data = json.loads(cls._search_re.search(data).group(1))
 
         for movie in data:
             if not "#!/peliculas" in movie["url"]:
                 continue
 
             yield Movie(movie["id"], movie["tit"], movie["url"])
+
+    @classmethod
+    def get_recomended(cls):
+        data = url_open(urls.recomended_movies)
+        jsondata = json.loads(cls._recomended_json_re.search(data).group(1))
+
+        max_recomended = 15
+
+        moviecount = 0
+        for movie in sorted(jsondata, reverse=True,
+                            key=lambda m: int(m["plays"].replace(".", ""))):
+
+            if moviecount < max_recomended:
+                yield Movie(movie["id"], movie["tit"], movie["url"])
+                moviecount += 1
+            else:
+                break
+
+    @classmethod
+    def get_latest(cls):
+        data = url_open(urls.latest_movies)
+        jsondata = json.loads(cls._latest_json_re.search(data).group(1))
+
+        max_recomended = 15
+
+        moviecount = 0
+        for movie in sorted(jsondata, reverse=True,
+                            key=lambda m: int(m["ano"])):
+
+            if moviecount < max_recomended:
+                yield Movie(movie["id"], movie["tit"], movie["url"])
+                moviecount += 1
+            else:
+                break
