@@ -18,6 +18,7 @@ from Constants import *
 from SList import SList
 from Config import Config
 from Player import Player
+from Gettext import gettext
 from Accounts import ACCOUNTS
 from Settings import SettingsDialog
 from ThreadRunner import GtkThreadRunner
@@ -26,11 +27,6 @@ from Paths import MARKS_FILE, FAVORITES_FILE
 from Utils.Log import console
 
 log = console("GuiManager")
-
-# if "-d" in sys.argv or "--dummy" in sys.argv:
-#     testdir = os.path.join(os.getcwd(), "pycavane", "tests")
-#     pycavane.cuevana_api.setup("guicavane", "guicavane",
-#         cache_dir=testdir, cache_lifetime=13**37)
 
 
 class GuiManager(object):
@@ -197,7 +193,7 @@ class GuiManager(object):
         self.path_label.set_text("")
         self.name_list_model.clear()
         self.background_task(self.api.Show.search, self.display_shows,
-                             status_message="Obtaining shows list")
+                             status_message=gettext("Obtaining shows list"))
 
     def set_mode_movies(self):
         """ Sets the current mode to movies. """
@@ -217,21 +213,21 @@ class GuiManager(object):
         self.name_filter.set_text("")
 
         self.background_task(self.favorites.get_all, self.display_favorites,
-                             status_message="Loading favorites")
+                             status_message=gettext("Loading favorites"))
 
     def set_mode_latest_movies(self):
         """ Sets the curret mode to latest movies. """
 
         self.sidebar.hide()
-        self.background_task(self.api.Movie.get_latest,
-            self.display_movies, status_message="Loading latest movies...")
+        self.background_task(self.api.Movie.get_latest, self.display_movies,
+            status_message=gettext("Loading latest movies..."))
 
     def set_mode_recomended_movies(self):
         """ Sets the curret mode to recomended movies. """
 
         self.sidebar.hide()
-        self.background_task(self.api.Movie.get_recomended,
-            self.display_movies, status_message="Loading recomended movies...")
+        self.background_task(self.api.Movie.get_recomended, self.display_movies,
+            status_message=gettext("Loading recomended movies..."))
 
     def update_favorites(self, favorites):
         for fav_name in favorites:
@@ -277,7 +273,7 @@ class GuiManager(object):
         self.name_list_model.clear()
 
         if is_error:
-            self.report_error("Error loading favorites: %s" % result)
+            self.report_error(gettext("Error loading favorites: %s") % result)
             return
 
         for favorite in result:
@@ -297,10 +293,10 @@ class GuiManager(object):
 
         if is_error:
             if isinstance(result, NotImplementedError):
-                message = "Not avaliable for this site"
+                message = gettext("Not avaliable for this site")
             else:
-                message = "Problem fetching shows:\n\n"
-                message += "details: %s" % result
+                message = gettext("Problem fetching shows:\n\n" \
+                                  "details: %s") % result
 
             self.report_error(message)
             return

@@ -31,3 +31,5 @@ COVER_IMAGES_DIR = os.path.join(CONFIG_DIR, "images")
 HOSTS_IMAGES_DIR = os.path.join(IMAGES_DIR, "Downloaders")
 
 GUI_DIR = os.path.join(MAIN_DIR, "Glade")
+
+TRANSLATION_DIR = os.path.join(MAIN_DIR, "Translations")
