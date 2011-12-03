@@ -78,7 +78,7 @@ class Bitshare(BaseDownloader):
         try:
             self.recaptcha_challenge_id = RECAPTCHA_CHALLENGE_ID_RE.search(page_data).group(1)
         except:
-            log.err("Captcha id not found")
+            log.error("Captcha id not found")
             self.recaptcha_challenge_id = None
 
         request_url = REQUEST_URL % self.download_id

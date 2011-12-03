@@ -15,6 +15,11 @@ from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
 
 from Base import BaseDownloader
 
+from guicavane.Utils.Log import console
+from guicavane.Utils.Debug import tmp_dump
+
+log = console("Downloaders.Wupload")
+
 
 RECAPTCHA_CHALLENGE_URL = "http://api.recaptcha.net/challenge?k="
 RECAPTCHA_IMAGE_URL = "http://www.google.com/recaptcha/api/image?c="
@@ -69,7 +74,11 @@ class Wupload(BaseDownloader):
             self.regular_url = REGULAR_URL_RE.search(page_data).group(1)
             self.regular_url = "http://www.wupload.com/file/" + self.regular_url
         except Exception, e:
-            raise DownloadError("Regular link not found")
+            msg = "Regular link not found"
+            log.error(msg)
+            log.error(e.message)
+            log.info("Dumped '%s' in '%s'" % (self.url, tmp_dump(page_data)))
+            raise DownloadError(msg)
 
         MAIN_URL_OPEN.add_headers({"X-Requested-With": "XMLHttpRequest"})
         regular_data = MAIN_URL_OPEN(self.regular_url)
@@ -89,6 +98,8 @@ class Wupload(BaseDownloader):
                                 "Please wait %d second%s..." % (i, "s" * (i > 1)))
                 time.sleep(1)
 
+            log.info("Trying to get captcha..")
+            log.info(tm_data)
             regular_data = MAIN_URL_OPEN(self.regular_url, data=tm_data)
 
         if "Download Ready" in regular_data:
@@ -97,8 +108,12 @@ class Wupload(BaseDownloader):
         else:
             try:
                 self.recaptcha_challenge_id = RECAPTCHA_CHALLENGE_ID_RE.search(regular_data).group(1)
-            except:
-                raise DownloadError("Captcha challenge not found")
+            except Exception, e:
+                msg = "Captcha challenge not found!"
+                log.error(msg)
+                log.error(e.message)
+                log.info("Dumped '%s' in '%s'" % (self.url, tmp_dump(page_data)))
+                raise DownloadError(msg)
 
     def on_waiting_finish(self, (is_error, result)):
         if is_error:

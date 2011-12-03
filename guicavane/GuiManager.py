@@ -161,7 +161,7 @@ class GuiManager(object):
         if callback == None:
             def real_callback((is_error, result)):
                 if is_error:
-                    log.err("Error: %s" % result)
+                    log.error("Error: %s" % result)
 
         GtkThreadRunner(real_callback, func, *args, **kwargs)
 
@@ -729,8 +729,8 @@ class GuiManager(object):
         if is_error:
             msg = "Problem downloading show image"
             self.set_status_message(msg)
-            log.err(msg)
-            log.err(result)
+            log.error(msg)
+            log.error(result)
             return
 
         image_path = result
