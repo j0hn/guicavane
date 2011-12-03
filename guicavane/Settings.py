@@ -37,7 +37,7 @@ class SettingsDialog(object):
             "player_arguments_entry", "megaupload_user_entry",
             "megaupload_pass_entry", "cuevana_user_entry",
             "cuevana_pass_entry", "cache_dir_button", "automatic_marks",
-            "filename_template", "automatic_megaupload",
+            "use_custom_resolve", "filename_template", "automatic_megaupload",
         ]
 
         for glade_object in glade_objects:
@@ -51,6 +51,7 @@ class SettingsDialog(object):
         player_arguments = self.config.get_key("player_arguments")
         cache_dir = self.config.get_key("cache_dir")
         automatic_marks = self.config.get_key("automatic_marks")
+        use_custom_resolve = self.config.get_key("use_custom_resolve")
         filename_template = self.config.get_key("filename_template")
         automatic_megaupload = self.config.get_key("automatic_megaupload")
         try:
@@ -67,6 +68,7 @@ class SettingsDialog(object):
         self.cuevana_pass_entry.set_text(cuevana_pass)
         self.cache_dir_button.set_filename(cache_dir)
         self.automatic_marks.set_active(automatic_marks)
+        self.use_custom_resolve.set_active(use_custom_resolve)
         self.filename_template.set_text(filename_template)
         self.automatic_megaupload.set_active(automatic_megaupload)
 
@@ -96,6 +98,7 @@ class SettingsDialog(object):
         player_arguments = self.player_arguments_entry.get_text()
         cache_dir = self.cache_dir_button.get_filename()
         automatic_marks = self.automatic_marks.get_active()
+        use_custom_resolve = self.use_custom_resolve.get_active()
         filename_template = self.filename_template.get_text()
         automatic_megaupload = self.automatic_megaupload.get_active()
         cuevana_user = self.cuevana_user_entry.get_text()
@@ -109,6 +112,7 @@ class SettingsDialog(object):
         self.config.set_key("cuevana_pass", cuevana_pass)
         self.config.set_key("cache_dir", cache_dir)
         self.config.set_key("automatic_marks", automatic_marks)
+        self.config.set_key("use_custom_resolve", use_custom_resolve)
         self.config.set_key("player_arguments", player_arguments)
         self.config.set_key("filename_template", filename_template)
         self.config.set_key("automatic_megaupload", automatic_megaupload)
