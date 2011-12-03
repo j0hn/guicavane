@@ -14,7 +14,7 @@ import subprocess
 import Downloaders
 from Hosts.Base import BaseMovie, BaseEpisode
 from guicavane.Utils.UrlOpen import UrlOpen
-from guicavane import Config
+from guicavane.Config import Config
 from Constants import HOSTS_GUI_FILE, HOSTS_VIEW_COLUMN_OBJECT, \
                       HOSTS_VIEW_COLUMN_TEXT
 
