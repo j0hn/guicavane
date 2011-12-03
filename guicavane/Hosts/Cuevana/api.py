@@ -14,10 +14,12 @@ import json
 
 import urls
 from guicavane.Hosts.Base import *
+from guicavane.Utils.Log import console
 from guicavane.Utils.UrlOpen import UrlOpen
 
 DISPLAY_NAME = "Cuevana"
 url_open = UrlOpen()
+log = console("Hosts.Cuevana")
 
 
 class Episode(BaseEpisode):
@@ -136,8 +138,12 @@ class Show(BaseShow):
         jsondata = json.loads(cls._shows_json_re.search(data).group(1))
 
         for show in jsondata:
-            if not name or name in show['tit'].lower():
-                yield Show(show["id"], show["tit"], show["url"])
+            try:
+                if not name or name in show['tit'].lower():
+                    yield Show(show["id"], show["tit"], show["url"])
+            except Exception, error:
+                log.warn("Show '%s' couldn't be loaded: %s" % \
+                    (show["tit"], error))
 
 
 class Movie(BaseMovie):
