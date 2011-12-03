@@ -130,7 +130,7 @@ class Movie(BaseMovie):
     _real_id_re = re.compile("var postID = (.*?);")
 
     def __init__(self, id, name, url):
-        self.id = id
+        self._id = id
         self.name = name
         self.url = url
 
@@ -140,20 +140,24 @@ class Movie(BaseMovie):
         data = json.loads(data)
         for res in data:
             if "pelicula" in res["display"].lower():
-                _id = res["id"]
+                _id = None #res["id"]
                 url = res["link"]
                 name = res["value"]
                 yield Movie(_id, name, url)
 
     @property
+    def id(self):
+        if not self._id:
+            data = url_open(urls.host + '/' + self.url)
+            _id = self._real_id_re.findall(data)[0]
+            self._id = _id
+        return self._id
+
+    @property
     def file_hosts(self):
         hosts = {}
 
-        data = url_open(urls.host + '/' + self.url)
-        _id = self._real_id_re.findall(data)[0]
-        self.id = _id
-
-        data = url_open(urls.sources % _id)
+        data = url_open(urls.sources % self.id)
         data = data.split('<div id="sources">', 1)[1]
         data = data.split('<div style="clear:left">', 1)[0]
 
@@ -162,7 +166,7 @@ class Movie(BaseMovie):
 
             args = {"key": host["id"],
                     "host": host["name"],
-                    "id": _id,
+                    "id": self.id,
                     "sub": ",ES",
                     "sub_pre": "ES"}
 
