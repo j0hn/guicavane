@@ -14,6 +14,7 @@ import subprocess
 import Downloaders
 from Hosts.Base import BaseMovie, BaseEpisode
 from guicavane.Utils.UrlOpen import UrlOpen
+from guicavane import Config
 from Constants import HOSTS_GUI_FILE, HOSTS_VIEW_COLUMN_OBJECT, \
                       HOSTS_VIEW_COLUMN_TEXT
 
@@ -27,7 +28,7 @@ class Player(object):
     def __init__(self, gui_manager, file_object,
                  file_path=None, download_only=False, choose_host=False):
         self.gui_manager = gui_manager
-        self.config = self.gui_manager.config
+        self.config = Config.get()
 
         self.file_object = file_object
         self.download_only = download_only

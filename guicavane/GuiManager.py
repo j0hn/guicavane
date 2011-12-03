@@ -39,7 +39,7 @@ class GuiManager(object):
         self.current_show = None
         self.current_season = None
 
-        self.config = Config()
+        self.config = Config.get()
 
         # API
         try:
