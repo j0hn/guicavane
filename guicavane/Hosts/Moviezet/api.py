@@ -70,7 +70,7 @@ class Episode(BaseEpisode):
 
         return self.__hosts
 
-    def get_subtitle(self, lang="ES", quality=None):
+    def get_subtitle_url(self, lang="ES", quality=None):
         return urls.sub_show % (self.id.replace("#", ""), lang)
 
 
@@ -175,6 +175,6 @@ class Movie(BaseMovie):
 
         return self.__hosts
 
-    def get_subtitle(self, lang="ES", quality=None):
+    def get_subtitle_url(self, lang="ES", quality=None):
         self.id = self._id_re.search(url_open(self.url)).group(1)
         return urls.sub_show % (self.id, lang)
