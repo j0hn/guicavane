@@ -292,8 +292,11 @@ class GuiManager(object):
         self.file_viewer_model.clear()
 
         if is_error:
-            message = "Problem fetching shows:\n\n"
-            message += "details: %s" % result
+            if isinstance(result, NotImplementedError):
+                message = "Not avaliable for this site"
+            else:
+                message = "Problem fetching shows:\n\n"
+                message += "details: %s" % result
 
             self.report_error(message)
             return
@@ -359,8 +362,12 @@ class GuiManager(object):
         """ Fills the file viewer with the movies from the search results. """
 
         if is_error:
-            message = "Problem fetching movies, "
-            message = "please try again in a few minutes."
+            if isinstance(result, NotImplementedError):
+                message = "Not avaliable for this site"
+            else:
+                message = "Problem fetching movies, "
+                message += "please try again in a few minutes."
+
             self.report_error(message)
             return
 
