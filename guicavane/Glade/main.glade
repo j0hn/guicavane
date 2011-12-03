@@ -218,15 +218,15 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="open_in_cuevana">
-        <property name="label" translatable="yes">Open in Cuevana</property>
+      <object class="GtkImageMenuItem" id="open_in_original">
+        <property name="label" translatable="yes">Open in Original Website</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
         <property name="use_underline">True</property>
         <property name="image">imageCuevana</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="open_in_cuevana" swapped="no"/>
+        <signal name="activate" handler="open_in_original" swapped="no"/>
       </object>
     </child>
     <child>
@@ -265,7 +265,7 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
   <object class="GtkImage" id="imageCuevana">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">../Images/cuevana.png</property>
+    <property name="stock">gtk-home</property>
   </object>
   <object class="GtkImage" id="imageHardDisk">
     <property name="visible">True</property>
@@ -987,14 +987,6 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
       <column type="PyObject"/>
     </columns>
   </object>
-  <object class="GtkListStore" id="site_liststore">
-    <columns>
-      <!-- column-name label -->
-      <column type="gchararray"/>
-      <!-- column-name module_reference -->
-      <column type="PyObject"/>
-    </columns>
-  </object>
   <object class="GtkMenu" id="name_shows_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1010,5 +1002,13 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
         <signal name="activate" handler="_on_add_favorite" swapped="no"/>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="site_liststore">
+    <columns>
+      <!-- column-name label -->
+      <column type="gchararray"/>
+      <!-- column-name module_reference -->
+      <column type="PyObject"/>
+    </columns>
   </object>
 </interface>

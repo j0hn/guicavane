@@ -608,12 +608,21 @@ class GuiManager(object):
             model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE)
             self.marks.remove(mark_string)
 
-    def open_in_cuevana(self, *args):
-        """ Open selected episode or movie on cuevana website. """
+    def open_in_original(self, *args):
+        """ Open selected episode or movie on his original website. """
 
         path, _ = self.file_viewer.get_cursor()
         file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
-        webbrowser.open(file_object.cuevana_url)
+        try:
+            url = file_object.original_url
+        except NotImplementedError:
+            self.report_error("Option not avaliable in this site")
+            return
+        except:
+            self.report_error("Error opening original url: %s" % error)
+            return
+
+        webbrowser.open(url)
 
     def _on_search_clear_clicked(self, *args):
         """ Clears the search input. """
