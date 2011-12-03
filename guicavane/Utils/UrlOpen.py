@@ -34,7 +34,7 @@ cached = Cached.get()
 cached.set_cache_dir(CACHE_DIR)
 
 class DownloadError(Exception):
-    pass
+    """ Indicates a downloading error. """
 
 def retry(callback):
     """ Retry decorator. """

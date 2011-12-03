@@ -9,10 +9,11 @@ import re
 import time
 import gobject
 
-from Base import BaseDownloader, DownloadError
 from guicavane.Utils.UrlOpen import UrlOpen
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
 from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
+
+from Base import BaseDownloader
 
 RECAPTCHA_CHALLENGE_URL = "http://api.recaptcha.net/challenge?k="
 RECAPTCHA_IMAGE_URL = "http://www.google.com/recaptcha/api/image?c="
