@@ -125,6 +125,9 @@ class Show(BaseShow):
 
 
 class Movie(BaseMovie):
+    _hosts_re = re.compile("onclick=\"goSource\('(?P<id>.*?)'," \
+                           "'(?P<name>.*?)'\)")
+    _real_id_re = re.compile("var postID = (.*?);")
 
     def __init__(self, id, name, url):
         self.id = id
@@ -133,7 +136,46 @@ class Movie(BaseMovie):
 
     @classmethod
     def search(self, query=""):
-        pass
+        data = url_open(urls.search, data={"query": query})
+        data = json.loads(data)
+        for res in data:
+            if "pelicula" in res["display"].lower():
+                _id = res["id"]
+                url = res["link"]
+                name = res["value"]
+                yield Movie(_id, name, url)
+
+    @property
+    def file_hosts(self):
+        hosts = {}
+
+        data = url_open(urls.host + '/' + self.url)
+        _id = self._real_id_re.findall(data)[0]
+        self.id = _id
+
+        data = url_open(urls.sources % _id)
+        data = data.split('<div id="sources">', 1)[1]
+        data = data.split('<div style="clear:left">', 1)[0]
+
+        for host in self._hosts_re.finditer(data):
+            host = host.groupdict()
+
+            args = {"key": host["id"],
+                    "host": host["name"],
+                    "id": _id,
+                    "sub": ",ES",
+                    "sub_pre": "ES"}
+
+            hostdata = url_open(urls.source_get, args)
+
+            longname = HOST_TRANSLATE[host["name"]]
+
+            if longname not in hosts:
+                hosts[longname] = {}
+
+            hosts[longname]["360"] = hostdata
+
+        return hosts
 
     def get_subtitle_url(self, lang="ES", quality=None):
-        pass
+        return urls.sub_show % (self.id, lang)
