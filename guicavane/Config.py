@@ -18,7 +18,7 @@ DEFAULT_VALUES = {
     "cache_dir": TEMP_DIR,
     "last_mode": "Shows",
     "last_download_directory": HOME_DIR,
-    "images_dir": IMAGES_DIR,
+    "images_dir": COVER_IMAGES_DIR,
     "cuevana_user": "",
     "cuevana_pass": "",
     "automatic_marks": True,
