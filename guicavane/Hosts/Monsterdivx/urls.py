@@ -16,3 +16,6 @@ source_get = host + "/wp-content/plugins/monsterdivx-player/scripts/source_get.p
 
 # Subtitles
 sub_show = host + "/sub/%s_%s.srt"
+
+# Misc
+search = host + "/wp-content/themes/monsterdivx/scripts/suggest.php"
