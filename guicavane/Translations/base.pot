@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-12-03 19:23-0300\n"
+"POT-Creation-Date: 2011-12-04 16:50-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,37 +17,222 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: GuiManager.py:194
+#: GuiManager.py:112 GuiManager.py:136
+msgid "Loading..."
+msgstr ""
+
+#: GuiManager.py:195
 msgid "Obtaining shows list"
 msgstr ""
 
-#: GuiManager.py:214
+#: GuiManager.py:215
 msgid "Loading favorites"
 msgstr ""
 
-#: GuiManager.py:221
+#: GuiManager.py:222
 msgid "Loading latest movies..."
 msgstr ""
 
-#: GuiManager.py:228
+#: GuiManager.py:229
 msgid "Loading recomended movies..."
 msgstr ""
 
-#: GuiManager.py:274
+#: GuiManager.py:275
 #, python-format
 msgid "Error loading favorites: %s"
 msgstr ""
 
-#: GuiManager.py:294
+#: GuiManager.py:295 GuiManager.py:365
 msgid "Not avaliable for this site"
 msgstr ""
 
-#: GuiManager.py:296
+#: GuiManager.py:297
 #, python-format
 msgid ""
 "Problem fetching shows:\n"
 "\n"
 "details: %s"
+msgstr ""
+
+#: GuiManager.py:310
+#, python-format
+msgid ""
+"Problem fetching seasons:\n"
+"\n"
+"details: %s"
+msgstr ""
+
+#: GuiManager.py:325
+#, python-format
+msgid ""
+"Problem fetching episodes:\n"
+"\n"
+"details: %s"
+msgstr ""
+
+#: GuiManager.py:367
+#, python-format
+msgid ""
+"Problem fetching movies, please try again in a few minutes.\n"
+"details: %s"
+msgstr ""
+
+#: GuiManager.py:431 GuiManager.py:462
+#, python-format
+msgid "Loading show %s..."
+msgstr ""
+
+#: GuiManager.py:545
+msgid "Dowload to..."
+msgstr ""
+
+#: GuiManager.py:627
+msgid "Option not avaliable in this site"
+msgstr ""
+
+#: GuiManager.py:630
+#, python-format
+msgid "Error opening original url: %s"
+msgstr ""
+
+#: GuiManager.py:650
+#, python-format
+msgid "Searching movies with title %s..."
+msgstr ""
+
+#: GuiManager.py:677
+msgid "<b>Cast:</b> "
+msgstr ""
+
+#: GuiManager.py:678
+msgid "<b>Genere:</b> "
+msgstr ""
+
+#: GuiManager.py:679
+msgid "<b>Language:</b> "
+msgstr ""
+
+#: GuiManager.py:688
+msgid "Information not supported for this site"
+msgstr ""
+
+#: GuiManager.py:690
+#, python-format
+msgid "Error downloading information: %s"
+msgstr ""
+
+#: GuiManager.py:731
+msgid "Problem downloading show image"
+msgstr ""
+
+#: Player.py:63
+msgid "Fetching hosts..."
+msgstr ""
+
+#: Player.py:86
+#, python-format
+msgid "Error fetching hosts: %s"
+msgstr ""
+
+#: Player.py:95
+msgid "No host found"
+msgstr ""
+
+#: Player.py:146
+msgid "Downloading subtitles..."
+msgstr ""
+
+#: Player.py:150
+msgid "Please wait..."
+msgstr ""
+
+#: Player.py:158
+msgid "Filling cache..."
+msgstr ""
+
+#: Player.py:178
+#, python-format
+msgid "Error pre-downloading: %s"
+msgstr ""
+
+#: Player.py:182
+#, python-format
+msgid "Downloading: %s"
+msgstr ""
+
+#: Player.py:184
+#, python-format
+msgid "Playing: %s"
+msgstr ""
+
+#: Player.py:225
+#, python-format
+msgid "%d minute left"
+msgstr ""
+
+#: Player.py:227
+#, python-format
+msgid "%d minutes left"
+msgstr ""
+
+#: Player.py:230
+#, python-format
+msgid "%d seconds left"
+msgstr ""
+
+#: Player.py:232
+msgid "a few seconds left"
+msgstr ""
+
+#: Player.py:344
+msgid "Download subtitle failed"
+msgstr ""
+
+#: Downloaders/Bitshare.py:94 Downloaders/Megaupload.py:50
+#, python-format
+msgid "Please wait %d second%s..."
+msgstr ""
+
+#: Downloaders/Bitshare.py:101
+msgid "Obtaining bitshare link..."
+msgstr ""
+
+#: Downloaders/Bitshare.py:104
+#, python-format
+msgid "Error obtaining bitshare's link: %s"
+msgstr ""
+
+#: Downloaders/Bitshare.py:133
+msgid "Sending Captcha..."
+msgstr ""
+
+#: Downloaders/Bitshare.py:152
+#, python-format
+msgid "Not success finding the bitshare download link. Got: %s"
+msgstr ""
+
+#: Downloaders/Bitshare.py:172
+msgid "Wrong captcha"
+msgstr ""
+
+#: Downloaders/Bitshare.py:185 Downloaders/Megaupload.py:104
+#, python-format
+msgid "Download finish with error: %s"
+msgstr ""
+
+#: Downloaders/Megaupload.py:56
+#, python-format
+msgid "Error: %s"
+msgstr ""
+
+#: Downloaders/Megaupload.py:77
+#, python-format
+msgid "Error obtaining megaupload's link: %s"
+msgstr ""
+
+#: Downloaders/Megaupload.py:93
+#, python-format
+msgid "Error downloading from megaupload: %s"
 msgstr ""
 
 #: Glade/captcha.glade:7

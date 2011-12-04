@@ -109,7 +109,7 @@ class GuiManager(object):
             if username and password:
                 account_obj.login(username, password)
 
-    def freeze(self, status_message="Loading..."):
+    def freeze(self, status_message=gettext("Loading...")):
         """ Freezes the gui so the user can't interact with it. """
 
         self.header_hbox.set_sensitive(False)
@@ -133,7 +133,7 @@ class GuiManager(object):
         was no errors.
         """
 
-        status_message = "Loading..."
+        status_message = gettext("Loading...")
         freeze = True
 
         if "status_message" in kwargs:
@@ -307,8 +307,8 @@ class GuiManager(object):
         """ Fills the file viewer with the seasons. """
 
         if is_error:
-            message = "Problem fetching seasons:\n\n"
-            message += "details: %s" % result
+            message = gettext("Problem fetching seasons:\n\n" \
+                              "details: %s") % result
 
             self.report_error(message)
             return
@@ -322,8 +322,8 @@ class GuiManager(object):
         """ Fills the file viewer with the episodes. """
 
         if is_error:
-            message = "Problem fetching episodes:\n\n"
-            message += "details: %s" % result
+            message = gettext("Problem fetching episodes:\n\n" \
+                              "details: %s") % result
 
             self.report_error(message)
             return
@@ -362,10 +362,11 @@ class GuiManager(object):
 
         if is_error:
             if isinstance(result, NotImplementedError):
-                message = "Not avaliable for this site"
+                message = gettext("Not avaliable for this site")
             else:
-                message = "Problem fetching movies, "
-                message += "please try again in a few minutes."
+                message = gettext("Problem fetching movies, " \
+                                  "please try again in a few minutes.\n"
+                                  "details: %s" % result)
 
             self.report_error(message)
             return
@@ -427,7 +428,7 @@ class GuiManager(object):
             return [x for x in selected_show.seasons]
 
         self.background_task(fetch_seasons, self.display_seasons,
-            status_message="Loading show %s..." % selected_show.name)
+            status_message=gettext("Loading show %s...") % selected_show.name)
 
     def _on_file_viewer_open(self, widget, path, *args):
         """ Called when the user double clicks on a file
@@ -458,7 +459,8 @@ class GuiManager(object):
                 return [x for x in self.current_show.seasons]
 
             self.background_task(fetch_seasons, self.display_seasons,
-                status_message="Loading show %s..." % self.current_show.name)
+                status_message=gettext("Loading show %s...") % \
+                                       self.current_show.name)
 
     def _on_name_filter_change(self, *args):
         """ Called when the textbox to filter names changes. """
@@ -540,7 +542,7 @@ class GuiManager(object):
         """ Called when the user click on the download and
         play context menu item. """
 
-        chooser = gtk.FileChooserDialog(title="Dowload to...",
+        chooser = gtk.FileChooserDialog(title=gettext("Dowload to..."),
                   parent=self.main_window,
                   action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                   buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
@@ -622,10 +624,10 @@ class GuiManager(object):
         try:
             url = file_object.original_url
         except NotImplementedError:
-            self.report_error("Option not avaliable in this site")
+            self.report_error(gettext("Option not avaliable in this site"))
             return
         except:
-            self.report_error("Error opening original url: %s" % error)
+            self.report_error(gettext("Error opening original url: %s") % error)
             return
 
         webbrowser.open(url)
@@ -644,8 +646,8 @@ class GuiManager(object):
 
         query = self.search_entry.get_text()
         self.background_task(self.api.Movie.search,
-                    self.display_movies, query,
-                    status_message="Searching movies with title %s..." % query)
+            self.display_movies, query,
+            status_message=gettext("Searching movies with title %s...") % query)
 
     def _on_about_clicked(self, *args):
         """ Opens the about dialog. """
@@ -671,10 +673,10 @@ class GuiManager(object):
                              file_object, freeze=False)
 
         def fetch_info():
-            full_description = file_object.info["description"] + "\n\n" \
-                "<b>Cast:</b> " + ", ".join(file_object.info["cast"]) + "\n" \
-                "<b>Genere:</b> " + file_object.info["genere"] + "\n" \
-                "<b>Language:</b> " + file_object.info["language"]
+            full_description = file_object.info["description"] + "\n\n" + \
+                gettext("<b>Cast:</b> ") + ", ".join(file_object.info["cast"]) + "\n" + \
+                gettext("<b>Genere:</b> ") + file_object.info["genere"] + "\n" + \
+                gettext("<b>Language:</b> ") + file_object.info["language"]
 
             return file_object.name, full_description
 
@@ -683,9 +685,9 @@ class GuiManager(object):
     def set_info(self, (is_error, result)):
         if is_error:
             if isinstance(result, NotImplementedError):
-                message = "Information not supported for this site"
+                message = gettext("Information not supported for this site")
             else:
-                message = "Error downloading information: %s" % result
+                message = gettext("Error downloading information: %s") % result
 
             self.report_error(message)
             return
@@ -726,7 +728,7 @@ class GuiManager(object):
         """ Sets the image of the current episode. """
 
         if is_error:
-            msg = "Problem downloading show image"
+            msg = gettext("Problem downloading show image")
             self.set_status_message(msg)
             log.error(msg)
             log.error(result)

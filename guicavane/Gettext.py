@@ -8,6 +8,7 @@ Gettext. Translation system.
 import os
 import locale
 import gettext
+import gtk.glade
 
 from Paths import TRANSLATION_DIR
 
@@ -30,6 +31,8 @@ def configure_gettext():
 
     gettext.bindtextdomain(APP_NAME, TRANSLATION_DIR)
     gettext.textdomain(APP_NAME)
+    gtk.glade.bindtextdomain(APP_NAME, TRANSLATION_DIR)
+    gtk.glade.textdomain(APP_NAME)
 
     lang = gettext.translation(APP_NAME, TRANSLATION_DIR,
                                languages=langs, fallback=True)
