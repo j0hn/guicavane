@@ -45,6 +45,13 @@ def setup_linux():
     hosts = ["guicavane.Hosts." + x for x in hosts if os.path.isdir(
         os.path.join(hosts_dir, x))]
 
+    translations_dir = "guicavane/Translations"
+    translations = []
+    for trans in os.listdir(translations_dir):
+        trans_path = os.path.join(translations_dir, trans)
+        if os.path.isdir(trans_path):
+            translations.append("Translations/" + trans + "/LC_MESSAGES/*")
+
     setup(
         name = "guicavane",
         version = VERSION_NUMBER,
@@ -56,7 +63,7 @@ def setup_linux():
         packages = ["guicavane", "guicavane.Downloaders", "guicavane.Utils",
                     "guicavane.Accounts", "guicavane.Hosts"] + hosts,
         package_data = {"guicavane": ["Glade/*.glade", "Images/*.png",
-            "Images/Downloaders/*.png"]},
+            "Images/Downloaders/*.png"] + translations},
         scripts = ["bin/guicavane"],
         cmdclass = {"install": CustomInstall}
     )
@@ -90,7 +97,7 @@ def setup_windows():
         }
     }
 
-    
+
     files = []
     files.append(("Glade",
         ["guicavane\\Glade\\" + x for x in os.listdir("guicavane\\Glade")]))
@@ -99,16 +106,16 @@ def setup_windows():
             not os.path.isdir("guicavane\\Images\\" + x)]))
     files.append(("Images\\Downloaders\\",
         ["guicavane\\Images\\Downloaders\\" + x for x in os.listdir("guicavane\\Images\\Downloaders\\")]))
-        
+
     hosts_dir = "guicavane\\Hosts"
     hosts = os.listdir(hosts_dir)
     hosts = [os.path.join(hosts_dir, x) for x in hosts if os.path.isdir(
         os.path.join(hosts_dir, x))]
-        
+
     for host in hosts:
         cleanhost = host.replace("guicavane\\", "")
         files.append((cleanhost, [os.path.join(host, x) for x in os.listdir(host)]))
-    
+
     setup(
         name = "Guicavane",
         license = "GPL-3",
