@@ -8,12 +8,15 @@ Megaupload Downloader.
 import re
 
 from guicavane.Utils.UrlOpen import UrlOpen
+from guicavane.Utils.Debug import tmp_dump
+from guicavane.Utils.Log import console
 from Base import BaseAccount
 
+log = console("Accounts.Megaupload")
 
 LOGIN_PAGE = "http://www.megaupload.com?c=login"
 ACCOUNT_PAGE = "http://www.megaupload.com?c=account"
-URL_OPEN = UrlOpen()
+URL_OPEN = UrlOpen(use_cache=False)
 
 
 class Megaupload(BaseAccount):
