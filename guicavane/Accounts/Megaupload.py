@@ -54,8 +54,10 @@ class Megaupload(BaseAccount):
         if username in rc:
             self.logged = True
             self.cookiejar = URL_OPEN.cookiejar
+            log.info("Logged to MU")
 
         else:
+            log.warn("Not logged to MU")
             self.logged = False
 
         self.verified = True
