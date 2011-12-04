@@ -11,21 +11,23 @@ import os
 import json
 
 from Paths import *
+from Utils.Singleton import Singleton
 
 DEFAULT_VALUES = {
     "player_location": VLC_LOCATION,
     "cache_dir": TEMP_DIR,
     "last_mode": "Shows",
     "last_download_directory": HOME_DIR,
-    "images_dir": IMAGES_DIR,
+    "images_dir": COVER_IMAGES_DIR,
     "cuevana_user": "",
     "cuevana_pass": "",
     "automatic_marks": True,
+    "use_custom_resolve": False,
     "player_arguments": "",
     "filename_template": "<show> S<season>E<episode> - <name>",
     "accounts": [("megaupload", {"username": "", "password": ""})],
     "automatic_megaupload": False,
-    "site": "cuevana",
+    "site": "Cuevana",
 }
 
 if not os.path.exists(CONFIG_DIR):
@@ -41,10 +43,11 @@ def get_default(key):
     return DEFAULT_VALUES.get(key, None)
 
 
-class Config:
+class Config(Singleton):
     """ Configuration manager. Uses json as config format. """
 
     def __init__(self):
+        Singleton.__init__(self)
         self.config_file = CONFIG_FILE
 
         self.data = {}

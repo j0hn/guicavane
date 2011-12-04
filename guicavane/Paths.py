@@ -18,6 +18,7 @@ else:
 HOME_DIR = os.path.expanduser("~")
 
 TEMP_DIR = tempfile.gettempdir()
+CACHE_DIR = TEMP_DIR
 
 CONFIG_DIR = os.path.join(HOME_DIR, ".guicavane")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "guicavane.conf")
@@ -26,6 +27,9 @@ MARKS_FILE = os.path.join(CONFIG_DIR, "marks.slist")
 FAVORITES_FILE = os.path.join(CONFIG_DIR, "favorites.slist")
 
 IMAGES_DIR = os.path.join(MAIN_DIR, "Images")
-HOSTS_IMAGES_DIR = os.path.join(IMAGES_DIR, "hosts")
+COVER_IMAGES_DIR = os.path.join(CONFIG_DIR, "images")
+HOSTS_IMAGES_DIR = os.path.join(IMAGES_DIR, "Downloaders")
 
 GUI_DIR = os.path.join(MAIN_DIR, "Glade")
+
+TRANSLATION_DIR = os.path.join(MAIN_DIR, "Translations")

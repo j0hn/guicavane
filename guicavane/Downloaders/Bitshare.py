@@ -9,10 +9,15 @@ import re
 import time
 import gobject
 
-from guicavane.Util import UrlOpen
-from Base import BaseDownloader, DownloadError
-from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
+from guicavane.Utils.UrlOpen import UrlOpen, DownloadError
+from Base import BaseDownloader
 from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
+
+from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
+
+from guicavane.Utils.Log import console
+
+log = console("Downloaders.Bitshare")
 
 
 AJAXDL_RE = re.compile('var ajaxdl = "(.*?)";')
@@ -26,8 +31,8 @@ RECAPTCHA_CHALLENGE_ID_RE = re.compile('<script type="text/javascript" ' \
                      'src="http://api.recaptcha.net/challenge\?k=(.+?) ">')
 RECAPTCHA_NEW_CHALLENGE_RE = re.compile("challenge : '(.+?)',")
 
-MAIN_URL_OPEN = UrlOpen()
-CAPTCHA_URL_OPEN = UrlOpen()
+MAIN_URL_OPEN = UrlOpen(use_cache=False)
+CAPTCHA_URL_OPEN = UrlOpen(use_cache=False)
 
 
 class Bitshare(BaseDownloader):
@@ -58,15 +63,22 @@ class Bitshare(BaseDownloader):
         page_data = MAIN_URL_OPEN(self.url)
         self.download_id = self.url.split("?f=")[1]
 
+        if "Error - Archivo no disponible" in page_data:
+            msg = "File not avaliable anymore"
+            log.warn(msg)
+            raise Exception(msg)
+
         try:
             self.ajaxdl = AJAXDL_RE.search(page_data).group(1)
         except:
-            raise DownloadError("ajaxid not found")
+            msg = "ajaxid not found"
+            log.warn(msg)
+            raise DownloadError(msg)
 
         try:
             self.recaptcha_challenge_id = RECAPTCHA_CHALLENGE_ID_RE.search(page_data).group(1)
         except:
-            print "Captcha id not found"
+            log.error("Captcha id not found")
             self.recaptcha_challenge_id = None
 
         request_url = REQUEST_URL % self.download_id

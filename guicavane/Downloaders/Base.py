@@ -8,11 +8,6 @@ Base Downloader. Every Downloader must be a subclass from this Downloader.
 import os
 import gtk
 
-
-class DownloadError(Exception):
-    """ Indicates a downloading error. """
-
-
 class BaseDownloader(object):
     """ Base class for a Downloader. """
 

@@ -8,6 +8,7 @@ from Megaupload import Megaupload
 from Bitshare import Bitshare
 from Filefactory import Filefactory
 from Hotfile import Hotfile
+from Wupload import Wupload
 
 DUMMY_ENABLE = False
 if "-d" in sys.argv or "--dummy" in sys.argv:
@@ -18,6 +19,7 @@ AVALIABLE_HOSTS = {
     "bitshare": Bitshare,
     "filefactory": Filefactory,
     "hotfile": Hotfile,
+    "wupload": Wupload,
 }
 
 if DUMMY_ENABLE:

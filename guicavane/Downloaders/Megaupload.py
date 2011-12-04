@@ -9,13 +9,14 @@ import re
 import time
 import gobject
 
-from guicavane.Util import UrlOpen
+from guicavane.Utils.UrlOpen import UrlOpen, DownloadError
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
-from Base import BaseDownloader, DownloadError
+
+from Base import BaseDownloader
 
 
 MEGALINK_RE = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')
-URL_OPEN = UrlOpen()
+URL_OPEN = UrlOpen(use_cache=False)
 
 
 class Megaupload(BaseDownloader):

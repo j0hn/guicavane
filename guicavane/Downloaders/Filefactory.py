@@ -9,10 +9,11 @@ import re
 import time
 import gobject
 
-from guicavane.Util import UrlOpen
-from Base import BaseDownloader
+from guicavane.Utils.UrlOpen import UrlOpen, DownloadError
 from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
+
+from Base import BaseDownloader
 
 HOST = "http://www.filefactory.com"
 RECAPTCHA_CHALLENGE_URL = "http://api.recaptcha.net/challenge?k="
@@ -27,8 +28,8 @@ FILE_URL_RE = re.compile(r'name="redirect" value="(.*?)"/>')
 FILE_URL_RE = re.compile(r'<a href="(.*?)" id="downloadLinkTarget">')
 COUNTDOWN_RE = re.compile(r'<span class="countdown">(\d*?)</span>')
 
-MAIN_URL_OPEN = UrlOpen()
-CAPTCHA_URL_OPEN = UrlOpen()
+MAIN_URL_OPEN = UrlOpen(use_cache=False)
+CAPTCHA_URL_OPEN = UrlOpen(use_cache=False)
 
 
 class Filefactory(BaseDownloader):

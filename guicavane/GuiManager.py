@@ -13,20 +13,19 @@ import base64
 import urllib
 import webbrowser
 
-import pycavane
+import Hosts
 from Constants import *
 from SList import SList
 from Config import Config
 from Player import Player
+from Gettext import gettext
+from Utils.Log import console
 from Accounts import ACCOUNTS
 from Settings import SettingsDialog
 from ThreadRunner import GtkThreadRunner
 from Paths import MARKS_FILE, FAVORITES_FILE
 
-if "-d" in sys.argv or "--dummy" in sys.argv:
-    testdir = os.path.join(os.getcwd(), "pycavane", "tests")
-    pycavane.cuevana_api.setup("guicavane", "guicavane",
-        cache_dir=testdir, cache_lifetime=13**37)
+log = console("GuiManager")
 
 
 class GuiManager(object):
@@ -39,13 +38,13 @@ class GuiManager(object):
         self.current_show = None
         self.current_season = None
 
-        self.config = Config()
+        self.config = Config.get()
 
         # API
         try:
-            self.api = getattr(pycavane, self.config.get_key("site") + "_api")
+            self.api = getattr(Hosts, self.config.get_key("site")).api
         except Exception, error:
-            self.api = pycavane.cuevana_api
+            self.api = Hosts.Cuevana.api
 
         self.marks = SList(MARKS_FILE)
         self.favorites = SList(FAVORITES_FILE)
@@ -66,7 +65,7 @@ class GuiManager(object):
             "sidebar", "sidebar_vbox", "path_label", "info_window",
             "info_title", "info_label", "info_image", "file_viewer_menu",
             "error_label", "error_dialog", "header_hbox", "main_hpaned",
-            "about_dialog",
+            "about_dialog", "site_liststore",
         ]
 
         for glade_object in glade_objects:
@@ -84,14 +83,12 @@ class GuiManager(object):
         # Start on last mode
         try:
             last_mode = self.config.get_key("last_mode")
-            getattr(self, "set_mode_%s" % last_mode.lower().replace(" ", "_"))()
             self.mode_combo.set_active(MODES.index(last_mode))
         except:
             self.set_mode_shows()
 
-        # Set last site active
-        last_site = self.config.get_key("site")
-        self.site_combo.set_active(SITES.index(last_site))
+        # Fill sites combobox
+        self.fill_sites_combobox()
 
         # Login
         self.background_task(self.login_accounts, freeze=False)
@@ -106,7 +103,7 @@ class GuiManager(object):
             try:
                 account_obj = ACCOUNTS[account_name]
             except KeyError:
-                print "Warning: account not recognized: %s" % account_name
+                log.warn("account not recognized: %s" % account_name)
                 continue
 
             if username and password:
@@ -163,9 +160,23 @@ class GuiManager(object):
         if callback == None:
             def real_callback((is_error, result)):
                 if is_error:
-                    print "Error: %s" % result
+                    log.error("Error: %s" % result)
 
         GtkThreadRunner(real_callback, func, *args, **kwargs)
+
+    def fill_sites_combobox(self):
+        """ Fills the sites combobox with the avaliable apis. """
+
+        for module in Hosts.AVALIABLE_APIS:
+            display_name = module.DISPLAY_NAME
+
+            self.site_liststore.append([display_name, module])
+
+        # Set last site active
+        last_site = self.config.get_key("site")
+        api_names = [x.DISPLAY_NAME for x in Hosts.AVALIABLE_APIS]
+        if last_site in api_names:
+            self.site_combo.set_active(api_names.index(last_site))
 
     def set_status_message(self, message):
         """ Sets the message shown in the statusbar.  """
@@ -181,7 +192,7 @@ class GuiManager(object):
         self.path_label.set_text("")
         self.name_list_model.clear()
         self.background_task(self.api.Show.search, self.display_shows,
-                             status_message="Obtaining shows list")
+                             status_message=gettext("Obtaining shows list"))
 
     def set_mode_movies(self):
         """ Sets the current mode to movies. """
@@ -199,29 +210,23 @@ class GuiManager(object):
         self.search_entry.set_text("")
         self.path_label.set_text("")
         self.name_filter.set_text("")
-        self.name_list_model.clear()
-        for favorite in self.favorites.get_all():
-            try:
-                show = self.api.Show.search(favorite).next()
-            except StopIteration:
-                print "Warning: didin't find %s in show list" % favorite
-                continue
 
-            self.name_list_model.append([show.name, show])
+        self.background_task(self.favorites.get_all, self.display_favorites,
+                             status_message=gettext("Loading favorites"))
 
     def set_mode_latest_movies(self):
         """ Sets the curret mode to latest movies. """
 
         self.sidebar.hide()
-        self.background_task(self.api.Movie.get_latest,
-            self.display_movies, status_message="Loading latest movies...")
+        self.background_task(self.api.Movie.get_latest, self.display_movies,
+            status_message=gettext("Loading latest movies..."))
 
     def set_mode_recomended_movies(self):
         """ Sets the curret mode to recomended movies. """
 
         self.sidebar.hide()
-        self.background_task(self.api.Movie.get_recomended,
-            self.display_movies, status_message="Loading recomended movies...")
+        self.background_task(self.api.Movie.get_recomended, self.display_movies,
+            status_message=gettext("Loading recomended movies..."))
 
     def update_favorites(self, favorites):
         for fav_name in favorites:
@@ -250,12 +255,10 @@ class GuiManager(object):
 
         model = self.site_combo.get_model()
         active = self.site_combo.get_active()
-        mode_text = model[active][0]
+        site_text = model[active][SITES_COLUMN_TEXT]
+        site_module = model[active][SITES_COLUMN_OBJECT]
 
-        # Poscondition
-        #assert mode_text in MODES
-
-        return mode_text.lower()
+        return (site_text, site_module)
 
     def report_error(self, message):
         """ Shows up an error dialog to the user. """
@@ -265,6 +268,22 @@ class GuiManager(object):
         self.set_status_message("")
         self.unfreeze()
 
+    def display_favorites(self, (is_error, result)):
+        self.name_list_model.clear()
+
+        if is_error:
+            self.report_error(gettext("Error loading favorites: %s") % result)
+            return
+
+        for favorite in result:
+            try:
+                show = self.api.Show.search(favorite).next()
+            except StopIteration:
+                log.warn("didin't find %s in show list" % favorite)
+                continue
+
+            self.name_list_model.append([show.name, show])
+
     def display_shows(self, (is_error, result)):
         """ Displays the shows. """
 
@@ -272,8 +291,12 @@ class GuiManager(object):
         self.file_viewer_model.clear()
 
         if is_error:
-            message = "Problem fetching shows, "
-            message += "please try again in a few minutes."
+            if isinstance(result, NotImplementedError):
+                message = gettext("Not avaliable for this site")
+            else:
+                message = gettext("Problem fetching shows:\n\n" \
+                                  "details: %s") % result
+
             self.report_error(message)
             return
 
@@ -284,8 +307,9 @@ class GuiManager(object):
         """ Fills the file viewer with the seasons. """
 
         if is_error:
-            message = "Problem fetching seasons, "
-            message = "please try again in a few minutes."
+            message = "Problem fetching seasons:\n\n"
+            message += "details: %s" % result
+
             self.report_error(message)
             return
 
@@ -298,8 +322,9 @@ class GuiManager(object):
         """ Fills the file viewer with the episodes. """
 
         if is_error:
-            message = "Problem fetching episodes, "
-            message = "please try again in a few minutes."
+            message = "Problem fetching episodes:\n\n"
+            message += "details: %s" % result
+
             self.report_error(message)
             return
 
@@ -336,8 +361,12 @@ class GuiManager(object):
         """ Fills the file viewer with the movies from the search results. """
 
         if is_error:
-            message = "Problem fetching movies, "
-            message = "please try again in a few minutes."
+            if isinstance(result, NotImplementedError):
+                message = "Not avaliable for this site"
+            else:
+                message = "Problem fetching movies, "
+                message += "please try again in a few minutes."
+
             self.report_error(message)
             return
 
@@ -365,7 +394,6 @@ class GuiManager(object):
 
         last_mode = self.get_mode()
         self.config.set_key("last_mode", last_mode)
-
         self.file_viewer_model.clear()
 
         # Call the corresponding set_mode method
@@ -374,9 +402,10 @@ class GuiManager(object):
     def _on_site_change(self, *args):
         """ Called when the mode combobox changes value. """
 
-        site_mode = self.get_site()
-        self.config.set_key("site", site_mode)
-        self.api = getattr(pycavane, site_mode + "_api")
+        site_text, site_module = self.get_site()
+
+        self.config.set_key("site", site_text)
+        self.api = site_module
 
         self.file_viewer_model.clear()
 
@@ -394,9 +423,11 @@ class GuiManager(object):
         self.current_show = selected_show
         self.path_label.set_text(selected_show.name)
 
-        self.background_task(self.api.Season.search, self.display_seasons,
-                selected_show, status_message="Loading show %s..." % \
-                selected_show.name)
+        def fetch_seasons():
+            return [x for x in selected_show.seasons]
+
+        self.background_task(fetch_seasons, self.display_seasons,
+            status_message="Loading show %s..." % selected_show.name)
 
     def _on_file_viewer_open(self, widget, path, *args):
         """ Called when the user double clicks on a file
@@ -422,8 +453,11 @@ class GuiManager(object):
         elif isinstance(file_object, self.api.Episode):
             Player(self, file_object)
         elif file_object == None:
-            self.background_task(self.api.Season.search,
-                self.display_seasons, self.current_show,
+
+            def fetch_seasons():
+                return [x for x in self.current_show.seasons]
+
+            self.background_task(fetch_seasons, self.display_seasons,
                 status_message="Loading show %s..." % self.current_show.name)
 
     def _on_name_filter_change(self, *args):
@@ -465,9 +499,6 @@ class GuiManager(object):
         if selected not in self.favorites.get_all():
             self.favorites.add(selected)
 
-        #self.background_task(self.pycavane.add_favorite,
-        #                     self.on_finish_favorite, selected, False)
-
     def _on_remove_favorite(self, *args):
         """ Removes the selected show from favorites. """
 
@@ -478,9 +509,6 @@ class GuiManager(object):
         if selected in self.favorites.get_all():
             self.favorites.remove(selected)
             self.set_mode_favorites()
-
-        #self.background_task(self.pycavane.del_favorite,
-        #                     self.on_finish_favorite, selected, False)
 
     def _on_file_button_press(self, view, event):
         """ Called when the user press any mouse button on the file viewer. """
@@ -586,12 +614,21 @@ class GuiManager(object):
             model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE)
             self.marks.remove(mark_string)
 
-    def open_in_cuevana(self, *args):
-        """ Open selected episode or movie on cuevana website. """
+    def open_in_original(self, *args):
+        """ Open selected episode or movie on his original website. """
 
         path, _ = self.file_viewer.get_cursor()
         file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
-        webbrowser.open(file_object.cuevana_url)
+        try:
+            url = file_object.original_url
+        except NotImplementedError:
+            self.report_error("Option not avaliable in this site")
+            return
+        except:
+            self.report_error("Error opening original url: %s" % error)
+            return
+
+        webbrowser.open(url)
 
     def _on_search_clear_clicked(self, *args):
         """ Clears the search input. """
@@ -622,9 +659,7 @@ class GuiManager(object):
         self.settings_dialog.show()
 
     def _on_info_clicked(self, *args):
-        """
-        Called when click on the context menu info item.
-        """
+        """ Called when click on the context menu info item. """
 
         path, _ = self.file_viewer.get_cursor()
         file_object = self.file_viewer_model[path][FILE_VIEW_COLUMN_OBJECT]
@@ -633,15 +668,30 @@ class GuiManager(object):
         self.info_image.set_from_pixbuf(empty_case)
 
         self.background_task(self.download_show_image, self.set_info_image,
-                             file_object)
+                             file_object, freeze=False)
 
-        full_description = file_object.info["description"] + "\n\n" \
-            "<b>Cast:</b> " + ", ".join(file_object.info["cast"]) + "\n" \
-            "<b>Genere:</b> " + file_object.info["genere"] + "\n" \
-            "<b>Language:</b> " + file_object.info["language"]
+        def fetch_info():
+            full_description = file_object.info["description"] + "\n\n" \
+                "<b>Cast:</b> " + ", ".join(file_object.info["cast"]) + "\n" \
+                "<b>Genere:</b> " + file_object.info["genere"] + "\n" \
+                "<b>Language:</b> " + file_object.info["language"]
 
-        self.info_title.set_label(file_object.info["name"])
-        self.info_label.set_label(full_description)
+            return file_object.name, full_description
+
+        self.background_task(fetch_info, self.set_info, freeze=True)
+
+    def set_info(self, (is_error, result)):
+        if is_error:
+            if isinstance(result, NotImplementedError):
+                message = "Information not supported for this site"
+            else:
+                message = "Error downloading information: %s" % result
+
+            self.report_error(message)
+            return
+
+        self.info_title.set_label(result[0])
+        self.info_label.set_label(result[1])
         self.info_window.show()
 
     def _on_info_window_close(self, *args):
@@ -656,7 +706,7 @@ class GuiManager(object):
 
         images_dir = self.config.get_key("images_dir")
         if isinstance(file_object, self.api.Episode):
-            name = file_object.show.lower()
+            name = file_object.show.name.lower()
         else:
             name = file_object.name.lower()
 
@@ -676,8 +726,10 @@ class GuiManager(object):
         """ Sets the image of the current episode. """
 
         if is_error:
-            self.set_status_message("Problem downloading show image")
-            print result
+            msg = "Problem downloading show image"
+            self.set_status_message(msg)
+            log.error(msg)
+            log.error(result)
             return
 
         image_path = result

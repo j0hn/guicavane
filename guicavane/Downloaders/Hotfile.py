@@ -9,10 +9,11 @@ import re
 import time
 import gobject
 
-from Base import BaseDownloader, DownloadError
-from guicavane.Util import UrlOpen
+from guicavane.Utils.UrlOpen import UrlOpen
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
 from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
+
+from Base import BaseDownloader
 
 RECAPTCHA_CHALLENGE_URL = "http://api.recaptcha.net/challenge?k="
 RECAPTCHA_IMAGE_URL = "http://www.google.com/recaptcha/api/image?c="
@@ -104,7 +105,6 @@ class Hotfile(BaseDownloader):
                 "recaptcha_response_field": response_text}
 
         page_data = MAIN_URL_OPEN(self.url, data=data)
-        print page_data
         self.file_url = FILE_URL_RE.search(page_data).group(1)
 
     def _download_loop(self):

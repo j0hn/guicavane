@@ -11,7 +11,7 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="has_separator">True</property>
     <property name="program_name">Guicavane</property>
-    <property name="version">1.6.0 (saits)</property>
+    <property name="version">1.6.1</property>
     <property name="copyright" translatable="yes">j0hn &lt;j0hn.com.ar@gmail.com&gt;</property>
     <property name="comments" translatable="yes">A Graphical User Interface for 
 the website www.cuevana.tv
@@ -218,15 +218,15 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
       </object>
     </child>
     <child>
-      <object class="GtkImageMenuItem" id="open_in_cuevana">
-        <property name="label" translatable="yes">Open in Cuevana</property>
+      <object class="GtkImageMenuItem" id="open_in_original">
+        <property name="label" translatable="yes">Open in Original Website</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="use_action_appearance">False</property>
         <property name="use_underline">True</property>
         <property name="image">imageCuevana</property>
         <property name="use_stock">False</property>
-        <signal name="activate" handler="open_in_cuevana" swapped="no"/>
+        <signal name="activate" handler="open_in_original" swapped="no"/>
       </object>
     </child>
     <child>
@@ -265,7 +265,7 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
   <object class="GtkImage" id="imageCuevana">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="pixbuf">../Images/cuevana.png</property>
+    <property name="stock">gtk-home</property>
   </object>
   <object class="GtkImage" id="imageHardDisk">
     <property name="visible">True</property>
@@ -1007,20 +1007,8 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
     <columns>
       <!-- column-name label -->
       <column type="gchararray"/>
+      <!-- column-name module_reference -->
+      <column type="PyObject"/>
     </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Cuevana</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Pelispedia</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Freevana</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Moviezet</col>
-      </row>
-    </data>
   </object>
 </interface>
