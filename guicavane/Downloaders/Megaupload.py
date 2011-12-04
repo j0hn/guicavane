@@ -47,13 +47,13 @@ class Megaupload(BaseDownloader):
 
         for i in range(self.account.wait_time, 0, -1):
             gobject.idle_add(self.gui_manager.set_status_message,
-                            "Please wait %d second%s..." % (i, "s" * (i > 1)))
+                gettext("Please wait %d second%s...") % (i, "s" * (i > 1)))
             time.sleep(1)
 
     def start_download(self, (is_error, result)):
         """ Starts the actually download loop and opens up the player. """
         if is_error:
-            self.gui_manager.report_error("Error: %s" % result)
+            self.gui_manager.report_error(gettext("Error: %s") % result)
             return
 
         self.gui_manager.background_task(self._download_loop,
@@ -74,7 +74,8 @@ class Megaupload(BaseDownloader):
         """ Called on finish finding the real link. """
 
         if is_error:
-            self.gui_manager.report_error("Error obtaining megaupload's link: %s" % result)
+            message = gettext("Error obtaining megaupload's link: %s") % result
+            self.gui_manager.report_error(message)
             return
 
         self.megalink = result
@@ -89,7 +90,8 @@ class Megaupload(BaseDownloader):
         try:
             handler = URL_OPEN(self.megalink, handle=True)
         except Exception, error:
-            raise DownloadError("Error downloading from megaupload: %s" % error)
+            message = gettext("Error downloading from megaupload: %s") % error
+            raise DownloadError(message)
 
         # Using the BaseDownloader download function
         self.download_to(handler, self.file_path)
@@ -99,6 +101,7 @@ class Megaupload(BaseDownloader):
             if "Requested Range Not Satisfiable" in str(result):
                 self.file_size = self.downloaded_size
             else:
-                self.gui_manager.report_error("Download finish with error: %s" % result)
+                message = gettext("Download finish with error: %s") % result
+                self.gui_manager.report_error(message)
 
         self.gui_manager.unfreeze()

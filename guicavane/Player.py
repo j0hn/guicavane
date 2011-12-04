@@ -12,9 +12,10 @@ import gobject
 import subprocess
 
 import Downloaders
-from Hosts.Base import BaseMovie, BaseEpisode
-from guicavane.Utils.UrlOpen import UrlOpen
 from guicavane.Config import Config
+from guicavane.Gettext import gettext
+from guicavane.Utils.UrlOpen import UrlOpen
+from Hosts.Base import BaseMovie, BaseEpisode
 from Constants import HOSTS_GUI_FILE, HOSTS_VIEW_COLUMN_OBJECT, \
                       HOSTS_VIEW_COLUMN_TEXT
 
@@ -59,7 +60,7 @@ class Player(object):
                 self.hosts_builder.get_object(glade_object))
 
         self.gui_manager.background_task(self.get_hosts, self.display_hosts,
-            status_message="Fetching hosts...", unfreeze=False)
+            status_message=gettext("Fetching hosts..."), unfreeze=False)
 
     def get_hosts(self):
         """ Returns a dict with the avaliable downloaders for the file. """
@@ -82,7 +83,8 @@ class Player(object):
         """ Shows up the hosts selecting window. """
 
         if is_error:
-            self.gui_manager.report_error("Error fetching hosts: %s" % result)
+            self.gui_manager.report_error(gettext("Error fetching hosts: %s") % \
+                                          result)
             gobject.idle_add(self.gui_manager.progress.hide)
             return
 
@@ -90,7 +92,7 @@ class Player(object):
         gobject.idle_add(self.gui_manager.set_status_message, "")
 
         if not result:
-            self.gui_manager.report_error("No host found")
+            self.gui_manager.report_error(gettext("No host found"))
             self.gui_manager.unfreeze()
             return
 
@@ -141,17 +143,19 @@ class Player(object):
 
         # Download the subtitle
         gobject.idle_add(self.gui_manager.set_status_message,
-            "Downloading subtitles...")
+            gettext("Downloading subtitles..."))
 
         # Wait for the file to exists
-        gobject.idle_add(self.gui_manager.set_status_message, "Wait please...")
+        gobject.idle_add(self.gui_manager.set_status_message,
+                         gettext("Please wait..."))
         while not os.path.exists(self.file_path):
             time.sleep(1)
 
         # Show the progress bar box
         gobject.idle_add(self.gui_manager.progress.set_fraction, 0.0)
         gobject.idle_add(self.gui_manager.progress_box.show)
-        gobject.idle_add(self.gui_manager.set_status_message, "Filling cache...")
+        gobject.idle_add(self.gui_manager.set_status_message,
+                         gettext("Filling cache..."))
 
         if self.downloader.file_size != 0:
             # Waits %1 of the total download
@@ -171,13 +175,13 @@ class Player(object):
         """ Fires up a new process with the player runing. """
 
         if is_error:
-            self.gui_manager.report_error("Error pre downloading: %s" % result)
+            self.gui_manager.report_error(gettext("Error pre-downloading: %s") % result)
             return
 
         if self.download_only:
-            message = "Downloading: %s"
+            message = gettext("Downloading: %s")
         else:
-            message = "Playing: %s"
+            message = gettext("Playing: %s")
 
         gobject.idle_add(self.gui_manager.set_status_message,
                          message % self.file_object.name)
@@ -218,14 +222,14 @@ class Player(object):
 
             if remaining_time >= 1:  # if it's more than a minute
                 if remaining_time == 1:
-                    remaining_message = "%d minute left" % remaining_time
+                    remaining_message = gettext("%d minute left") % remaining_time
                 else:
-                    remaining_message = "%d minutes left" % remaining_time
+                    remaining_message = gettext("%d minutes left") % remaining_time
             else:
                 if (remaining_time * 60) > 10:
-                    remaining_message = "%d seconds left" % (remaining_time * 60)
+                    remaining_message = gettext("%d seconds left") % (remaining_time * 60)
                 elif remaining_time != 0:
-                    remaining_message = "a few seconds left"
+                    remaining_message = gettext("a few seconds left")
                 else:
                     remaining_message = ""
 
@@ -337,4 +341,4 @@ class Player(object):
     def _on_download_subtitle_finish(self, (is_error, result)):
         if is_error:
             gobject.idle_add(self.gui_manager.set_status_message,
-                "Download subtitle failed")
+                gettext("Download subtitle failed"))

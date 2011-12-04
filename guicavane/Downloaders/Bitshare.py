@@ -91,17 +91,18 @@ class Bitshare(BaseDownloader):
 
         for i in range(waiting_time, 0, -1):
             gobject.idle_add(self.gui_manager.set_status_message,
-                            "Please wait %d second%s..." % (i, "s" * (i > 1)))
+                gettext("Please wait %d second%s...") % (i, "s" * (i > 1)))
             time.sleep(1)
 
         return has_captcha
 
     def on_waiting_finish(self, (is_error, result)):
         gobject.idle_add(self.gui_manager.set_status_message,
-                         "Obtaining bitshare link...")
+                         gettext("Obtaining bitshare link..."))
 
         if is_error:
-            self.gui_manager.report_error("Error obtaining bitshare's link: %s" % result)
+            message = gettext("Error obtaining bitshare's link: %s") % result
+            self.gui_manager.report_error(message)
             return
 
         has_captcha = result
@@ -129,7 +130,7 @@ class Bitshare(BaseDownloader):
 
     def send_captcha(self):
         gobject.idle_add(self.gui_manager.set_status_message,
-            "Sending Captcha...")
+            gettext("Sending Captcha..."))
 
         response_text = self.captcha_window.get_input_text()
 
@@ -148,8 +149,8 @@ class Bitshare(BaseDownloader):
         page_data = MAIN_URL_OPEN(request_url, data=request_data)
 
         if not page_data.startswith("SUCCESS"):
-            message = "Not success finding the bitshare "
-            message += "download link. Got: %s" % page_data
+            message = gettext("Not success finding the bitshare " \
+                              "download link. Got: %s") % page_data
 
             self.gui_manager.report_error(message)
             return
@@ -168,7 +169,7 @@ class Bitshare(BaseDownloader):
 
     def _on_captcha_finish(self, (is_error, result)):
         if not result:
-            self.gui_manager.report_error("Wrong captcha")
+            self.gui_manager.report_error(gettext("Wrong captcha"))
             return
 
         self.gui_manager.background_task(self._download_loop,
@@ -181,6 +182,7 @@ class Bitshare(BaseDownloader):
             if "Requested Range Not Satisfiable" in str(result):
                 self.file_size = self.downloaded_size
             else:
-                self.gui_manager.report_error("Download finish with error: %s" % result)
+                message = gettext("Download finish with error: %s") % result
+                self.gui_manager.report_error(message)
 
         self.gui_manager.unfreeze()
