@@ -18,10 +18,12 @@ import functools
 from StringIO import StringIO
 
 from Cached import Cached
-from guicavane.Constants import DEFAULT_REQUEST_TIMEOUT, CUSTOM_DNS
-from guicavane.Paths import CACHE_DIR
 from guicavane.Config import Config
+from guicavane.Paths import CACHE_DIR
+from guicavane.Utils.Log import console
+from guicavane.Constants import DEFAULT_REQUEST_TIMEOUT, CUSTOM_DNS
 
+log = console("GuiManager")
 config = Config.get()
 
 HEADERS = {
@@ -51,8 +53,10 @@ def retry(callback):
                 tried += 1
                 time.sleep(1)
 
-        error = "Can't download. Error: '%s', args: '%s'" % \
-            (error, str(args) + str(kwargs))
+
+        error = "Can't download. Error: '%s'" % error
+        long_error = error + ", args: '%s'" % (str(args) + str(kwargs))
+        log.error(long_error)
 
         raise DownloadError(error)
 

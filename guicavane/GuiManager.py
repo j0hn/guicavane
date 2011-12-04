@@ -19,12 +19,11 @@ from SList import SList
 from Config import Config
 from Player import Player
 from Gettext import gettext
+from Utils.Log import console
 from Accounts import ACCOUNTS
 from Settings import SettingsDialog
 from ThreadRunner import GtkThreadRunner
 from Paths import MARKS_FILE, FAVORITES_FILE
-
-from Utils.Log import console
 
 log = console("GuiManager")
 
