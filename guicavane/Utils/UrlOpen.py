@@ -76,10 +76,9 @@ class CustomHTTPConnection(httplib.HTTPConnection):
                                               self.port), self.timeout)
 
 
-class CustomHTTPHandler(urllib2.HTTPHandler, urllib2.HTTPCookieProcessor):
-    def __init__(self, cookiejar):
+class CustomHTTPHandler(urllib2.HTTPHandler):
+    def __init__(self):
         urllib2.HTTPHandler.__init__(self)
-        urllib2.HTTPCookieProcessor.__init__(self, cookiejar)
 
     def http_open(self, req):
         return self.do_open(CustomHTTPConnection, req)
@@ -143,9 +142,9 @@ class UrlOpen(object):
     def build_opener(self):
         """ Setup cookies in urllib2. """
 
-        #handler = urllib2.HTTPCookieProcessor(self.cookiejar)
-        handler = CustomHTTPHandler(self.cookiejar)
-        return urllib2.build_opener(handler)
+        cookie_handler = urllib2.HTTPCookieProcessor(self.cookiejar)
+        custom_handler = CustomHTTPHandler()
+        return urllib2.build_opener(cookie_handler, custom_handler)
 
     def set_timeout(self, value):
         """ Sets the max request timeout. """
