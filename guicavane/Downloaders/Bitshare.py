@@ -9,16 +9,14 @@ import re
 import time
 import gobject
 
-from guicavane.Utils.UrlOpen import UrlOpen, DownloadError
 from Base import BaseDownloader
+from guicavane.Gettext import gettext
+from guicavane.Utils.Log import console
+from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
+from guicavane.Utils.UrlOpen import UrlOpen, DownloadError
 from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
 
-from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
-
-from guicavane.Utils.Log import console
-
 log = console("Downloaders.Bitshare")
-
 
 AJAXDL_RE = re.compile('var ajaxdl = "(.*?)";')
 
