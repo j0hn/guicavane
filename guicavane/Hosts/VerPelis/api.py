@@ -33,6 +33,11 @@ def normalize_name(name):
 class Episode(BaseEpisode):
     _hosts_re = re.compile('<a.*?title="Ver pelicula desde (?P<host>[^\?"]*?)\??"'\
                            '.*?href="(?P<id>.*?)vp=.*?">')
+    _serie_info_re = re.compile('<div class="peli_img_int mgbot10px">.*?'\
+                                '<img src="(?P<image>.*?)".*?/>.*?</div>.*?'\
+                                'Genero:</span> (?P<genere>.*?)</li>.*'\
+                                '<div class="sinoptxt.*?">.*?<p>'\
+                                '(?P<description>.*?)</p>', re.DOTALL)
 
     def __init__(self, id, name, number, season, show):
         self.id = id
@@ -63,6 +68,26 @@ class Episode(BaseEpisode):
             self.__hosts[hostname]["360"] = url
 
         return self.__hosts
+
+    @property
+    def original_url(self):
+        return urls.episode_orig_url % (normalize_name(self.show.name),
+                                       self.season.number, self.number)
+
+    @property
+    def info(self):
+        url = urls.episode_orig_url % (normalize_name(self.show.name),
+                                        self.season.number, self.number)
+        data = url_open(url)
+
+        info = self._serie_info_re.search(data).groupdict()
+        # Adding missing fields
+        info['cast'] = ''
+        info['language'] = ''
+        # Making pretty some fields
+        info['description'] = info['description'].strip()
+
+        return info
 
     def get_subtitle_url(self, lang="ES", quality=None):
         # Notar, la pagina no tiene soporte para diferentes idiomas

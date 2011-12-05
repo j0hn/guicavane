@@ -8,6 +8,7 @@ shows = host + 'listaseries.php'
 seasons = host + 'series/%s/'
 episodes = seasons + '%s.html'
 
+episode_orig_url = host + 'series/%s-%sx%s.html'
 episode = host + 'nodo/id-vs-%s_%sx%s.html'
 #movie = host + 'movies/%s'
 
