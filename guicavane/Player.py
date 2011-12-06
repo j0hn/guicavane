@@ -96,6 +96,18 @@ class Player(object):
             self.gui_manager.unfreeze()
             return
 
+        if len(result) == 1 and not self.choose_host:
+            host, qualities = result.items()[0]
+
+            if len(qualities) == 1:
+                gobject.idle_add(self.gui_manager.set_status_message,
+                    gettext("Only one host found, starting download..."))
+
+                url = qualities.items()[0][1]
+                self.downloader = Downloaders.get(host, self.gui_manager, url)
+                self.downloader.process_url(self.play, self.file_path)
+                return
+
         # elif len(result) == 1 and not self.choose_host:
         #     gobject.idle_add(self.gui_manager.set_status_message,
         #         "Only one host found, starting download...")
