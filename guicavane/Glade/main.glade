@@ -544,6 +544,12 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
                     <property name="active">0</property>
                     <signal name="changed" handler="_on_site_change" swapped="no"/>
                     <child>
+                      <object class="GtkCellRendererPixbuf" id="site_rederer_image"/>
+                      <attributes>
+                        <attribute name="pixbuf">2</attribute>
+                      </attributes>
+                    </child>
+                    <child>
                       <object class="GtkCellRendererText" id="site_renderer_text"/>
                       <attributes>
                         <attribute name="text">0</attribute>
@@ -1009,6 +1015,8 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
       <column type="gchararray"/>
       <!-- column-name module_reference -->
       <column type="PyObject"/>
+      <!-- column-name image -->
+      <column type="GdkPixbuf"/>
     </columns>
   </object>
 </interface>

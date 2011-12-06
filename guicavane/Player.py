@@ -14,10 +14,13 @@ import subprocess
 import Downloaders
 from guicavane.Config import Config
 from guicavane.Gettext import gettext
+from guicavane.Utils.Log import console
 from guicavane.Utils.UrlOpen import UrlOpen
 from Hosts.Base import BaseMovie, BaseEpisode
 from Constants import HOSTS_GUI_FILE, HOSTS_VIEW_COLUMN_OBJECT, \
                       HOSTS_VIEW_COLUMN_TEXT
+
+log = console("Player")
 
 
 class Player(object):
@@ -289,7 +292,12 @@ class Player(object):
 
         if downloaded_size >= file_size:
             if self.config.get_key("automatic_marks"):
-                self.gui_manager.marks.add(self.file_object.id)
+                mark_string = "%s-%s-%s" % (self.file_object.show.name,
+                    self.file_object.season.name, self.file_object.name)
+
+                log.info("Mark automatically added: %s" % mark_string)
+
+                self.gui_manager.marks.add(mark_string)
                 self.gui_manager.refresh_marks()
 
     def get_filename(self):
