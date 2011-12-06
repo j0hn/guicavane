@@ -170,7 +170,15 @@ class GuiManager(object):
         for module in Hosts.AVALIABLE_APIS:
             display_name = module.DISPLAY_NAME
 
-            self.site_liststore.append([display_name, module])
+            imagepath = os.path.join(IMAGES_DIR, "Sites", display_name.lower() + ".png")
+            pixbuf = None
+
+            if os.path.exists(imagepath):
+                image = gtk.Image()
+                image.set_from_file(imagepath)
+                pixbuf = image.get_pixbuf()
+
+            self.site_liststore.append([display_name, module, pixbuf])
 
         # Set last site active
         last_site = self.config.get_key("site")
