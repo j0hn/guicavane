@@ -337,15 +337,11 @@ class GuiManager(object):
 
         for episode in result:
             episode_name = "%s - %s" % (episode.number, episode.name)
-
-            mark_string = "%s-%s-%s" % (self.current_show.name,
-                self.current_season.name, episode.name)
-
             icon = ICON_FILE_MOVIE
-            if str(episode.id) in marks or mark_string in marks:
-                icon = ICON_FILE_MOVIE_MARK
 
             self.file_viewer_model.append([icon, episode_name, episode])
+
+        self.refresh_marks()
 
     def refresh_marks(self):
         marks = self.marks.get_all()
@@ -353,7 +349,14 @@ class GuiManager(object):
         for row in self.file_viewer_model:
             iteration = self.file_viewer_model.get_iter(row.path)
             obj = row[FILE_VIEW_COLUMN_OBJECT]
-            if not obj is None and obj.id in marks:
+
+            if not obj:
+                continue
+
+            mark_string = "%s-%s-%s" % (self.current_show.name,
+                self.current_season.name, obj.name)
+
+            if mark_string in marks:
                 self.file_viewer_model.set_value(iteration,
                     FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE_MARK)
 
