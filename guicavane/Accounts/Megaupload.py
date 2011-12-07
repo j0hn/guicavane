@@ -40,6 +40,11 @@ class Megaupload(BaseAccount):
             self._password == password:
             return
 
+        if URL_OPEN.check_cookie("megaupload.com"):
+            log.info("Already logged to MU")
+            self.logged = True
+            return
+
         self.verified = False
 
         self._username = username
@@ -53,7 +58,6 @@ class Megaupload(BaseAccount):
         rc = URL_OPEN(LOGIN_PAGE, data=data)
         if username in rc:
             self.logged = True
-            self.cookiejar = URL_OPEN.cookiejar
             log.info("Logged to MU")
 
         else:
@@ -81,4 +85,3 @@ class Megaupload(BaseAccount):
         Megaupload waiting time for the given account.
         """
         return self.account_wait[self.account_type]
-

@@ -15,6 +15,11 @@ from guicavane.Utils.UrlOpen import UrlOpen, DownloadError
 
 from Base import BaseDownloader
 
+from guicavane.Utils.Debug import tmp_dump
+from guicavane.Utils.Log import console
+
+log = console("Downloaders.Megaupload")
+
 
 MEGALINK_RE = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')
 URL_OPEN = UrlOpen(use_cache=False)
@@ -69,7 +74,10 @@ class Megaupload(BaseDownloader):
         except Exception, error:
             raise DownloadError(error)
 
-        return MEGALINK_RE.findall(page_data)[0]
+        link = MEGALINK_RE.findall(page_data)
+        if not link:
+            log.info("dumped in: %s" % tmp_dump(page_data))
+        return link[0]
 
     def _on_megalink_finish(self, (is_error, result)):
         """ Called on finish finding the real link. """

@@ -23,6 +23,8 @@ CACHE_DIR = TEMP_DIR
 CONFIG_DIR = os.path.join(HOME_DIR, ".guicavane")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "guicavane.conf")
 
+COOKIES_FILE = os.path.join(CONFIG_DIR, "cookies.jar")
+
 MARKS_FILE = os.path.join(CONFIG_DIR, "marks.slist")
 FAVORITES_FILE = os.path.join(CONFIG_DIR, "favorites.slist")
 
