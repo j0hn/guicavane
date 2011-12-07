@@ -11,6 +11,11 @@ to run a function on a thread and return the result when it's done
 import Queue
 import gobject
 import threading
+import traceback
+from guicavane.Utils.Log import console
+from StringIO import StringIO
+
+log = console("ThreadRunner")
 
 
 class GtkThreadRunner(threading.Thread):
@@ -45,6 +50,14 @@ class GtkThreadRunner(threading.Thread):
             result = (False, self.func(*self.args, **self.kwargs))
         except Exception, ex:
             result = (True, ex)
+
+            error_str = StringIO()
+            error_str.write("running: %s, args: %s, kwargs: %s\nDetails:\n" % \
+                (self.func, self.args, self.kwargs))
+
+            traceback.print_exc(file=error_str)
+            error_str.seek(0)
+            log.error(error_str.read())
 
         self.result.put(result)
 

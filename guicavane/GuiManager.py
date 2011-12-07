@@ -159,8 +159,7 @@ class GuiManager(object):
 
         if callback == None:
             def real_callback((is_error, result)):
-                if is_error:
-                    log.error("Error: %s" % result)
+                pass
 
         GtkThreadRunner(real_callback, func, *args, **kwargs)
 
