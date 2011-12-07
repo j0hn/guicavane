@@ -19,14 +19,12 @@ DEFAULT_VALUES = {
     "last_mode": "Shows",
     "last_download_directory": HOME_DIR,
     "images_dir": COVER_IMAGES_DIR,
-    "cuevana_user": "",
-    "cuevana_pass": "",
     "automatic_marks": True,
     "use_custom_resolve": False,
     "player_arguments": "",
     "filename_template": "<show> S<season>E<episode> - <name>",
     "accounts": [("megaupload", {"username": "", "password": ""})],
-    "automatic_megaupload": False,
+    "automatic_start": False,
     "site": "Cuevana",
 }
 

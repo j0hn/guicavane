@@ -121,48 +121,6 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkHBox" id="automatic_marks_hbox">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <object class="GtkLabel" id="automatic_marks_label">
-                        <property name="width_request">200</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Mark episodes as watched right after watching or downloading them.</property>
-                        <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Automatic marks:</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="automatic_marks">
-                        <property name="label" translatable="yes">Enable</property>
-                        <property name="width_request">200</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="use_action_appearance">False</property>
-                        <property name="draw_indicator">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkHBox" id="use_custom_resolve_hbox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -205,18 +163,17 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkHBox" id="automatic_megaupload_hbox">
+                  <object class="GtkHBox" id="automatic_marks_hbox">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkLabel" id="automatic_megaupload_label">
+                      <object class="GtkLabel" id="automatic_marks_label">
                         <property name="width_request">200</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Automatically choose megaupload if it's posible.
-You can also skip this right clicking on the movie or episode and choosing 'Choose Host'.</property>
+                        <property name="tooltip_text" translatable="yes">Mark episodes as watched right after watching or downloading them.</property>
                         <property name="xalign">0</property>
-                        <property name="label" translatable="yes">Automatically use megaupload:</property>
+                        <property name="label" translatable="yes">Automatic marks:</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -225,7 +182,51 @@ You can also skip this right clicking on the movie or episode and choosing 'Choo
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="automatic_megaupload">
+                      <object class="GtkCheckButton" id="automatic_marks">
+                        <property name="label" translatable="yes">Enable</property>
+                        <property name="width_request">200</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="automatic_start_hbox">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkLabel" id="automatic_start_label">
+                        <property name="width_request">200</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Automatically choose megaupload if it's posible.
+You can also skip this right clicking on the movie or episode and choosing 'Choose Host'.</property>
+                        <property name="xalign">0</property>
+                        <property name="label" translatable="yes">Automatically start
+when ther's only 1 host:</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="automatic_start">
                         <property name="label" translatable="yes">Enable</property>
                         <property name="width_request">200</property>
                         <property name="visible">True</property>
@@ -394,67 +395,6 @@ You can also skip this right clicking on the movie or episode and choosing 'Choo
                 <property name="can_focus">False</property>
                 <property name="border_width">5</property>
                 <child>
-                  <object class="GtkExpander" id="cuevana_account">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <child>
-                      <object class="GtkHBox" id="cuevana_hbox">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="spacing">5</property>
-                        <child>
-                          <object class="GtkEntry" id="cuevana_user_entry">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="invisible_char">•</property>
-                            <property name="invisible_char_set">True</property>
-                            <property name="primary_icon_activatable">False</property>
-                            <property name="secondary_icon_activatable">False</property>
-                            <property name="primary_icon_sensitive">True</property>
-                            <property name="secondary_icon_sensitive">True</property>
-                          </object>
-                          <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="cuevana_pass_entry">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="visibility">False</property>
-                            <property name="invisible_char">•</property>
-                            <property name="invisible_char_set">True</property>
-                            <property name="primary_icon_activatable">False</property>
-                            <property name="secondary_icon_activatable">False</property>
-                            <property name="primary_icon_sensitive">True</property>
-                            <property name="secondary_icon_sensitive">True</property>
-                            <signal name="activate" handler="_on_save_settings" swapped="no"/>
-                          </object>
-                          <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
-                    <child type="label">
-                      <object class="GtkLabel" id="cuevana_title">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Cuevana</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkExpander" id="megaupload_account">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -512,7 +452,7 @@ You can also skip this right clicking on the movie or episode and choosing 'Choo
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
               </object>
