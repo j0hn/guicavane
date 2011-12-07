@@ -1,8 +1,13 @@
-'''helpers for logging, now you don't have excuse to use logging
+#!/usr/bin/env python
+# coding: utf-8
+
+"""
+Helpers for logging, now you don't have excuse to use logging
 
 https://github.com/marianoguerra/me/blob/master/code/python/mlog/mlog.py
-'''
+"""
 
+import sys
 import inspect
 import logging
 import logging.handlers
@@ -83,8 +88,14 @@ def _get_logger(name, logger, handler, level, format):
 
     return logger
 
-def console(name=None, level=logging.INFO, logger=None, format=None):
+def console(name=None, logger=None, format=None):
     handler = logging.StreamHandler()
+
+    if "-v" in sys.argv:
+        level = logging.DEBUG
+    else:
+        level = logging.WARN
+
     return _get_logger(name, logger, handler, level, format)
 
 def file(path, when=None, name=None, level=logging.DEBUG, logger=None,
