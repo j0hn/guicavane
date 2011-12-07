@@ -51,9 +51,16 @@ class GtkThreadRunner(threading.Thread):
         except Exception, ex:
             result = (True, ex)
 
+            if self.func.im_class == type:
+                methodname = "%s.%s" % (self.func.__self__.__name__, \
+                                        self.func.im_func.func_name)
+            else:
+                methodname = "%s.%s" % (self.func.im_class.__name__, \
+                                        self.func.im_func.func_name)
+
             error_str = StringIO()
             error_str.write("running: %s, args: %s, kwargs: %s\nDetails:\n" % \
-                (self.func, self.args, self.kwargs))
+                (methodname, self.args, self.kwargs))
 
             traceback.print_exc(file=error_str)
             error_str.seek(0)
