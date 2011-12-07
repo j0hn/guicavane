@@ -44,7 +44,7 @@ class GuiManager(object):
         try:
             self.api = getattr(Hosts, self.config.get_key("site")).api
         except Exception, error:
-            self.api = Hosts.Cuevana.api
+            self.api = Hosts.AVALIABLE_APIS[0]
 
         self.marks = SList(MARKS_FILE)
         self.favorites = SList(FAVORITES_FILE)
@@ -180,10 +180,9 @@ class GuiManager(object):
             self.site_liststore.append([display_name, module, pixbuf])
 
         # Set last site active
-        last_site = self.config.get_key("site")
+        last_site = self.api.DISPLAY_NAME
         api_names = [x.DISPLAY_NAME for x in Hosts.AVALIABLE_APIS]
-        if last_site in api_names:
-            self.site_combo.set_active(api_names.index(last_site))
+        self.site_combo.set_active(api_names.index(last_site))
 
     def set_status_message(self, message):
         """ Sets the message shown in the statusbar.  """
