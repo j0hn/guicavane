@@ -360,5 +360,7 @@ class Player(object):
 
     def _on_download_subtitle_finish(self, (is_error, result)):
         if is_error:
+            log.error("Download subtitle failed: %s" % result)
+
             gobject.idle_add(self.gui_manager.set_status_message,
                 gettext("Download subtitle failed"))
