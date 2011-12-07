@@ -35,9 +35,8 @@ class SettingsDialog(object):
         glade_objects = [
             "settings_dialog", "player_location_button",
             "player_arguments_entry", "megaupload_user_entry",
-            "megaupload_pass_entry", "cuevana_user_entry",
-            "cuevana_pass_entry", "cache_dir_button", "automatic_marks",
-            "use_custom_resolve", "filename_template", "automatic_megaupload",
+            "megaupload_pass_entry", "cache_dir_button", "automatic_marks",
+            "use_custom_resolve", "filename_template", "automatic_start",
         ]
 
         for glade_object in glade_objects:
@@ -53,24 +52,16 @@ class SettingsDialog(object):
         automatic_marks = self.config.get_key("automatic_marks")
         use_custom_resolve = self.config.get_key("use_custom_resolve")
         filename_template = self.config.get_key("filename_template")
-        automatic_megaupload = self.config.get_key("automatic_megaupload")
-        try:
-            cuevana_user = self.config.get_key("cuevana_user")
-            cuevana_pass = base64.b64decode(self.config.get_key("cuevana_pass"))
-        except:
-            cuevana_user = ""
-            cuevana_pass = ""
+        automatic_start = self.config.get_key("automatic_start")
 
         # Set the values
         self.player_location_button.set_filename(player_location)
         self.player_arguments_entry.set_text(player_arguments)
-        self.cuevana_user_entry.set_text(cuevana_user)
-        self.cuevana_pass_entry.set_text(cuevana_pass)
         self.cache_dir_button.set_filename(cache_dir)
         self.automatic_marks.set_active(automatic_marks)
         self.use_custom_resolve.set_active(use_custom_resolve)
         self.filename_template.set_text(filename_template)
-        self.automatic_megaupload.set_active(automatic_megaupload)
+        self.automatic_start.set_active(automatic_start)
 
         # Accounts
         accounts = self.config.get_key("accounts")
@@ -100,22 +91,18 @@ class SettingsDialog(object):
         automatic_marks = self.automatic_marks.get_active()
         use_custom_resolve = self.use_custom_resolve.get_active()
         filename_template = self.filename_template.get_text()
-        automatic_megaupload = self.automatic_megaupload.get_active()
-        cuevana_user = self.cuevana_user_entry.get_text()
-        cuevana_pass = base64.b64encode(self.cuevana_pass_entry.get_text())
+        automatic_start = self.automatic_start.get_active()
 
         # Save the new values to the config
         if player_location != None:
             self.config.set_key("player_location", player_location)
 
-        self.config.set_key("cuevana_user", cuevana_user)
-        self.config.set_key("cuevana_pass", cuevana_pass)
         self.config.set_key("cache_dir", cache_dir)
         self.config.set_key("automatic_marks", automatic_marks)
         self.config.set_key("use_custom_resolve", use_custom_resolve)
         self.config.set_key("player_arguments", player_arguments)
         self.config.set_key("filename_template", filename_template)
-        self.config.set_key("automatic_megaupload", automatic_megaupload)
+        self.config.set_key("automatic_start", automatic_start)
         self.config.save()
 
         # Accounts:

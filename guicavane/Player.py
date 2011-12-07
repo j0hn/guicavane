@@ -99,7 +99,9 @@ class Player(object):
             self.gui_manager.unfreeze()
             return
 
-        if len(result) == 1 and not self.choose_host:
+        automatic_start = self.config.get_key("automatic_start")
+
+        if automatic_start and len(result) == 1 and not self.choose_host:
             host, qualities = result.items()[0]
 
             if len(qualities) == 1:
