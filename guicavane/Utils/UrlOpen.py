@@ -25,7 +25,6 @@ from guicavane.Utils.Log import console
 from guicavane.Constants import DEFAULT_REQUEST_TIMEOUT, CUSTOM_DNS
 
 log = console("GuiManager")
-config = Config.get()
 
 HEADERS = {
     'User-Agent': 'User-Agent:Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.1 '
@@ -77,6 +76,7 @@ def save_cookies(callback):
 
 
 def CustomResolver(host):
+    config = Config.get()
     if config.get_key("use_custom_resolve"):
         if host in CUSTOM_DNS:
             host = CUSTOM_DNS[host]

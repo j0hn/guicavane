@@ -14,8 +14,10 @@ import urllib
 import webbrowser
 
 import Hosts
+from Paths import *
 from Constants import *
 from SList import SList
+from Wizard import Wizard
 from Config import Config
 from Player import Player
 from Gettext import gettext
@@ -23,7 +25,6 @@ from Utils.Log import console
 from Accounts import ACCOUNTS
 from Settings import SettingsDialog
 from ThreadRunner import GtkThreadRunner
-from Paths import MARKS_FILE, FAVORITES_FILE
 
 log = console("GuiManager")
 
@@ -38,6 +39,7 @@ class GuiManager(object):
         self.current_show = None
         self.current_season = None
 
+        is_first_time = not os.path.exists(CONFIG_FILE)
         self.config = Config.get()
 
         # API
@@ -92,6 +94,10 @@ class GuiManager(object):
 
         # Login
         self.background_task(self.login_accounts, freeze=False)
+
+        if is_first_time:
+            wizard = Wizard(self.main_window)
+            wizard.show()
 
     def login_accounts(self):
         accounts = self.config.get_key("accounts")
