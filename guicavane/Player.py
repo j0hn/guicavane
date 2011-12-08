@@ -16,9 +16,10 @@ from guicavane.Config import Config
 from guicavane.Gettext import gettext
 from guicavane.Utils.Log import console
 from guicavane.Utils.UrlOpen import UrlOpen
-from Hosts.Base import BaseMovie, BaseEpisode
-from Constants import HOSTS_GUI_FILE, HOSTS_VIEW_COLUMN_OBJECT, \
-                      HOSTS_VIEW_COLUMN_TEXT
+from guicavane.Paths import HOSTS_GUI_FILE
+from guicavane.Hosts.Base import BaseMovie, BaseEpisode
+from guicavane.Constants import HOSTS_VIEW_COLUMN_OBJECT, \
+                                HOSTS_VIEW_COLUMN_TEXT
 
 log = console("Player")
 

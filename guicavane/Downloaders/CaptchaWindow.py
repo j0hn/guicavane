@@ -8,8 +8,7 @@ Captcha Window. Utility to show an input window with a captcha image.
 import gtk
 import gobject
 
-from guicavane.Constants import CAPTCHA_GUI_FILE
-from guicavane.Paths import TEMP_DIR, SEP
+from guicavane.Paths import TEMP_DIR, SEP, CAPTCHA_GUI_FILE
 
 CAPTCHA_IMAGE_PATH = TEMP_DIR + SEP + "recaptcha_image"
 
