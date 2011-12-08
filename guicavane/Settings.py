@@ -8,7 +8,8 @@ Settings. Manages the gui of the settings.
 
 import gtk
 import base64
-from Constants import SETTINGS_GUI_FILE
+from guicavane.Config import Config
+from guicavane.Paths import SETTINGS_GUI_FILE
 
 # Dict with host -> (username_input, password_input) to retrive the
 # accounts information
@@ -29,7 +30,7 @@ class SettingsDialog(object):
         self.builder.connect_signals(self)
 
         self.gui_manager = gui_manager
-        self.config = self.gui_manager.config
+        self.config = Config.get()
 
         # Widgets
         glade_objects = [
