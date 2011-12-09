@@ -79,7 +79,7 @@ class Wupload(BaseDownloader):
             msg = "Regular link not found"
             log.error(msg)
             log.error(e.message)
-            log.info("Dumped '%s' in '%s'" % (self.url, tmp_dump(page_data)))
+            tmp_dump(page_data, link)
             raise DownloadError(msg)
 
         self.MAIN_URL_OPEN.add_headers({"X-Requested-With": "XMLHttpRequest"})
@@ -117,7 +117,7 @@ class Wupload(BaseDownloader):
                 msg = "Captcha challenge not found!"
                 log.error(msg)
                 log.error(e.message)
-                log.info("Dumped '%s' in '%s'" % (self.url, tmp_dump(page_data)))
+                tmp_dump(page_data, self.url)
                 raise DownloadError(msg)
 
         return has_captcha
