@@ -22,6 +22,13 @@ url_open = UrlOpen()
 log = console("Hosts.Cuevana")
 
 
+def _match_or_empty_string(re_obj, data, group):
+    try:
+        return re_obj.search(data).group(group)
+    except:
+        return ""
+
+
 class Episode(BaseEpisode):
     _sources_re = re.compile('sources = ({.*?}), sel_source')
     _image_re = re.compile('<div class="img"><img src="(.*?)" /></div>')
@@ -51,11 +58,11 @@ class Episode(BaseEpisode):
         page_data = url_open(urls.show_info % \
             (self.id, self.show.urlname, self.urlname))
 
-        image = self._image_re.search(page_data).group(1)
-        description = self._description_re.search(page_data).group(1).strip()
+        image = _match_or_empty_string(self._image_re, page_data, 1)
+        description = _match_or_empty_string(self._description_re, page_data, 1).strip()
         cast = self._cast_re.findall(page_data)
-        genere = self._genere_re.search(page_data).group(1).strip()
-        language = self._language_re.search(page_data).group(1).strip()
+        genere = _match_or_empty_string(self._genere_re, page_data, 1).strip()
+        language = _match_or_empty_string(self._language_re, page_data, 1).strip()
 
         info = {"image": image, "description": description,
                        "cast": cast, "genere": genere, "language": language}
