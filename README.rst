@@ -15,7 +15,7 @@ Requires
 --------
 * Python
 * Gtk
-* PyGtk (Ubuntu package python-gtk2-dev)
+* PyGtk (Ubuntu package python-gtk2)
 
 Linux Users
 -----------
