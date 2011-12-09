@@ -51,12 +51,15 @@ class GtkThreadRunner(threading.Thread):
         except Exception, ex:
             result = (True, ex)
 
-            if self.func.im_class == type:
-                methodname = "%s.%s" % (self.func.__self__.__name__, \
-                                        self.func.im_func.func_name)
+            if hasattr(self.func, "im_class"):
+                if self.func.im_class == type:
+                    methodname = "%s.%s" % (self.func.__self__.__name__, \
+                                            self.func.im_func.func_name)
+                else:
+                    methodname = "%s.%s" % (self.func.im_class.__name__, \
+                                            self.func.im_func.func_name)
             else:
-                methodname = "%s.%s" % (self.func.im_class.__name__, \
-                                        self.func.im_func.func_name)
+                methodname = "%s" % self.func
 
             error_str = StringIO()
             error_str.write("running: %s, args: %s, kwargs: %s\nDetails:\n" % \
