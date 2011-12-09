@@ -295,8 +295,11 @@ class Player(object):
 
         if downloaded_size >= file_size:
             if self.config.get_key("automatic_marks"):
-                mark_string = "%s-%s-%s" % (self.file_object.show.name,
-                    self.file_object.season.name, self.file_object.name)
+                if isinstance(self.file_object, BaseMovie):
+                    mark_string = "%s" % self.file_object.name
+                else:
+                    mark_string = "%s-%s-%s" % (self.file_object.show.name,
+                        self.file_object.season.name, self.file_object.name)
 
                 log.info("Mark automatically added: %s" % mark_string)
 
