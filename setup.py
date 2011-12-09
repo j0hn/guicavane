@@ -84,7 +84,7 @@ def setup_windows():
         'py2exe': {
             'packages': 'encodings, gtk, guicavane, guicavane.Downloaders',
             'includes': 'cairo, pangocairo, pango, atk, gobject, os, urllib,' \
-                        'urllib2, cookielib, guicavane, ' \
+                        'urllib2, cookielib, guicavane, gettext, gtk.glade, ' \
                         'gio, unicodedata, webbrowser, ' \
                         'guicavane.Downloaders, guicavane.Accounts, ' \
                         'guicavane.Utils',
@@ -106,6 +106,17 @@ def setup_windows():
             not os.path.isdir("guicavane\\Images\\" + x)]))
     files.append(("Images\\Downloaders\\",
         ["guicavane\\Images\\Downloaders\\" + x for x in os.listdir("guicavane\\Images\\Downloaders\\")]))
+    files.append(("Images\\Sites\\",
+        ["guicavane\\Images\\Sites\\" + x for x in os.listdir("guicavane\\Images\\Sites\\")]))
+
+    for translation in os.listdir("guicavane\\Translations\\"):
+        if not os.path.isdir("guicavane\\Translations\\" + translation):
+            continue
+
+        files.append(("Translations\\" + translation + "\\LC_MESSAGES",
+            ["guicavane\\Translations\\" + translation + "\\LC_MESSAGES\\" + \
+            x for x in os.listdir("guicavane\\Translations\\" + translation + "\\LC_MESSAGES")]))
+
 
     hosts_dir = "guicavane\\Hosts"
     hosts = os.listdir(hosts_dir)
