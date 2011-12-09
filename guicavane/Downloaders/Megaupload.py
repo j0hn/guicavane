@@ -76,7 +76,7 @@ class Megaupload(BaseDownloader):
 
         link = MEGALINK_RE.findall(page_data)
         if not link:
-            log.info("dumped in: %s" % tmp_dump(page_data))
+            tmp_dump(page_data, link)
         return link[0]
 
     def _on_megalink_finish(self, (is_error, result)):
