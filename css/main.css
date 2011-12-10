@@ -1,6 +1,17 @@
 body{
     background: url("../images/background.jpg");
-	-webkit-font-smoothing: subpixel-antialiased;
+    -webkit-font-smoothing: subpixel-antialiased;
+}
+
+a:link, a:visited {
+    color: #3a6596;
+    text-decoration:none;
+    font-weight: bold;
+}
+
+a:hover, a:active {
+    color: #6499b6;
+    text-decoration: underline;
 }
 
 #top-dark{
@@ -31,6 +42,13 @@ body{
     font-family: arial;
 }
 
+#header_desc{
+    font-size: 16px;
+    color: #bbb;
+    display: inline;
+    font-style: italic;
+}
+
 #menubar{
     text-align: right;
     margin-top: 15px;
@@ -56,4 +74,51 @@ body{
 
 #menubar ul li a:hover, #menubar ul li  .selected{
     border-bottom: 3px solid #000;
+}
+
+#content{
+    margin-top: 20px;
+}
+
+#description .desc_title{
+    font-size: 20px;
+    border-bottom: 2px dotted #000;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+#description ul li i{
+    color: #444;
+    font-size: 13px;
+}
+
+.center_title{
+    font-size: 20px;
+    text-align: center;
+
+}
+
+#downloads_box{
+    width: 400px;
+    margin: 0 auto;
+}
+
+.download_source{
+    margin-bottom: 10px;
+}
+
+.download_source img{
+    float: left;
+    margin-right: 5px;
+}
+
+.download_link{
+    padding-top: 8px;
+}
+
+.download_desc{
+    margin-left: 37px;
+    padding-top: 5px;
+    color: #999;
+    font-size: 14px;
 }
