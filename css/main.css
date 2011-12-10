@@ -78,6 +78,7 @@ a:hover, a:active {
 
 #content{
     margin-top: 20px;
+    font-family: arial,sans-serif;
 }
 
 #description .desc_title{

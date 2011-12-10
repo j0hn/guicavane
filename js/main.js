@@ -19,13 +19,16 @@ $(document).ready(function(){
 });
 
 function load_section(document_name, menuitem){
-    $.ajax({
-        url: document_name,
-        dataType: "html",
-        cache: false,
-        success: function(data){
-            $("#content").html(data);
-        }
+    $("#content").fadeOut(300, function(){
+        $.ajax({
+            url: document_name,
+            dataType: "html",
+            cache: false,
+            success: function(data){
+                $("#content").html(data);
+                $("#content").fadeIn();
+            }
+        });
     });
 
     $("#menubar li a").each(function(index, item){
