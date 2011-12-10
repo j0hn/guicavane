@@ -22,6 +22,7 @@ function load_section(document_name, menuitem){
     $.ajax({
         url: document_name,
         dataType: "html",
+        cache: false,
         success: function(data){
             $("#content").html(data);
         }
