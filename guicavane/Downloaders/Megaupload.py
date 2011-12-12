@@ -69,14 +69,26 @@ class Megaupload(BaseDownloader):
 
     def get_megalink(self):
         """ Returns the real downloadable megaupload url. """
+
+        log.debug("Megaupload link: %s" % self.url)
+
         try:
             page_data = URL_OPEN(self.url)
         except Exception, error:
             raise DownloadError(error)
 
-        link = MEGALINK_RE.findall(page_data)
+        try:
+            link = MEGALINK_RE.search(page_data).group(1)
+        except:
+            raise Exception("Unable to find file url. Maybe the " \
+                            "file was removed.\n\nVisit: %s to " \
+                            "make sure." % self.url)
+
         if not link:
             tmp_dump(page_data, link)
+            raise Exception("No real file found")
+
+        log.debug("Link obtained: %s" % link)
         return link[0]
 
     def _on_megalink_finish(self, (is_error, result)):
@@ -107,6 +119,8 @@ class Megaupload(BaseDownloader):
 
     def _on_download_finish(self, (is_error, result)):
         if is_error:
+            gobject.idle_add(self.gui_manager.progress_box.hide)
+
             if "Requested Range Not Satisfiable" in str(result):
                 self.file_size = self.downloaded_size
             else:

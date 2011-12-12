@@ -87,6 +87,10 @@ class Episode(BaseEpisode):
                         ("host", host)]
 
                 hostdata = url_open(urls.source_get, data=data)
+
+                if "referer.us/" in hostdata:
+                    hostdata = hostdata.replace("referer.us/", "")
+
                 url = hostdata[hostdata.find('http:'):].split('&id')[0]
 
                 if not host in hosts:
@@ -213,6 +217,10 @@ class Movie(BaseMovie):
                         ("host", host)]
 
                 hostdata = url_open(urls.source_get, data=data)
+
+                if "referer.us/" in hostdata:
+                    hostdata = hostdata.replace("referer.us/", "")
+
                 url = hostdata[hostdata.find('http:'):].split('&id')[0]
 
                 if not host in hosts:
