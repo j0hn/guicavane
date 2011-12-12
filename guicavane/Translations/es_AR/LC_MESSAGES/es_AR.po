@@ -36,7 +36,7 @@ msgstr "Cargando ultimas peliculas..."
 
 #: GuiManager.py:229
 msgid "Loading recomended movies..."
-msgstr "Cargando peliculas recomndadas..."
+msgstr "Cargando peliculas recomendadas..."
 
 #: GuiManager.py:275
 #, python-format
@@ -126,7 +126,7 @@ msgstr "<b>Idioma:</b> "
 
 #: GuiManager.py:688
 msgid "Information not supported for this site"
-msgstr "Informacion no soportado por este sitio"
+msgstr "Informacion no soportada por este sitio"
 
 #: GuiManager.py:690
 #, python-format
