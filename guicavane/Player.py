@@ -86,14 +86,13 @@ class Player(object):
     def display_hosts(self, (is_error, result)):
         """ Shows up the hosts selecting window. """
 
+        gobject.idle_add(self.gui_manager.set_status_message, "")
+
         if is_error:
             self.gui_manager.report_error(gettext("Error fetching hosts: %s") % \
                                           result)
-            gobject.idle_add(self.gui_manager.progress.hide)
+            gobject.idle_add(self.gui_manager.progress_box.hide)
             return
-
-
-        gobject.idle_add(self.gui_manager.set_status_message, "")
 
         if not result:
             self.gui_manager.report_error(gettext("No host found"))
@@ -113,28 +112,6 @@ class Player(object):
                 self.downloader = Downloaders.get(host, self.gui_manager, url)
                 self.downloader.process_url(self.play, self.file_path)
                 return
-
-        # elif len(result) == 1 and not self.choose_host:
-        #     gobject.idle_add(self.gui_manager.set_status_message,
-        #         "Only one host found, starting download...")
-        #     self.downloader = result[0]
-        #     self.downloader.process_url(self.play, self.file_path)
-        # else:
-        #     megaupload = [x for x in result if x.name == "Megaupload"]
-        #     if not self.choose_host and len(megaupload) != 0 and \
-        #            self.config.get_key("automatic_megaupload"):
-
-        #         gobject.idle_add(self.gui_manager.set_status_message,
-        #             "Automatically starting with megaupload")
-        #         self.downloader = megaupload[0]
-        #         self.downloader.process_url(self.play, self.file_path)
-        #     else:
-        #         for downloader in result:
-        #             icon = downloader.icon
-        #             name = downloader.name
-        #             self.hosts_icon_view_model.append([icon, name, downloader])
-
-        #         self.hosts_window.show_all()
 
         for host in result:
             for quality in result[host]:
@@ -331,10 +308,14 @@ class Player(object):
     def download_subtitle(self):
         """ Downloads the subtitle for the selected episode. """
 
-        url = self.file_object.get_subtitle_url(quality=self.selected_quality)
         url_open = UrlOpen()
 
-        url_open(url, filename=self.file_path.replace(".mp4", ".srt"))
+        url = self.file_object.get_subtitle_url(quality=self.selected_quality)
+        filename = self.file_path.replace(".mp4", ".srt")
+
+        log.debug("Traying to download subtitles from: %s and save it to: %s" % (url, filename))
+
+        url_open(url, filename=filename)
 
     # ================================
     # =         CALLBACKS            =
