@@ -25,6 +25,7 @@ from Utils.Log import console
 from Accounts import ACCOUNTS
 from Settings import SettingsDialog
 from ThreadRunner import GtkThreadRunner
+from Hosts.Base import BaseMovie, BaseEpisode
 
 log = console("GuiManager")
 
@@ -365,8 +366,11 @@ class GuiManager(object):
             if not obj:
                 continue
 
-            mark_string = "%s-%s-%s" % (self.current_show.name,
-                self.current_season.name, obj.name)
+            if isinstance(obj, self.api.Movie):
+                mark_string = "%s" % obj.name
+            elif isinstance(obj, self.api.Episode):
+                mark_string = "%s-%s-%s" % (self.current_show.name,
+                    self.current_season.name, obj.name)
 
             if mark_string in marks:
                 self.file_viewer_model.set_value(iteration,
@@ -392,6 +396,9 @@ class GuiManager(object):
             name = movie.name
             icon = ICON_FILE_MOVIE
             self.file_viewer_model.append([icon, name, movie])
+
+        self.refresh_marks()
+
 
     # ================================
     # =         CALLBACKS            =
@@ -603,11 +610,14 @@ class GuiManager(object):
 
         selection = self.file_viewer.get_selection()
         model, iteration = selection.get_selected()
-        episode = model.get_value(iteration, FILE_VIEW_COLUMN_OBJECT)
+        obj = model.get_value(iteration, FILE_VIEW_COLUMN_OBJECT)
         model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE_MARK)
 
-        mark_string = "%s-%s-%s" % (self.current_show.name,
-            self.current_season.name, episode.name)
+        if isinstance(obj, self.api.Movie):
+            mark_string = "%s" % obj.name
+        elif isinstance(obj, self.api.Episode):
+            mark_string = "%s-%s-%s" % (self.current_show.name,
+                self.current_season.name, obj.name)
 
         self.marks.add(mark_string)
 
