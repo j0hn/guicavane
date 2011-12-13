@@ -27,9 +27,11 @@ from guicavane.Constants import DEFAULT_REQUEST_TIMEOUT, CUSTOM_DNS
 log = console("GuiManager")
 
 HEADERS = {
-    'User-Agent': 'User-Agent:Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.1 '
-                  '(KHTML, like Gecko) Chrome/13.0.772.0 Safari/535.1',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;'}
+    'User-Agent': 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.11 ' \
+                  '(KHTML, like Gecko) Chrome/17.0.963.2 Safari/535.11',
+    'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+}
 
 RETRY_TIMES = 5
 cached = Cached.get()
