@@ -24,7 +24,7 @@ from guicavane.Paths import CACHE_DIR, COOKIES_FILE
 from guicavane.Utils.Log import console
 from guicavane.Constants import DEFAULT_REQUEST_TIMEOUT, CUSTOM_DNS
 
-log = console("GuiManager")
+log = console("UrlOpen")
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.11 ' \
