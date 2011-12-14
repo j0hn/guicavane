@@ -12,7 +12,7 @@ import gtk.glade
 
 from Paths import TRANSLATION_DIR
 
-APP_NAME = "guicavane"
+TRANS_NAME = "messages"
 
 
 def configure_gettext():
@@ -29,12 +29,12 @@ def configure_gettext():
     if language:
         langs += language.split(":")
 
-    gettext.bindtextdomain(APP_NAME, TRANSLATION_DIR)
-    gettext.textdomain(APP_NAME)
-    gtk.glade.bindtextdomain(APP_NAME, TRANSLATION_DIR)
-    gtk.glade.textdomain(APP_NAME)
+    gettext.bindtextdomain(TRANS_NAME, TRANSLATION_DIR)
+    gettext.textdomain(TRANS_NAME)
+    gtk.glade.bindtextdomain(TRANS_NAME, TRANSLATION_DIR)
+    gtk.glade.textdomain(TRANS_NAME)
 
-    lang = gettext.translation(APP_NAME, TRANSLATION_DIR,
+    lang = gettext.translation(TRANS_NAME, TRANSLATION_DIR,
                                languages=langs, fallback=True)
 
     return lang.gettext
