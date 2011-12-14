@@ -8,6 +8,7 @@ Player. Handles the download and starts the player.
 import os
 import gtk
 import time
+import string
 import gobject
 import subprocess
 
@@ -286,23 +287,26 @@ class Player(object):
     def get_filename(self):
         """ Returns the file path of the file. """
 
+        valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+
         if isinstance(self.file_object, BaseMovie):
-            return self.file_object.name.replace(os.sep, "_") + ".mp4"
+            result = self.file_object.name.replace(os.sep, "_")
+        elif isinstance(self.file_object, BaseEpisode):
+            result = self.config.get_key("filename_template")
+            result = result.replace("<show>", self.file_object.show.name)
+            result = result.replace("<season>", "%.2d" % \
+                int(self.file_object.season.number))
+            result = result.replace("<episode>", "%s" % \
+                str(self.file_object.number))
+            result = result.replace("<name>", self.file_object.name)
+        else:
+            raise Exception("Error traying to obtain filename from a non " \
+                            "Movie/Episode object: %s (%s)." % \
+                            (self.file_object, type(self.file_object)))
 
-        # If isn't a movie it must be an episode
-        assert isinstance(self.file_object, BaseEpisode)
 
-        result = self.config.get_key("filename_template")
-        result = result.replace("<show>", self.file_object.show.name)
-        result = result.replace("<season>", "%.2d" % \
-            int(self.file_object.season.number))
-        result = result.replace("<episode>", "%s" % \
-            str(self.file_object.number))
-        result = result.replace("<name>", self.file_object.name)
-        for char in '\/:?*"<>|%.':
-            result = result.replace(char, "_")
+        result = ''.join(c for c in result if c in valid_chars)
         result = result + ".mp4"
-
         return result
 
     def download_subtitle(self):
