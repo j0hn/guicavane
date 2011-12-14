@@ -83,9 +83,6 @@ class GuiManager(object):
             (self.name_filter, NAME_LIST_COLUMN_TEXT))
         self.name_list.set_model(self.name_list_model_filter)
 
-        # Now we show the window
-        self.main_window.show_all()
-
         # Get last mode, needs to be before the filling combo functions
         last_mode = self.config.get_key("last_mode")
 
@@ -105,6 +102,15 @@ class GuiManager(object):
         if is_first_time:
             wizard = Wizard(self.main_window)
             wizard.show()
+
+        # Set last window position and size
+        last_x, last_y = self.config.get_key("last_window_pos")
+        last_width, last_height = self.config.get_key("last_window_size")
+        self.main_window.move(last_x, last_y)
+        self.main_window.resize(last_width, last_height)
+
+        # Now we show the window
+        self.main_window.show_all()
 
     def login_accounts(self):
         accounts = self.config.get_key("accounts")
@@ -444,7 +450,11 @@ class GuiManager(object):
     def _on_destroy(self, *args):
         """ Called when the window closes.  """
 
-        #self.save_config()
+        # Save window position and size
+        window_pos = self.main_window.get_position()
+        window_size = self.main_window.get_size()
+        self.config.set_key("last_window_pos", window_pos)
+        self.config.set_key("last_window_size", window_size)
 
         # We kill gtk
         gtk.main_quit()

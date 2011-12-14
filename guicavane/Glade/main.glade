@@ -402,7 +402,7 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
     <property name="default_width">900</property>
     <property name="default_height">500</property>
     <property name="icon">../Images/logo.png</property>
-    <signal name="destroy" handler="_on_destroy" swapped="no"/>
+    <signal name="delete-event" handler="_on_destroy" swapped="no"/>
     <child>
       <object class="GtkVBox" id="main_vbox">
         <property name="visible">True</property>

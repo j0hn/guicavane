@@ -26,6 +26,8 @@ DEFAULT_VALUES = {
     "accounts": [("megaupload", {"username": "", "password": ""})],
     "automatic_start": False,
     "site": "Cuevana",
+    "last_window_pos": [0, 0],
+    "last_window_size": [900, 500],
 }
 
 if not os.path.exists(CONFIG_DIR):
