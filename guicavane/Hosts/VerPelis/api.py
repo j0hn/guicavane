@@ -11,11 +11,13 @@ Authors: Andres Bordese <andresb9163@gmail.com>
 import re
 from hashlib import md5
 
-from guicavane.Hosts.Base import *
 import urls
+from guicavane.Hosts.Base import *
 from guicavane.Utils.UrlOpen import UrlOpen
 
-DISPLAY_NAME = "Ver-Pelis"
+display_name = "Ver-Pelis"
+display_image = "ver-pelis.png"
+implements = ["Shows"]
 
 url_open = UrlOpen()
 

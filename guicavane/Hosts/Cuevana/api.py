@@ -18,7 +18,10 @@ from guicavane.Utils.Log import console
 from guicavane.Utils.Debug import tmp_dump
 from guicavane.Utils.UrlOpen import UrlOpen
 
-DISPLAY_NAME = "Cuevana"
+display_name = "Cuevana"
+display_image = "cuevana.png"
+implements = ["Shows", "Movies", "Recomended", "Latest"]
+
 url_open = UrlOpen()
 log = console("Hosts.Cuevana")
 

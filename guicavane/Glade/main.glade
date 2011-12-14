@@ -951,23 +951,6 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
       <!-- column-name label -->
       <column type="gchararray"/>
     </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Shows</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Movies</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Favorites</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Latest Movies</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Recomended Movies</col>
-      </row>
-    </data>
   </object>
   <object class="GtkMenu" id="name_favorites_menu">
     <property name="visible">True</property>

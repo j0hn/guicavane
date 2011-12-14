@@ -16,7 +16,10 @@ import urls
 from guicavane.Hosts.Base import *
 from guicavane.Utils.UrlOpen import UrlOpen
 
-DISPLAY_NAME = "Monsterdivx"
+display_name = "Monsterdivx"
+display_image = "monsterdivx.png"
+implements = ["Shows", "Movies"]
+
 url_open = UrlOpen()
 
 HOST_TRANSLATE = {"mega": "megaupload",

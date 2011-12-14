@@ -37,6 +37,8 @@ class GuiManager(object):
         """ Creates the main window. """
 
         # Attributes
+        self.avaliable_modes = []
+
         self.current_show = None
         self.current_season = None
 
@@ -64,7 +66,8 @@ class GuiManager(object):
             "main_window", "statusbar_label", "progress_box", "progress",
             "progress_label", "name_filter", "name_filter_clear", "name_list",
             "name_list_model", "file_viewer", "file_viewer_model",
-            "mode_combo", "site_combo", "search_entry", "search_button", "search_clear",
+            "mode_combo", "mode_liststore", "site_combo",
+            "search_button", "search_clear", "search_entry", "search_hbox",
             "sidebar", "sidebar_vbox", "path_label", "info_window",
             "info_title", "info_label", "info_image", "file_viewer_menu",
             "error_label", "error_dialog", "header_hbox", "main_hpaned",
@@ -84,14 +87,15 @@ class GuiManager(object):
         self.main_window.show_all()
 
         # Start on last mode
-        try:
-            last_mode = self.config.get_key("last_mode")
-            self.mode_combo.set_active(MODES.index(last_mode))
-        except:
-            self.set_mode_shows()
+        # try:
+        #     last_mode = self.config.get_key("last_mode")
+        #     self.mode_combo.set_active(MODES.index(last_mode))
+        # except:
+        #     self.set_mode_shows()
 
-        # Fill sites combobox
+        # Fill combobox
         self.fill_sites_combobox()
+        self.fill_mode_combobox()
 
         # Login
         self.background_task(self.login_accounts, freeze=False)
@@ -174,9 +178,9 @@ class GuiManager(object):
         """ Fills the sites combobox with the avaliable apis. """
 
         for module in Hosts.AVALIABLE_APIS:
-            display_name = module.DISPLAY_NAME
+            display_name = module.display_name
 
-            imagepath = os.path.join(IMAGES_DIR, "Sites", display_name.lower() + ".png")
+            imagepath = os.path.join(SITES_IMAGES_DIR, module.display_image)
             pixbuf = None
 
             if os.path.exists(imagepath):
@@ -187,9 +191,46 @@ class GuiManager(object):
             self.site_liststore.append([display_name, module, pixbuf])
 
         # Set last site active
-        last_site = self.api.DISPLAY_NAME
-        api_names = [x.DISPLAY_NAME for x in Hosts.AVALIABLE_APIS]
+        last_site = self.api.display_name
+        api_names = [x.display_name for x in Hosts.AVALIABLE_APIS]
         self.site_combo.set_active(api_names.index(last_site))
+
+    def fill_mode_combobox(self):
+        """ Fills the modes combobox with the avaliable modes
+        to the current selected api. """
+
+        try:
+            last_mode = self.get_mode()
+        except:
+            last_mode = None
+
+        self.avaliable_modes = []
+        avaliable_modes = []
+
+        for implementation in self.api.implements:
+            if implementation in MODES:
+                avaliable_modes.append(MODES[implementation])
+                self.avaliable_modes.append(implementation)
+
+        # Favorites it's present if shows it's.
+        # And it's 2º in the combobox
+        if "Shows" in self.avaliable_modes:
+            avaliable_modes.insert(1, MODES["Favorites"])
+            self.avaliable_modes.insert(1, "Favorites")
+
+        if "Movies" in self.avaliable_modes:
+            self.search_hbox.set_sensitive(True)
+        else:
+            self.search_hbox.set_sensitive(False)
+
+        self.mode_liststore.clear()
+        for mode in avaliable_modes:
+            self.mode_liststore.append([mode])
+
+        if last_mode in self.avaliable_modes:
+            self.mode_combo.set_active(self.avaliable_modes.index(last_mode))
+        else:
+            self.mode_combo.set_active(0)
 
     def set_status_message(self, message):
         """ Sets the message shown in the statusbar.  """
@@ -227,14 +268,14 @@ class GuiManager(object):
         self.background_task(self.favorites.get_all, self.display_favorites,
                              status_message=gettext("Loading favorites"))
 
-    def set_mode_latest_movies(self):
+    def set_mode_latest(self):
         """ Sets the curret mode to latest movies. """
 
         self.sidebar.hide()
         self.background_task(self.api.Movie.get_latest, self.display_movies,
             status_message=gettext("Loading latest movies..."))
 
-    def set_mode_recomended_movies(self):
+    def set_mode_recomended(self):
         """ Sets the curret mode to recomended movies. """
 
         self.sidebar.hide()
@@ -246,19 +287,13 @@ class GuiManager(object):
             if fav_name not in self.favorites.get_all():
                 self.favorites.add(fav_name)
 
-        if self.get_mode() == MODE_FAVORITES:
+        if self.get_mode() == "Favorites":
             self.set_mode_favorites()
 
     def get_mode(self):
-        """ Returns the current mode. i.e the value of the mode combobox.
-        The result will be the constant MODE_* (see constants definitions). """
-
         model = self.mode_combo.get_model()
-        active = self.mode_combo.get_active()
-        mode_text = model[active][0]
-
-        # Poscondition
-        assert mode_text in MODES
+        active = max(0, self.mode_combo.get_active())
+        mode_text = self.avaliable_modes[active]
 
         return mode_text
 
@@ -416,6 +451,10 @@ class GuiManager(object):
         """ Called when the mode combobox changes value. """
 
         last_mode = self.get_mode()
+
+        if last_mode not in self.avaliable_modes:
+            return
+
         self.config.set_key("last_mode", last_mode)
         self.file_viewer_model.clear()
 
@@ -431,9 +470,7 @@ class GuiManager(object):
         self.api = site_module
 
         self.file_viewer_model.clear()
-
-        # Call the corresponding set_mode method
-        self._on_mode_change()
+        self.fill_mode_combobox()
 
     def _on_show_selected(self, tree_view, path, column):
         """ Called when the user selects a show from the name list. """
@@ -506,7 +543,7 @@ class GuiManager(object):
         """ Called when the user press any mouse button on the name list. """
 
         if event.button == 3:  # 3 it's right click
-            if self.get_mode() == MODE_FAVORITES:
+            if self.get_mode() == "Favorites":
                 popup_menu = self.builder.get_object("name_favorites_menu")
             else:
                 popup_menu = self.builder.get_object("name_shows_menu")
@@ -667,7 +704,7 @@ class GuiManager(object):
 
         # Sets the correct mode
         self.set_mode_movies()
-        self.mode_combo.set_active(MODES.index(MODE_MOVIES))
+        self.mode_combo.set_active(self.avaliable_modes.index("Movies"))
 
         query = self.search_entry.get_text()
         self.background_task(self.api.Movie.search,

@@ -16,7 +16,10 @@ from guicavane.Hosts.Base import *
 from guicavane.Utils.Log import console
 from guicavane.Utils.UrlOpen import UrlOpen
 
-DISPLAY_NAME = "Nooo"
+display_name = "Nooo"
+display_image = "nooo.png"
+implements = ["Movies"]
+
 url_open = UrlOpen()
 log = console("Hosts.Noo")
 

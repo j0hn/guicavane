@@ -10,18 +10,18 @@ Module with constants values.
 import os
 import sys
 import gtk
+from Gettext import gettext
 
 from Paths import GUI_DIR, IMAGES_DIR, SEP
 
 # Modes
-MODE_SHOWS = "Shows"
-MODE_MOVIES = "Movies"
-MODE_FAVORITES = "Favorites"
-MODE_LATEST_MOVIES = "Latest Movies"
-MODE_RECOMENDED_MOVIES = "Recomended Movies"
-MODES = [MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES,
-         MODE_LATEST_MOVIES, MODE_RECOMENDED_MOVIES]
-# NOTE: MODES must be in the same order as they appear in the combobox
+MODES = {
+    "Shows": gettext("Shows"),
+    "Movies": gettext("Movies"),
+    "Favorites": gettext("Favorites"),
+    "Latest": gettext("Latest movies"),
+    "Recomended": gettext("Recomended movies"),
+}
 
 # Index of the columns on the tree views
 FILE_VIEW_COLUMN_PIXBUF = 0
