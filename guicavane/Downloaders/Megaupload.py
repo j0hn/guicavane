@@ -88,7 +88,7 @@ class Megaupload(BaseDownloader):
             raise Exception("No real file found")
 
         log.debug("Link obtained: %s" % link)
-        return link[0]
+        return link
 
     def _on_megalink_finish(self, (is_error, result)):
         """ Called on finish finding the real link. """
