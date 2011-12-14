@@ -86,16 +86,18 @@ class GuiManager(object):
         # Now we show the window
         self.main_window.show_all()
 
-        # Start on last mode
-        # try:
-        #     last_mode = self.config.get_key("last_mode")
-        #     self.mode_combo.set_active(MODES.index(last_mode))
-        # except:
-        #     self.set_mode_shows()
+        # Get last mode, needs to be before the filling combo functions
+        last_mode = self.config.get_key("last_mode")
 
         # Fill combobox
         self.fill_sites_combobox()
         self.fill_mode_combobox()
+
+        # Start on last mode
+        try:
+            self.mode_combo.set_active(self.avaliable_modes.index(last_mode))
+        except:
+            self.set_mode_shows()
 
         # Login
         self.background_task(self.login_accounts, freeze=False)
