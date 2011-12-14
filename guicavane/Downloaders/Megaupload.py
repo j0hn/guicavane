@@ -80,8 +80,7 @@ class Megaupload(BaseDownloader):
         try:
             link = MEGALINK_RE.search(page_data).group(1)
         except:
-            raise Exception("Unable to find file url. Maybe the " \
-                            "file was removed.\n\nVisit: %s to " \
+            raise Exception("File was removed.\n\nVisit: %s to " \
                             "make sure." % self.url)
 
         if not link:

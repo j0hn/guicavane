@@ -104,7 +104,12 @@ class UrlOpen(object):
     def __init__(self, use_cache=True):
         self.cookiejar = cookielib.LWPCookieJar(filename=COOKIES_FILE)
         if os.path.exists(COOKIES_FILE):
-            self.cookiejar.load()
+            try:
+                self.cookiejar.load()
+            except:
+                # Avoid corrupted cookies
+                pass
+
         self.opener = self.build_opener()
         self.set_timeout(DEFAULT_REQUEST_TIMEOUT)
         self.use_cache = use_cache
