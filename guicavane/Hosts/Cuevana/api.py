@@ -168,7 +168,7 @@ class Movie(BaseMovie):
     _recomended_json_re = re.compile("\$\('#list'\).list\({l:(.*?]), page", re.DOTALL)
     _latest_json_re = re.compile("\$\('#list'\).list\({l:(.*?]), page", re.DOTALL)
 
-    _image_re = re.compile('<div class="img"><img src="(.*?)" />')
+    _image_re = re.compile('<div class="img"><img src="(.*?)"/>')
     _description_re = re.compile('<h2>Sinopsis</h2>(.*?)<div class="sep">', re.DOTALL)
     _cast_re = re.compile("<a href='#!/buscar/q:.*?'>(.*?)</a>")
     _genere_re = re.compile('<b>Género:</b>(.*?)</div>')
