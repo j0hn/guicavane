@@ -11,7 +11,7 @@ episode = host + "/%s/"
 
 # Sources
 sources = host + "/wp-content/plugins/monsterdivx-player/scripts/source-iframe.php?" \
-                 "monsterdivx=true&id=%s&sub=,ES&onstart=yes&sub_pre=ES"
+                 "monsterdivx=true&mid=%s&sub=,ES&sub_pre=ES"
 source_get = host + "/wp-content/plugins/monsterdivx-player/scripts/source_get.php"
 
 # Subtitles
