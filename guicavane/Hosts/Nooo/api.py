@@ -21,7 +21,7 @@ display_image = "nooo.png"
 implements = ["Movies"]
 
 url_open = UrlOpen()
-log = console("Hosts.Noo")
+log = console("Hosts Noo")
 
 HOSTMAP = {
     'http://bitshare.com': 'bitshare',

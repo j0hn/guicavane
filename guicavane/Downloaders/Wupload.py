@@ -19,7 +19,7 @@ from Base import BaseDownloader
 from guicavane.Utils.Log import console
 from guicavane.Utils.Debug import tmp_dump
 
-log = console("Downloaders.Wupload")
+log = console("Downloaders Wupload")
 
 
 RECAPTCHA_CHALLENGE_URL = "http://api.recaptcha.net/challenge?k="

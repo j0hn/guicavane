@@ -18,7 +18,7 @@ from Base import BaseDownloader
 from guicavane.Utils.Debug import tmp_dump
 from guicavane.Utils.Log import console
 
-log = console("Downloaders.Megaupload")
+log = console("Downloaders Megaupload")
 
 
 MEGALINK_RE = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')

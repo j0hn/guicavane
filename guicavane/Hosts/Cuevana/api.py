@@ -23,7 +23,7 @@ display_image = "cuevana.png"
 implements = ["Shows", "Movies", "Recomended", "Latest"]
 
 url_open = UrlOpen()
-log = console("Hosts.Cuevana")
+log = console("Hosts Cuevana")
 
 
 def _match_or_empty_string(re_obj, data, group):

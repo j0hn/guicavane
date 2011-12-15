@@ -16,7 +16,7 @@ from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
 from guicavane.Utils.UrlOpen import UrlOpen, DownloadError
 from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
 
-log = console("Downloaders.Bitshare")
+log = console("Downloaders Bitshare")
 
 AJAXDL_RE = re.compile('var ajaxdl = "(.*?)";')
 
