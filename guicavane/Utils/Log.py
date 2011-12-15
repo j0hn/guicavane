@@ -66,6 +66,7 @@ def istty(handler):
     return getattr(handler.stream, 'isatty', lambda: False)()
 
 def _get_logger(name, logger, handler, level, format):
+    first_logger = logger and False or True
     if logger is None:
         if name is None:
             name = get_caller_module(3)
@@ -75,6 +76,11 @@ def _get_logger(name, logger, handler, level, format):
 
     if format is None:
         format = DEFAULT_FORMAT
+
+    # don't add more handlers if the logger already have one
+    # and it's not a logger that need a new handler
+    if first_logger and logger.handlers:
+        return logger
 
     # Do not insert ansi colours in a non tty handler
     if istty(handler):
