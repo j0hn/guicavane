@@ -747,10 +747,16 @@ class GuiManager(object):
                              file_object, freeze=False)
 
         def fetch_info():
-            full_description = file_object.info["description"] + "\n\n" + \
-                gettext("<b>Cast:</b> ") + ", ".join(file_object.info["cast"]) + "\n" + \
-                gettext("<b>Genere:</b> ") + file_object.info["genere"] + "\n" + \
-                gettext("<b>Language:</b> ") + file_object.info["language"]
+
+            description = file_object.info.get("description", "")
+            cast = file_object.info.get("cast", [])
+            genere = file_object.info.get("genere", "")
+            language = file_object.info.get("language", "")
+
+            full_description = description + "\n\n" + \
+                gettext("<b>Cast:</b> ") + ", ".join(cast) + "\n" + \
+                gettext("<b>Genere:</b> ") + genere + "\n" + \
+                gettext("<b>Language:</b> ") + language
 
             return file_object.name, full_description
 
