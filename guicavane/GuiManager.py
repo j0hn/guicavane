@@ -14,8 +14,10 @@ import urllib
 import webbrowser
 
 import Hosts
+from Paths import *
 from Constants import *
 from SList import SList
+from Wizard import Wizard
 from Config import Config
 from Player import Player
 from Gettext import gettext
@@ -23,7 +25,7 @@ from Utils.Log import console
 from Accounts import ACCOUNTS
 from Settings import SettingsDialog
 from ThreadRunner import GtkThreadRunner
-from Paths import MARKS_FILE, FAVORITES_FILE
+from Hosts.Base import BaseMovie, BaseEpisode
 
 log = console("GuiManager")
 
@@ -35,16 +37,19 @@ class GuiManager(object):
         """ Creates the main window. """
 
         # Attributes
+        self.avaliable_modes = []
+
         self.current_show = None
         self.current_season = None
 
+        is_first_time = not os.path.exists(CONFIG_FILE)
         self.config = Config.get()
 
         # API
         try:
             self.api = getattr(Hosts, self.config.get_key("site")).api
         except Exception, error:
-            self.api = Hosts.Cuevana.api
+            self.api = Hosts.AVALIABLE_APIS[0]
 
         self.marks = SList(MARKS_FILE)
         self.favorites = SList(FAVORITES_FILE)
@@ -61,7 +66,8 @@ class GuiManager(object):
             "main_window", "statusbar_label", "progress_box", "progress",
             "progress_label", "name_filter", "name_filter_clear", "name_list",
             "name_list_model", "file_viewer", "file_viewer_model",
-            "mode_combo", "site_combo", "search_entry", "search_button", "search_clear",
+            "mode_combo", "mode_liststore", "site_combo",
+            "search_button", "search_clear", "search_entry", "search_hbox",
             "sidebar", "sidebar_vbox", "path_label", "info_window",
             "info_title", "info_label", "info_image", "file_viewer_menu",
             "error_label", "error_dialog", "header_hbox", "main_hpaned",
@@ -77,21 +83,34 @@ class GuiManager(object):
             (self.name_filter, NAME_LIST_COLUMN_TEXT))
         self.name_list.set_model(self.name_list_model_filter)
 
-        # Now we show the window
-        self.main_window.show_all()
+        # Get last mode, needs to be before the filling combo functions
+        last_mode = self.config.get_key("last_mode")
+
+        # Fill combobox
+        self.fill_sites_combobox()
+        self.fill_mode_combobox()
 
         # Start on last mode
         try:
-            last_mode = self.config.get_key("last_mode")
-            self.mode_combo.set_active(MODES.index(last_mode))
+            self.mode_combo.set_active(self.avaliable_modes.index(last_mode))
         except:
             self.set_mode_shows()
 
-        # Fill sites combobox
-        self.fill_sites_combobox()
-
         # Login
         self.background_task(self.login_accounts, freeze=False)
+
+        if is_first_time:
+            wizard = Wizard(self.main_window)
+            wizard.show()
+
+        # Set last window position and size
+        last_x, last_y = self.config.get_key("last_window_pos")
+        last_width, last_height = self.config.get_key("last_window_size")
+        self.main_window.move(last_x, last_y)
+        self.main_window.resize(last_width, last_height)
+
+        # Now we show the window
+        self.main_window.show_all()
 
     def login_accounts(self):
         accounts = self.config.get_key("accounts")
@@ -109,7 +128,7 @@ class GuiManager(object):
             if username and password:
                 account_obj.login(username, password)
 
-    def freeze(self, status_message="Loading..."):
+    def freeze(self, status_message=gettext("Loading...")):
         """ Freezes the gui so the user can't interact with it. """
 
         self.header_hbox.set_sensitive(False)
@@ -133,7 +152,7 @@ class GuiManager(object):
         was no errors.
         """
 
-        status_message = "Loading..."
+        status_message = gettext("Loading...")
         freeze = True
 
         if "status_message" in kwargs:
@@ -159,8 +178,7 @@ class GuiManager(object):
 
         if callback == None:
             def real_callback((is_error, result)):
-                if is_error:
-                    log.error("Error: %s" % result)
+                pass
 
         GtkThreadRunner(real_callback, func, *args, **kwargs)
 
@@ -168,15 +186,59 @@ class GuiManager(object):
         """ Fills the sites combobox with the avaliable apis. """
 
         for module in Hosts.AVALIABLE_APIS:
-            display_name = module.DISPLAY_NAME
+            display_name = module.display_name
 
-            self.site_liststore.append([display_name, module])
+            imagepath = os.path.join(SITES_IMAGES_DIR, module.display_image)
+            pixbuf = None
+
+            if os.path.exists(imagepath):
+                image = gtk.Image()
+                image.set_from_file(imagepath)
+                pixbuf = image.get_pixbuf()
+
+            self.site_liststore.append([display_name, module, pixbuf])
 
         # Set last site active
-        last_site = self.config.get_key("site")
-        api_names = [x.DISPLAY_NAME for x in Hosts.AVALIABLE_APIS]
-        if last_site in api_names:
-            self.site_combo.set_active(api_names.index(last_site))
+        last_site = self.api.display_name
+        api_names = [x.display_name for x in Hosts.AVALIABLE_APIS]
+        self.site_combo.set_active(api_names.index(last_site))
+
+    def fill_mode_combobox(self):
+        """ Fills the modes combobox with the avaliable modes
+        to the current selected api. """
+
+        try:
+            last_mode = self.get_mode()
+        except:
+            last_mode = None
+
+        self.avaliable_modes = []
+        avaliable_modes = []
+
+        for implementation in self.api.implements:
+            if implementation in MODES:
+                avaliable_modes.append(MODES[implementation])
+                self.avaliable_modes.append(implementation)
+
+        # Favorites it's present if shows it's.
+        # And it's 2º in the combobox
+        if "Shows" in self.avaliable_modes:
+            avaliable_modes.insert(1, MODES["Favorites"])
+            self.avaliable_modes.insert(1, "Favorites")
+
+        if "Movies" in self.avaliable_modes:
+            self.search_hbox.set_sensitive(True)
+        else:
+            self.search_hbox.set_sensitive(False)
+
+        self.mode_liststore.clear()
+        for mode in avaliable_modes:
+            self.mode_liststore.append([mode])
+
+        if last_mode in self.avaliable_modes:
+            self.mode_combo.set_active(self.avaliable_modes.index(last_mode))
+        else:
+            self.mode_combo.set_active(0)
 
     def set_status_message(self, message):
         """ Sets the message shown in the statusbar.  """
@@ -214,14 +276,14 @@ class GuiManager(object):
         self.background_task(self.favorites.get_all, self.display_favorites,
                              status_message=gettext("Loading favorites"))
 
-    def set_mode_latest_movies(self):
+    def set_mode_latest(self):
         """ Sets the curret mode to latest movies. """
 
         self.sidebar.hide()
         self.background_task(self.api.Movie.get_latest, self.display_movies,
             status_message=gettext("Loading latest movies..."))
 
-    def set_mode_recomended_movies(self):
+    def set_mode_recomended(self):
         """ Sets the curret mode to recomended movies. """
 
         self.sidebar.hide()
@@ -233,19 +295,13 @@ class GuiManager(object):
             if fav_name not in self.favorites.get_all():
                 self.favorites.add(fav_name)
 
-        if self.get_mode() == MODE_FAVORITES:
+        if self.get_mode() == "Favorites":
             self.set_mode_favorites()
 
     def get_mode(self):
-        """ Returns the current mode. i.e the value of the mode combobox.
-        The result will be the constant MODE_* (see constants definitions). """
-
         model = self.mode_combo.get_model()
-        active = self.mode_combo.get_active()
-        mode_text = model[active][0]
-
-        # Poscondition
-        assert mode_text in MODES
+        active = max(0, self.mode_combo.get_active())
+        mode_text = self.avaliable_modes[active]
 
         return mode_text
 
@@ -307,8 +363,8 @@ class GuiManager(object):
         """ Fills the file viewer with the seasons. """
 
         if is_error:
-            message = "Problem fetching seasons:\n\n"
-            message += "details: %s" % result
+            message = gettext("Problem fetching seasons:\n\n" \
+                              "details: %s") % result
 
             self.report_error(message)
             return
@@ -322,8 +378,8 @@ class GuiManager(object):
         """ Fills the file viewer with the episodes. """
 
         if is_error:
-            message = "Problem fetching episodes:\n\n"
-            message += "details: %s" % result
+            message = gettext("Problem fetching episodes:\n\n" \
+                              "details: %s") % result
 
             self.report_error(message)
             return
@@ -337,15 +393,11 @@ class GuiManager(object):
 
         for episode in result:
             episode_name = "%s - %s" % (episode.number, episode.name)
-
-            mark_string = "%s-%s-%s" % (self.current_show.name,
-                self.current_season.name, episode.name)
-
             icon = ICON_FILE_MOVIE
-            if str(episode.id) in marks or mark_string in marks:
-                icon = ICON_FILE_MOVIE_MARK
 
             self.file_viewer_model.append([icon, episode_name, episode])
+
+        self.refresh_marks()
 
     def refresh_marks(self):
         marks = self.marks.get_all()
@@ -353,7 +405,17 @@ class GuiManager(object):
         for row in self.file_viewer_model:
             iteration = self.file_viewer_model.get_iter(row.path)
             obj = row[FILE_VIEW_COLUMN_OBJECT]
-            if not obj is None and obj.id in marks:
+
+            if not obj:
+                continue
+
+            if isinstance(obj, self.api.Movie):
+                mark_string = "%s" % obj.name
+            elif isinstance(obj, self.api.Episode):
+                mark_string = "%s-%s-%s" % (self.current_show.name,
+                    self.current_season.name, obj.name)
+
+            if mark_string in marks:
                 self.file_viewer_model.set_value(iteration,
                     FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE_MARK)
 
@@ -362,10 +424,11 @@ class GuiManager(object):
 
         if is_error:
             if isinstance(result, NotImplementedError):
-                message = "Not avaliable for this site"
+                message = gettext("Not avaliable for this site")
             else:
-                message = "Problem fetching movies, "
-                message += "please try again in a few minutes."
+                message = gettext("Problem fetching movies, " \
+                                  "please try again in a few minutes.\n"
+                                  "details: %s" % result)
 
             self.report_error(message)
             return
@@ -377,6 +440,9 @@ class GuiManager(object):
             icon = ICON_FILE_MOVIE
             self.file_viewer_model.append([icon, name, movie])
 
+        self.refresh_marks()
+
+
     # ================================
     # =         CALLBACKS            =
     # ================================
@@ -384,7 +450,11 @@ class GuiManager(object):
     def _on_destroy(self, *args):
         """ Called when the window closes.  """
 
-        #self.save_config()
+        # Save window position and size
+        window_pos = self.main_window.get_position()
+        window_size = self.main_window.get_size()
+        self.config.set_key("last_window_pos", window_pos)
+        self.config.set_key("last_window_size", window_size)
 
         # We kill gtk
         gtk.main_quit()
@@ -393,6 +463,10 @@ class GuiManager(object):
         """ Called when the mode combobox changes value. """
 
         last_mode = self.get_mode()
+
+        if last_mode not in self.avaliable_modes:
+            return
+
         self.config.set_key("last_mode", last_mode)
         self.file_viewer_model.clear()
 
@@ -408,9 +482,7 @@ class GuiManager(object):
         self.api = site_module
 
         self.file_viewer_model.clear()
-
-        # Call the corresponding set_mode method
-        self._on_mode_change()
+        self.fill_mode_combobox()
 
     def _on_show_selected(self, tree_view, path, column):
         """ Called when the user selects a show from the name list. """
@@ -427,7 +499,7 @@ class GuiManager(object):
             return [x for x in selected_show.seasons]
 
         self.background_task(fetch_seasons, self.display_seasons,
-            status_message="Loading show %s..." % selected_show.name)
+            status_message=gettext("Loading show %s...") % selected_show.name)
 
     def _on_file_viewer_open(self, widget, path, *args):
         """ Called when the user double clicks on a file
@@ -458,7 +530,8 @@ class GuiManager(object):
                 return [x for x in self.current_show.seasons]
 
             self.background_task(fetch_seasons, self.display_seasons,
-                status_message="Loading show %s..." % self.current_show.name)
+                status_message=gettext("Loading show %s...") % \
+                                       self.current_show.name)
 
     def _on_name_filter_change(self, *args):
         """ Called when the textbox to filter names changes. """
@@ -482,7 +555,7 @@ class GuiManager(object):
         """ Called when the user press any mouse button on the name list. """
 
         if event.button == 3:  # 3 it's right click
-            if self.get_mode() == MODE_FAVORITES:
+            if self.get_mode() == "Favorites":
                 popup_menu = self.builder.get_object("name_favorites_menu")
             else:
                 popup_menu = self.builder.get_object("name_shows_menu")
@@ -540,7 +613,7 @@ class GuiManager(object):
         """ Called when the user click on the download and
         play context menu item. """
 
-        chooser = gtk.FileChooserDialog(title="Dowload to...",
+        chooser = gtk.FileChooserDialog(title=gettext("Dowload to..."),
                   parent=self.main_window,
                   action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                   buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
@@ -586,11 +659,14 @@ class GuiManager(object):
 
         selection = self.file_viewer.get_selection()
         model, iteration = selection.get_selected()
-        episode = model.get_value(iteration, FILE_VIEW_COLUMN_OBJECT)
+        obj = model.get_value(iteration, FILE_VIEW_COLUMN_OBJECT)
         model.set_value(iteration, FILE_VIEW_COLUMN_PIXBUF, ICON_FILE_MOVIE_MARK)
 
-        mark_string = "%s-%s-%s" % (self.current_show.name,
-            self.current_season.name, episode.name)
+        if isinstance(obj, self.api.Movie):
+            mark_string = "%s" % obj.name
+        elif isinstance(obj, self.api.Episode):
+            mark_string = "%s-%s-%s" % (self.current_show.name,
+                self.current_season.name, obj.name)
 
         self.marks.add(mark_string)
 
@@ -622,10 +698,10 @@ class GuiManager(object):
         try:
             url = file_object.original_url
         except NotImplementedError:
-            self.report_error("Option not avaliable in this site")
+            self.report_error(gettext("Option not avaliable in this site"))
             return
         except:
-            self.report_error("Error opening original url: %s" % error)
+            self.report_error(gettext("Error opening original url: %s") % error)
             return
 
         webbrowser.open(url)
@@ -640,12 +716,12 @@ class GuiManager(object):
 
         # Sets the correct mode
         self.set_mode_movies()
-        self.mode_combo.set_active(MODES.index(MODE_MOVIES))
+        self.mode_combo.set_active(self.avaliable_modes.index("Movies"))
 
         query = self.search_entry.get_text()
         self.background_task(self.api.Movie.search,
-                    self.display_movies, query,
-                    status_message="Searching movies with title %s..." % query)
+            self.display_movies, query,
+            status_message=gettext("Searching movies with title %s...") % query)
 
     def _on_about_clicked(self, *args):
         """ Opens the about dialog. """
@@ -671,10 +747,10 @@ class GuiManager(object):
                              file_object, freeze=False)
 
         def fetch_info():
-            full_description = file_object.info["description"] + "\n\n" \
-                "<b>Cast:</b> " + ", ".join(file_object.info["cast"]) + "\n" \
-                "<b>Genere:</b> " + file_object.info["genere"] + "\n" \
-                "<b>Language:</b> " + file_object.info["language"]
+            full_description = file_object.info["description"] + "\n\n" + \
+                gettext("<b>Cast:</b> ") + ", ".join(file_object.info["cast"]) + "\n" + \
+                gettext("<b>Genere:</b> ") + file_object.info["genere"] + "\n" + \
+                gettext("<b>Language:</b> ") + file_object.info["language"]
 
             return file_object.name, full_description
 
@@ -683,9 +759,9 @@ class GuiManager(object):
     def set_info(self, (is_error, result)):
         if is_error:
             if isinstance(result, NotImplementedError):
-                message = "Information not supported for this site"
+                message = gettext("Information not supported for this site")
             else:
-                message = "Error downloading information: %s" % result
+                message = gettext("Error downloading information: %s") % result
 
             self.report_error(message)
             return
@@ -726,7 +802,7 @@ class GuiManager(object):
         """ Sets the image of the current episode. """
 
         if is_error:
-            msg = "Problem downloading show image"
+            msg = gettext("Problem downloading show image")
             self.set_status_message(msg)
             log.error(msg)
             log.error(result)

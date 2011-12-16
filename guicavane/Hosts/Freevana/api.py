@@ -15,7 +15,9 @@ from guicavane.Hosts.Base import *
 from guicavane.Utils.UrlOpen import UrlOpen
 from guicavane.Paths import CONFIG_DIR
 
-DISPLAY_NAME = "Freevana"
+display_name = "freevana"
+display_image = "freevana.png"
+implements = ["Shows", "Movies"]
 
 # Download latest freevana database from: http://tirino.github.com/freevana/
 DATABASE_FILE = "freevana.db"

@@ -9,8 +9,9 @@ import re
 import time
 import gobject
 
-from guicavane.Utils.UrlOpen import UrlOpen, DownloadError
+from guicavane.Gettext import gettext
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
+from guicavane.Utils.UrlOpen import UrlOpen, DownloadError
 from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
 
 from Base import BaseDownloader
@@ -18,7 +19,7 @@ from Base import BaseDownloader
 from guicavane.Utils.Log import console
 from guicavane.Utils.Debug import tmp_dump
 
-log = console("Downloaders.Wupload")
+log = console("Downloaders Wupload")
 
 
 RECAPTCHA_CHALLENGE_URL = "http://api.recaptcha.net/challenge?k="
@@ -29,11 +30,10 @@ RECAPTCHA_CHALLENGE_ID_RE = re.compile('Recaptcha.create\("(.*?)"')
 RECAPTCHA_NEW_CHALLENGE_RE = re.compile("challenge : '(.+?)',")
 WAITING_TIME_RE = re.compile('var countDownDelay = (\d+);')
 TM_RE = re.compile("id='tm' name='tm' value='(\d+)' />")
-TM_HASH_RE = re.compile("id='tm_hash' name='tm_hash' value='(\d+)' />")
+TM_HASH_RE = re.compile("id='tm_hash' name='tm_hash' value='(?P<value>[0-9a-f]*?)' />")
 FILE_URL_RE = re.compile('<span>Download Ready </span></h3>.*?' \
                          '<p><a href="(.*?)">', re.DOTALL)
 
-MAIN_URL_OPEN = UrlOpen(use_cache=False)
 CAPTCHA_URL_OPEN = UrlOpen(use_cache=False)
 
 
@@ -45,14 +45,16 @@ class Wupload(BaseDownloader):
     accept_ranges = False
 
     def __init__(self, gui_manager, url):
-        BaseDownloader.__init__(self, MAIN_URL_OPEN, gui_manager, url)
+        self.MAIN_URL_OPEN = UrlOpen(use_cache=False)
+
+        BaseDownloader.__init__(self, self.MAIN_URL_OPEN, gui_manager, url)
 
         self.gui_manager = gui_manager
         self.url = url
 
         self.captcha_window = CaptchaWindow(gui_manager, self._on_captcha_ok)
 
-        MAIN_URL_OPEN.add_headers({
+        self.MAIN_URL_OPEN.add_headers({
             "Referer": url,
             "Origin": "http://www.wupload.com",
             "Host": "www.wupload.com",
@@ -68,7 +70,7 @@ class Wupload(BaseDownloader):
                         self.on_waiting_finish, unfreeze=False)
 
     def start_regular(self):
-        page_data = MAIN_URL_OPEN(self.url)
+        page_data = self.MAIN_URL_OPEN(self.url)
 
         try:
             self.regular_url = REGULAR_URL_RE.search(page_data).group(1)
@@ -77,55 +79,64 @@ class Wupload(BaseDownloader):
             msg = "Regular link not found"
             log.error(msg)
             log.error(e.message)
-            log.info("Dumped '%s' in '%s'" % (self.url, tmp_dump(page_data)))
+            tmp_dump(page_data, link)
             raise DownloadError(msg)
 
-        MAIN_URL_OPEN.add_headers({"X-Requested-With": "XMLHttpRequest"})
-        regular_data = MAIN_URL_OPEN(self.regular_url)
+        self.MAIN_URL_OPEN.add_headers({"X-Requested-With": "XMLHttpRequest"})
+        regular_data = self.MAIN_URL_OPEN(self.regular_url)
+
 
         if "countDownDelay" in regular_data:
             waiting_time = int(WAITING_TIME_RE.search(regular_data).group(1))
 
             try:
                 tm = int(TM_RE.search(regular_data).group(1))
-                tm_hash = int(TM_HASH_RE.search(regular_data).group(1))
+                tm_hash = TM_HASH_RE.search(regular_data).group("value")
                 tm_data = {"tm": tm, "tm_hash": tm_hash}
             except:
                 tm_data = None
 
             for i in range(waiting_time, 0, -1):
                 gobject.idle_add(self.gui_manager.set_status_message,
-                                "Please wait %d second%s..." % (i, "s" * (i > 1)))
+                    gettext("Please wait %d second%s...") % (i, "s" * (i > 1)))
                 time.sleep(1)
 
             log.info("Trying to get captcha..")
             log.info(tm_data)
-            regular_data = MAIN_URL_OPEN(self.regular_url, data=tm_data)
+            regular_data = self.MAIN_URL_OPEN(self.regular_url, data=tm_data)
 
         if "Download Ready" in regular_data:
+            has_captcha = False
             self.file_url = FILE_URL_RE.search(regular_data).group(1)
-            return True
         else:
+            has_captcha = True
+
             try:
                 self.recaptcha_challenge_id = RECAPTCHA_CHALLENGE_ID_RE.search(regular_data).group(1)
             except Exception, e:
                 msg = "Captcha challenge not found!"
                 log.error(msg)
                 log.error(e.message)
-                log.info("Dumped '%s' in '%s'" % (self.url, tmp_dump(page_data)))
+                tmp_dump(page_data, self.url)
                 raise DownloadError(msg)
+
+        return has_captcha
 
     def on_waiting_finish(self, (is_error, result)):
         if is_error:
-            self.gui_manager.report_error("Error obtaining wuploads's link: %s" % result)
+            message = gettext("Error obtaining wuploads's link: %s" % result)
+            self.gui_manager.report_error(message)
             return
+        else:
+            has_captcha = result
 
-        if result:
-            self._on_captcha_finish((False, None))
-            return
+            if not has_captcha:
+                self._on_captcha_finish((False, None))
+            else:
+                self.gui_manager.background_task(self.request_captcha,
+                    self.captcha_window.show)
 
-        self.gui_manager.background_task(self.request_captcha,
-            self.captcha_window.show)
+        return None
 
     def request_captcha(self):
         assert self.recaptcha_challenge_id != None, "Captcha required but challenge not found"
@@ -150,12 +161,12 @@ class Wupload(BaseDownloader):
             "recaptcha_response_field": response_text,
         }
 
-        page_data = MAIN_URL_OPEN(self.regular_url, data=request_data)
+        page_data = self.MAIN_URL_OPEN(self.regular_url, data=request_data)
 
         self.file_url = FILE_URL_RE.search(page_data).group(1)
 
     def _download_loop(self):
-        handler = MAIN_URL_OPEN(self.file_url, handle=True)
+        handler = self.MAIN_URL_OPEN(self.file_url, handle=True)
 
         # Using the BaseDownloader download function
         self.download_to(handler, self.file_path)
@@ -166,7 +177,7 @@ class Wupload(BaseDownloader):
 
     def _on_captcha_finish(self, (is_error, result)):
         if is_error:
-            self.gui_manager.report_error("Wrong captcha (%s)" % result)
+            self.gui_manager.report_error(gettext("Wrong captcha"))
             return
 
         self.gui_manager.background_task(self._download_loop,
@@ -176,6 +187,7 @@ class Wupload(BaseDownloader):
 
     def _on_download_finish(self, (is_error, result)):
         if is_error:
-            self.gui_manager.report_error("Download finish with error: %s" % result)
+            message = gettext("Download finish with error: %s") % result
+            self.gui_manager.report_error(message)
 
         self.gui_manager.unfreeze()

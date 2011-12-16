@@ -8,15 +8,21 @@ Player. Handles the download and starts the player.
 import os
 import gtk
 import time
+import string
 import gobject
 import subprocess
 
 import Downloaders
-from Hosts.Base import BaseMovie, BaseEpisode
-from guicavane.Utils.UrlOpen import UrlOpen
 from guicavane.Config import Config
-from Constants import HOSTS_GUI_FILE, HOSTS_VIEW_COLUMN_OBJECT, \
-                      HOSTS_VIEW_COLUMN_TEXT
+from guicavane.Gettext import gettext
+from guicavane.Utils.Log import console
+from guicavane.Utils.UrlOpen import UrlOpen
+from guicavane.Paths import HOSTS_GUI_FILE
+from guicavane.Hosts.Base import BaseMovie, BaseEpisode
+from guicavane.Constants import HOSTS_VIEW_COLUMN_OBJECT, \
+                                HOSTS_VIEW_COLUMN_TEXT
+
+log = console("Player")
 
 
 class Player(object):
@@ -59,7 +65,7 @@ class Player(object):
                 self.hosts_builder.get_object(glade_object))
 
         self.gui_manager.background_task(self.get_hosts, self.display_hosts,
-            status_message="Fetching hosts...", unfreeze=False)
+            status_message=gettext("Fetching hosts..."), unfreeze=False)
 
     def get_hosts(self):
         """ Returns a dict with the avaliable downloaders for the file. """
@@ -81,40 +87,32 @@ class Player(object):
     def display_hosts(self, (is_error, result)):
         """ Shows up the hosts selecting window. """
 
-        if is_error:
-            self.gui_manager.report_error("Error fetching hosts: %s" % result)
-            gobject.idle_add(self.gui_manager.progress.hide)
-            return
-
-
         gobject.idle_add(self.gui_manager.set_status_message, "")
 
+        if is_error:
+            self.gui_manager.report_error(gettext("Error fetching hosts: %s") % \
+                                          result)
+            gobject.idle_add(self.gui_manager.progress_box.hide)
+            return
+
         if not result:
-            self.gui_manager.report_error("No host found")
+            self.gui_manager.report_error(gettext("No host found"))
             self.gui_manager.unfreeze()
             return
 
-        # elif len(result) == 1 and not self.choose_host:
-        #     gobject.idle_add(self.gui_manager.set_status_message,
-        #         "Only one host found, starting download...")
-        #     self.downloader = result[0]
-        #     self.downloader.process_url(self.play, self.file_path)
-        # else:
-        #     megaupload = [x for x in result if x.name == "Megaupload"]
-        #     if not self.choose_host and len(megaupload) != 0 and \
-        #            self.config.get_key("automatic_megaupload"):
+        automatic_start = self.config.get_key("automatic_start")
 
-        #         gobject.idle_add(self.gui_manager.set_status_message,
-        #             "Automatically starting with megaupload")
-        #         self.downloader = megaupload[0]
-        #         self.downloader.process_url(self.play, self.file_path)
-        #     else:
-        #         for downloader in result:
-        #             icon = downloader.icon
-        #             name = downloader.name
-        #             self.hosts_icon_view_model.append([icon, name, downloader])
+        if automatic_start and len(result) == 1 and not self.choose_host:
+            host, qualities = result.items()[0]
 
-        #         self.hosts_window.show_all()
+            if len(qualities) == 1:
+                gobject.idle_add(self.gui_manager.set_status_message,
+                    gettext("Only one host found, starting download..."))
+
+                url = qualities.items()[0][1]
+                self.downloader = Downloaders.get(host, self.gui_manager, url)
+                self.downloader.process_url(self.play, self.file_path)
+                return
 
         for host in result:
             for quality in result[host]:
@@ -141,17 +139,19 @@ class Player(object):
 
         # Download the subtitle
         gobject.idle_add(self.gui_manager.set_status_message,
-            "Downloading subtitles...")
+            gettext("Downloading subtitles..."))
 
         # Wait for the file to exists
-        gobject.idle_add(self.gui_manager.set_status_message, "Wait please...")
+        gobject.idle_add(self.gui_manager.set_status_message,
+                         gettext("Please wait..."))
         while not os.path.exists(self.file_path):
             time.sleep(1)
 
         # Show the progress bar box
         gobject.idle_add(self.gui_manager.progress.set_fraction, 0.0)
         gobject.idle_add(self.gui_manager.progress_box.show)
-        gobject.idle_add(self.gui_manager.set_status_message, "Filling cache...")
+        gobject.idle_add(self.gui_manager.set_status_message,
+                         gettext("Filling cache..."))
 
         if self.downloader.file_size != 0:
             # Waits %1 of the total download
@@ -171,13 +171,13 @@ class Player(object):
         """ Fires up a new process with the player runing. """
 
         if is_error:
-            self.gui_manager.report_error("Error pre downloading: %s" % result)
+            self.gui_manager.report_error(gettext("Error pre-downloading: %s") % result)
             return
 
         if self.download_only:
-            message = "Downloading: %s"
+            message = gettext("Downloading: %s")
         else:
-            message = "Playing: %s"
+            message = gettext("Playing: %s")
 
         gobject.idle_add(self.gui_manager.set_status_message,
                          message % self.file_object.name)
@@ -218,14 +218,14 @@ class Player(object):
 
             if remaining_time >= 1:  # if it's more than a minute
                 if remaining_time == 1:
-                    remaining_message = "%d minute left" % remaining_time
+                    remaining_message = gettext("%d minute left") % remaining_time
                 else:
-                    remaining_message = "%d minutes left" % remaining_time
+                    remaining_message = gettext("%d minutes left") % remaining_time
             else:
                 if (remaining_time * 60) > 10:
-                    remaining_message = "%d seconds left" % (remaining_time * 60)
+                    remaining_message = gettext("%d seconds left") % (remaining_time * 60)
                 elif remaining_time != 0:
-                    remaining_message = "a few seconds left"
+                    remaining_message = gettext("a few seconds left")
                 else:
                     remaining_message = ""
 
@@ -273,38 +273,53 @@ class Player(object):
 
         if downloaded_size >= file_size:
             if self.config.get_key("automatic_marks"):
-                self.gui_manager.marks.add(self.file_object.id)
+                if isinstance(self.file_object, BaseMovie):
+                    mark_string = "%s" % self.file_object.name
+                else:
+                    mark_string = "%s-%s-%s" % (self.file_object.show.name,
+                        self.file_object.season.name, self.file_object.name)
+
+                log.info("Mark automatically added: %s" % mark_string)
+
+                self.gui_manager.marks.add(mark_string)
                 self.gui_manager.refresh_marks()
 
     def get_filename(self):
         """ Returns the file path of the file. """
 
+        valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+
         if isinstance(self.file_object, BaseMovie):
-            return self.file_object.name.replace(os.sep, "_") + ".mp4"
+            result = self.file_object.name.replace(os.sep, "_")
+        elif isinstance(self.file_object, BaseEpisode):
+            result = self.config.get_key("filename_template")
+            result = result.replace("<show>", self.file_object.show.name)
+            result = result.replace("<season>", "%.2d" % \
+                int(self.file_object.season.number))
+            result = result.replace("<episode>", "%s" % \
+                str(self.file_object.number))
+            result = result.replace("<name>", self.file_object.name)
+        else:
+            raise Exception("Error traying to obtain filename from a non " \
+                            "Movie/Episode object: %s (%s)." % \
+                            (self.file_object, type(self.file_object)))
 
-        # If isn't a movie it must be an episode
-        assert isinstance(self.file_object, BaseEpisode)
 
-        result = self.config.get_key("filename_template")
-        result = result.replace("<show>", self.file_object.show.name)
-        result = result.replace("<season>", "%.2d" % \
-            int(self.file_object.season.number))
-        result = result.replace("<episode>", "%s" % \
-            str(self.file_object.number))
-        result = result.replace("<name>", self.file_object.name)
-        for char in '\/:?*"<>|%.':
-            result = result.replace(char, "_")
+        result = ''.join(c for c in result if c in valid_chars)
         result = result + ".mp4"
-
         return result
 
     def download_subtitle(self):
         """ Downloads the subtitle for the selected episode. """
 
-        url = self.file_object.get_subtitle_url(quality=self.selected_quality)
         url_open = UrlOpen()
 
-        url_open(url, filename=self.file_path.replace(".mp4", ".srt"))
+        url = self.file_object.get_subtitle_url(quality=self.selected_quality)
+        filename = self.file_path.replace(".mp4", ".srt")
+
+        log.debug("Traying to download subtitles from: %s and save it to: %s" % (url, filename))
+
+        url_open(url, filename=filename)
 
     # ================================
     # =         CALLBACKS            =
@@ -336,5 +351,7 @@ class Player(object):
 
     def _on_download_subtitle_finish(self, (is_error, result)):
         if is_error:
+            log.error("Download subtitle failed: %s" % result)
+
             gobject.idle_add(self.gui_manager.set_status_message,
-                "Download subtitle failed")
+                gettext("Download subtitle failed"))

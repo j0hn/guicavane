@@ -9,10 +9,16 @@ import re
 import time
 import gobject
 
-from guicavane.Utils.UrlOpen import UrlOpen, DownloadError
+from guicavane.Gettext import gettext
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
+from guicavane.Utils.UrlOpen import UrlOpen, DownloadError
 
 from Base import BaseDownloader
+
+from guicavane.Utils.Debug import tmp_dump
+from guicavane.Utils.Log import console
+
+log = console("Downloaders Megaupload")
 
 
 MEGALINK_RE = re.compile('<a.*?href="(http://.*megaupload.*/files/.*?)"')
@@ -47,13 +53,13 @@ class Megaupload(BaseDownloader):
 
         for i in range(self.account.wait_time, 0, -1):
             gobject.idle_add(self.gui_manager.set_status_message,
-                            "Please wait %d second%s..." % (i, "s" * (i > 1)))
+                gettext("Please wait %d second%s...") % (i, "s" * (i > 1)))
             time.sleep(1)
 
     def start_download(self, (is_error, result)):
         """ Starts the actually download loop and opens up the player. """
         if is_error:
-            self.gui_manager.report_error("Error: %s" % result)
+            self.gui_manager.report_error(gettext("Error: %s") % result)
             return
 
         self.gui_manager.background_task(self._download_loop,
@@ -63,18 +69,33 @@ class Megaupload(BaseDownloader):
 
     def get_megalink(self):
         """ Returns the real downloadable megaupload url. """
+
+        log.debug("Megaupload link: %s" % self.url)
+
         try:
             page_data = URL_OPEN(self.url)
         except Exception, error:
             raise DownloadError(error)
 
-        return MEGALINK_RE.findall(page_data)[0]
+        try:
+            link = MEGALINK_RE.search(page_data).group(1)
+        except:
+            raise Exception("File was removed.\n\nVisit: %s to " \
+                            "make sure." % self.url)
+
+        if not link:
+            tmp_dump(page_data, link)
+            raise Exception("No real file found")
+
+        log.debug("Link obtained: %s" % link)
+        return link
 
     def _on_megalink_finish(self, (is_error, result)):
         """ Called on finish finding the real link. """
 
         if is_error:
-            self.gui_manager.report_error("Error obtaining megaupload's link: %s" % result)
+            message = gettext("Error obtaining megaupload's link: %s") % result
+            self.gui_manager.report_error(message)
             return
 
         self.megalink = result
@@ -89,16 +110,20 @@ class Megaupload(BaseDownloader):
         try:
             handler = URL_OPEN(self.megalink, handle=True)
         except Exception, error:
-            raise DownloadError("Error downloading from megaupload: %s" % error)
+            message = gettext("Error downloading from megaupload: %s") % error
+            raise DownloadError(message)
 
         # Using the BaseDownloader download function
         self.download_to(handler, self.file_path)
 
     def _on_download_finish(self, (is_error, result)):
         if is_error:
+            gobject.idle_add(self.gui_manager.progress_box.hide)
+
             if "Requested Range Not Satisfiable" in str(result):
                 self.file_size = self.downloaded_size
             else:
-                self.gui_manager.report_error("Download finish with error: %s" % result)
+                message = gettext("Download finish with error: %s") % result
+                self.gui_manager.report_error(message)
 
         self.gui_manager.unfreeze()

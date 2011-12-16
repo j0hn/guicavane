@@ -10,9 +10,13 @@ Authors: Roger Duran <rogerduran@gmail.com>
 
 import re
 
-from guicavane.Hosts.Base import *
 import urls
+from guicavane.Hosts.Base import *
 from guicavane.Utils.UrlOpen import UrlOpen
+
+display_name = "Pelispedia"
+display_image = "pelispedia.png"
+implements = ["Shows", "Movies"]
 
 HOSTMAP = {'megaupload': 'http://www.megaupload.com/?d=',
            'kickupload': 'http://www.kickupload.com/files/',
@@ -31,7 +35,6 @@ HOSTNAMES = {'mega1': 'megaupload',
             'mega8': 'uploadking',
             }
 
-DISPLAY_NAME = "Pelispedia"
 
 url_open = UrlOpen()
 

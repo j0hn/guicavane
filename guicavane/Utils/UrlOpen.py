@@ -8,6 +8,7 @@ Requests webpages using cache, cookies,
 headers and retry features.
 """
 
+import os
 import time
 import urllib
 import socket
@@ -19,17 +20,18 @@ from StringIO import StringIO
 
 from Cached import Cached
 from guicavane.Config import Config
-from guicavane.Paths import CACHE_DIR
+from guicavane.Paths import CACHE_DIR, COOKIES_FILE
 from guicavane.Utils.Log import console
 from guicavane.Constants import DEFAULT_REQUEST_TIMEOUT, CUSTOM_DNS
 
-log = console("GuiManager")
-config = Config.get()
+log = console("UrlOpen")
 
 HEADERS = {
-    'User-Agent': 'User-Agent:Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.1 '
-                  '(KHTML, like Gecko) Chrome/13.0.772.0 Safari/535.1',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;'}
+    'User-Agent': 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.11 ' \
+                  '(KHTML, like Gecko) Chrome/17.0.963.2 Safari/535.11',
+    'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+}
 
 RETRY_TIMES = 5
 cached = Cached.get()
@@ -62,8 +64,21 @@ def retry(callback):
 
     return deco
 
+def save_cookies(callback):
+    """ Save cookies in each request """
+
+    @functools.wraps(callback)
+    def deco(self, *args, **kwargs):
+        data = callback(self, *args, **kwargs)
+        self.cookiejar.save()
+        return data
+
+    return deco
+
+
 
 def CustomResolver(host):
+    config = Config.get()
     if config.get_key("use_custom_resolve"):
         if host in CUSTOM_DNS:
             host = CUSTOM_DNS[host]
@@ -83,17 +98,24 @@ class CustomHTTPHandler(urllib2.HTTPHandler):
     def http_open(self, req):
         return self.do_open(CustomHTTPConnection, req)
 
-
 class UrlOpen(object):
     """ An url opener with cookies support. """
 
     def __init__(self, use_cache=True):
-        self.cookiejar = cookielib.CookieJar()
+        self.cookiejar = cookielib.LWPCookieJar(filename=COOKIES_FILE)
+        if os.path.exists(COOKIES_FILE):
+            try:
+                self.cookiejar.load()
+            except:
+                # Avoid corrupted cookies
+                pass
+
         self.opener = self.build_opener()
         self.set_timeout(DEFAULT_REQUEST_TIMEOUT)
         self.use_cache = use_cache
 
     @retry
+    @save_cookies
     def __call__(self, url, data=None, filename=None, handle=False, cache=True):
         cache_key = url + str(data)
         cache_data = cached(cache_key)
@@ -163,3 +185,9 @@ class UrlOpen(object):
         base_headers = dict(self.opener.addheaders)
         base_headers.update(headers)
         self.opener.addheaders = base_headers.items()
+
+    def check_cookie(self, domain):
+        for cookie in self.cookiejar:
+            if cookie.domain[1:] == domain and not cookie.is_expired():
+                return True
+        return False

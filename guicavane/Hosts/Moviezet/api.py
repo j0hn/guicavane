@@ -13,9 +13,13 @@ import re
 import urllib
 from hashlib import md5
 
-from guicavane.Hosts.Base import *
 import urls
+from guicavane.Hosts.Base import *
 from guicavane.Utils.UrlOpen import UrlOpen
+
+display_name = "Moviezet"
+display_image = "moviezet.png"
+implements = ["Shows", "Movies"]
 
 HOSTMAP = {'megaupload': 'http://www.megaupload.com/?d=',
            'kickupload': 'http://www.kickupload.com/files/',
@@ -28,7 +32,6 @@ HOSTNAMES = {'megaus': 'megaupload',
              'bit': 'bitshare',
              'file': 'filefactory'}
 
-DISPLAY_NAME = "Moviezet"
 
 url_open = UrlOpen()
 

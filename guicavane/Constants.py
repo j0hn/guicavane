@@ -10,24 +10,18 @@ Module with constants values.
 import os
 import sys
 import gtk
+from Gettext import gettext
 
 from Paths import GUI_DIR, IMAGES_DIR, SEP
 
-# Gui Files
-MAIN_GUI_FILE = GUI_DIR + SEP + "main.glade"
-SETTINGS_GUI_FILE = GUI_DIR + SEP + "settings.glade"
-HOSTS_GUI_FILE = GUI_DIR + SEP + "hosts.glade"
-CAPTCHA_GUI_FILE = GUI_DIR + SEP + "captcha.glade"
-
 # Modes
-MODE_SHOWS = "Shows"
-MODE_MOVIES = "Movies"
-MODE_FAVORITES = "Favorites"
-MODE_LATEST_MOVIES = "Latest Movies"
-MODE_RECOMENDED_MOVIES = "Recomended Movies"
-MODES = [MODE_SHOWS, MODE_MOVIES, MODE_FAVORITES,
-         MODE_LATEST_MOVIES, MODE_RECOMENDED_MOVIES]
-# NOTE: MODES must be in the same order as they appear in the combobox
+MODES = {
+    "Shows": gettext("Shows"),
+    "Movies": gettext("Movies"),
+    "Favorites": gettext("Favorites"),
+    "Latest": gettext("Latest movies"),
+    "Recomended": gettext("Recomended movies"),
+}
 
 # Index of the columns on the tree views
 FILE_VIEW_COLUMN_PIXBUF = 0
@@ -43,6 +37,7 @@ HOSTS_VIEW_COLUMN_OBJECT = 2
 
 SITES_COLUMN_TEXT = 0
 SITES_COLUMN_OBJECT = 1
+SITES_COLUMN_IMAGE = 2
 
 # Icons
 IMAGE_FOLDER = gtk.Image()

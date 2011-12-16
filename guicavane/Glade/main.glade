@@ -11,7 +11,7 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="has_separator">True</property>
     <property name="program_name">Guicavane</property>
-    <property name="version">1.6.1</property>
+    <property name="version">1.6.2</property>
     <property name="copyright" translatable="yes">j0hn &lt;j0hn.com.ar@gmail.com&gt;</property>
     <property name="comments" translatable="yes">A Graphical User Interface for 
 the website www.cuevana.tv
@@ -26,7 +26,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</property>
     <property name="authors">j0hn &lt;j0hn.com.ar@gmail.com&gt; - Lead developer
-Roger &lt;rogerduran@gmail.com&gt; - Pycavane Lead developer
+Roger &lt;rogerduran@gmail.com&gt; - Developer
 Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
     <property name="logo">../Images/logo_big.png</property>
     <property name="wrap_license">True</property>
@@ -402,7 +402,7 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
     <property name="default_width">900</property>
     <property name="default_height">500</property>
     <property name="icon">../Images/logo.png</property>
-    <signal name="destroy" handler="_on_destroy" swapped="no"/>
+    <signal name="delete-event" handler="_on_destroy" swapped="no"/>
     <child>
       <object class="GtkVBox" id="main_vbox">
         <property name="visible">True</property>
@@ -543,6 +543,12 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
                     <property name="model">site_liststore</property>
                     <property name="active">0</property>
                     <signal name="changed" handler="_on_site_change" swapped="no"/>
+                    <child>
+                      <object class="GtkCellRendererPixbuf" id="site_rederer_image"/>
+                      <attributes>
+                        <attribute name="pixbuf">2</attribute>
+                      </attributes>
+                    </child>
                     <child>
                       <object class="GtkCellRendererText" id="site_renderer_text"/>
                       <attributes>
@@ -945,23 +951,6 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
       <!-- column-name label -->
       <column type="gchararray"/>
     </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Shows</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Movies</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Favorites</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Latest Movies</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Recomended Movies</col>
-      </row>
-    </data>
   </object>
   <object class="GtkMenu" id="name_favorites_menu">
     <property name="visible">True</property>
@@ -1009,6 +998,8 @@ Curita &lt;who.knows.shia@gmail.com&gt; - Contributor</property>
       <column type="gchararray"/>
       <!-- column-name module_reference -->
       <column type="PyObject"/>
+      <!-- column-name image -->
+      <column type="GdkPixbuf"/>
     </columns>
   </object>
 </interface>

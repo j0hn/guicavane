@@ -75,7 +75,7 @@ Section "Start Menu Shortcuts"
   CreateShortCut "$SMPROGRAMS\Guicavane\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   CreateShortCut "$SMPROGRAMS\Guicavane\Guicavane.lnk" "$INSTDIR\Guicavane.exe" "" "$INSTDIR\Guicavane.exe" 0
 
-  CreateShortCut "$SMPROGRAMS\Guicavane\Webpage.lnk" "http://www.github.com/j0hn/guicavane"
+  CreateShortCut "$SMPROGRAMS\Guicavane\Webpage.lnk" "http://j0hn.github.com/guicavane"
   
 SectionEnd
 

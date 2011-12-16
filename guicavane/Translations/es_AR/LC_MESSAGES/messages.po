@@ -1,17 +1,17 @@
-# Translations template for PROJECT.
-# Copyright (C) 2011 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
+# Spanish translations for guicavane package
+# Copyright (C) 2011 THE guicavane'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the guicavane package.
+# j0hn <j0hn.com.ar@gmail.com>, 2011.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"Project-Id-Version: guicavane 1.6.3\n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-12-14 04:07-0300\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2011-12-04 16:54-0300\n"
+"Last-Translator: j0hn <j0hn.com.ar@gmail.com>\n"
+"Language-Team: Argentinian\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,52 +19,52 @@ msgstr ""
 
 #: Constants.py:19
 msgid "Shows"
-msgstr ""
+msgstr "Series"
 
 #: Constants.py:20
 msgid "Movies"
-msgstr ""
+msgstr "Películas"
 
 #: Constants.py:21
 msgid "Favorites"
-msgstr ""
+msgstr "Favoritos"
 
 #: Constants.py:22
 msgid "Latest movies"
-msgstr ""
+msgstr "Últimas películas"
 
 #: Constants.py:23
 msgid "Recomended movies"
-msgstr ""
+msgstr "Películas recomendadas"
 
 #: GuiManager.py:123 GuiManager.py:147
 msgid "Loading..."
-msgstr ""
+msgstr "Cargando..."
 
 #: GuiManager.py:249
 msgid "Obtaining shows list"
-msgstr ""
+msgstr "Obteniendo lista de series"
 
 #: GuiManager.py:269
 msgid "Loading favorites"
-msgstr ""
+msgstr "Cargando favoritos"
 
 #: GuiManager.py:276
 msgid "Loading latest movies..."
-msgstr ""
+msgstr "Cargando ultimas peliculas..."
 
 #: GuiManager.py:283
 msgid "Loading recomended movies..."
-msgstr ""
+msgstr "Cargando peliculas recomendadas..."
 
 #: GuiManager.py:323
 #, python-format
 msgid "Error loading favorites: %s"
-msgstr ""
+msgstr "Error cargando favoritos: %s"
 
 #: GuiManager.py:343 GuiManager.py:419
 msgid "Not avaliable for this site"
-msgstr ""
+msgstr "No disponible para este sitio"
 
 #: GuiManager.py:345
 #, python-format
@@ -73,6 +73,9 @@ msgid ""
 "\n"
 "details: %s"
 msgstr ""
+"Problema obteniendo series:\n"
+"\n"
+"detalles: %s"
 
 #: GuiManager.py:358
 #, python-format
@@ -81,6 +84,9 @@ msgid ""
 "\n"
 "details: %s"
 msgstr ""
+"Problema obteniendo temporadas:\n"
+"\n"
+"detalles: %s"
 
 #: GuiManager.py:373
 #, python-format
@@ -89,6 +95,9 @@ msgid ""
 "\n"
 "details: %s"
 msgstr ""
+"Problema obteniendo episodios:\n"
+"\n"
+"detalles: %s"
 
 #: GuiManager.py:421
 #, python-format
@@ -96,67 +105,70 @@ msgid ""
 "Problem fetching movies, please try again in a few minutes.\n"
 "details: %s"
 msgstr ""
+"Problema obteniendo peliculas, por favor intente nuevamente en unos "
+"minutos.\n"
+"detalles: %s"
 
 #: GuiManager.py:490 GuiManager.py:521
 #, python-format
 msgid "Loading show %s..."
-msgstr ""
+msgstr "Cargando serie %s..."
 
 #: GuiManager.py:604
 msgid "Dowload to..."
-msgstr ""
+msgstr "Descargar en..."
 
 #: GuiManager.py:689
 msgid "Option not avaliable in this site"
-msgstr ""
+msgstr "Opcion no disponible para este sitio"
 
 #: GuiManager.py:692
 #, python-format
 msgid "Error opening original url: %s"
-msgstr ""
+msgstr "Error al abrir url original: %s"
 
 #: GuiManager.py:712
 #, python-format
 msgid "Searching movies with title %s..."
-msgstr ""
+msgstr "Buscando peliculas con el titulo %s..."
 
 #: GuiManager.py:739
 msgid "<b>Cast:</b> "
-msgstr ""
+msgstr "<b>Reparto:</b> "
 
 #: GuiManager.py:740
 msgid "<b>Genere:</b> "
-msgstr ""
+msgstr "<b>Genero:</b> "
 
 #: GuiManager.py:741
 msgid "<b>Language:</b> "
-msgstr ""
+msgstr "<b>Idioma:</b> "
 
 #: GuiManager.py:750
 msgid "Information not supported for this site"
-msgstr ""
+msgstr "Informacion no soportada por este sitio"
 
 #: GuiManager.py:752
 #, python-format
 msgid "Error downloading information: %s"
-msgstr ""
+msgstr "Error al descargar informacion: %s"
 
 #: GuiManager.py:793
 msgid "Problem downloading show image"
-msgstr ""
+msgstr "Problema descargando imagen de serie"
 
 #: Player.py:67
 msgid "Fetching hosts..."
-msgstr ""
+msgstr "Obteniendo fuentes..."
 
 #: Player.py:92
 #, python-format
 msgid "Error fetching hosts: %s"
-msgstr ""
+msgstr "Error obteniendo fuentes: %s"
 
 #: Player.py:98
 msgid "No host found"
-msgstr ""
+msgstr "No hay fuentes disponibles"
 
 #: Player.py:109
 msgid "Only one host found, starting download..."
@@ -164,123 +176,123 @@ msgstr ""
 
 #: Player.py:141
 msgid "Downloading subtitles..."
-msgstr ""
+msgstr "Descargando subtitulos..."
 
 #: Player.py:145
 msgid "Please wait..."
-msgstr ""
+msgstr "Por favor espere..."
 
 #: Player.py:153
 msgid "Filling cache..."
-msgstr ""
+msgstr "Llenando cache..."
 
 #: Player.py:173
 #, python-format
 msgid "Error pre-downloading: %s"
-msgstr ""
+msgstr "Error pre-descargando: %s"
 
 #: Player.py:177
 #, python-format
 msgid "Downloading: %s"
-msgstr ""
+msgstr "Descargando: %s"
 
 #: Player.py:179
 #, python-format
 msgid "Playing: %s"
-msgstr ""
+msgstr "Reproduciendo: %s"
 
 #: Player.py:220
 #, python-format
 msgid "%d minute left"
-msgstr ""
+msgstr "%d minuto restante"
 
 #: Player.py:222
 #, python-format
 msgid "%d minutes left"
-msgstr ""
+msgstr "%d minutos restantes"
 
 #: Player.py:225
 #, python-format
 msgid "%d seconds left"
-msgstr ""
+msgstr "%d segundos restantes"
 
 #: Player.py:227
 msgid "a few seconds left"
-msgstr ""
+msgstr "unos segundos restantes"
 
 #: Player.py:353
 msgid "Download subtitle failed"
-msgstr ""
+msgstr "Descarga de subtitulos fallida"
 
 #: Downloaders/Bitshare.py:92 Downloaders/Megaupload.py:56
 #: Downloaders/Wupload.py:101
 #, python-format
 msgid "Please wait %d second%s..."
-msgstr ""
+msgstr "Por favor espere %d segundo%s.."
 
 #: Downloaders/Bitshare.py:99
 msgid "Obtaining bitshare link..."
-msgstr ""
+msgstr "Obteniendo link de bitshare"
 
 #: Downloaders/Bitshare.py:102
 #, python-format
 msgid "Error obtaining bitshare's link: %s"
-msgstr ""
+msgstr "Error obteniendo link de bitshare: %s"
 
 #: Downloaders/Bitshare.py:131
 msgid "Sending Captcha..."
-msgstr ""
+msgstr "Enviando captcha..."
 
 #: Downloaders/Bitshare.py:150
 #, python-format
 msgid "Not success finding the bitshare download link. Got: %s"
-msgstr ""
+msgstr "No se encontro el link de descarga de bitshare. Se obtuvo: %s"
 
 #: Downloaders/Bitshare.py:170 Downloaders/Wupload.py:180
 msgid "Wrong captcha"
-msgstr ""
+msgstr "Captcha erroneo"
 
 #: Downloaders/Bitshare.py:183 Downloaders/Megaupload.py:126
 #: Downloaders/Wupload.py:190
 #, python-format
 msgid "Download finish with error: %s"
-msgstr ""
+msgstr "La descarga finalizo con el error: %s"
 
 #: Downloaders/Megaupload.py:62
 #, python-format
 msgid "Error: %s"
-msgstr ""
+msgstr "Error: %s"
 
 #: Downloaders/Megaupload.py:97
 #, python-format
 msgid "Error obtaining megaupload's link: %s"
-msgstr ""
+msgstr "Error al obtener el link de megaupload: %s"
 
 #: Downloaders/Megaupload.py:113
 #, python-format
 msgid "Error downloading from megaupload: %s"
-msgstr ""
+msgstr "Error descargando desde megaupload: %s"
 
 #: Downloaders/Wupload.py:127
 #, python-format
 msgid "Error obtaining wuploads's link: %s"
-msgstr ""
+msgstr "Error al obtener el link de wupload: %s"
 
 #: Glade/captcha.glade:7
 msgid "Fill the captcha"
-msgstr ""
+msgstr "Complete el captcha"
 
 #: Glade/captcha.glade:30
 msgid "Please fill the captcha:"
-msgstr ""
+msgstr "Por favor complete el captcha:"
 
 #: Glade/hosts.glade:17
 msgid "Select a host"
-msgstr ""
+msgstr "Elija una fuente"
 
 #: Glade/hosts.glade:39
 msgid "Select one of these hosts:"
-msgstr ""
+msgstr "Elija una de las siguientes fuentes:"
 
 #: Glade/main.glade:15
 msgid "j0hn <j0hn.com.ar@gmail.com>"
@@ -291,10 +303,12 @@ msgid ""
 "A Graphical User Interface for \n"
 "the website www.cuevana.tv\n"
 msgstr ""
+"Una interfaz grafica para \n"
+"el sitio web www.cuevana.tv\n"
 
 #: Glade/main.glade:20
 msgid "Guicavane on github"
-msgstr ""
+msgstr "Guicavane en github"
 
 #: Glade/main.glade:27
 msgid ""
@@ -316,7 +330,7 @@ msgstr ""
 
 #: Glade/main.glade:59
 msgid "Guicavane Error"
-msgstr ""
+msgstr "Error de guicavane"
 
 #: Glade/main.glade:97
 msgid "\n"
@@ -324,31 +338,31 @@ msgstr ""
 
 #: Glade/main.glade:163
 msgid "Download _and play"
-msgstr ""
+msgstr "Desc_argar y reproducir"
 
 #: Glade/main.glade:175
 msgid "_Download only"
-msgstr ""
+msgstr "_Descargar unicamente"
 
 #: Glade/main.glade:198
 msgid "_Mark"
-msgstr ""
+msgstr "_Marcar"
 
 #: Glade/main.glade:210
 msgid "_Unmark"
-msgstr ""
+msgstr "D_esmarcar"
 
 #: Glade/main.glade:222
 msgid "Open in Original Website"
-msgstr ""
+msgstr "Abrir en el sitio original"
 
 #: Glade/main.glade:234
 msgid "Choose Host"
-msgstr ""
+msgstr "Elegir una fuente"
 
 #: Glade/main.glade:301
 msgid "Information"
-msgstr ""
+msgstr "Informacion"
 
 #: Glade/main.glade:400
 msgid "Guicavane"
@@ -356,27 +370,27 @@ msgstr ""
 
 #: Glade/main.glade:419
 msgid "_Settings"
-msgstr ""
+msgstr "_Preferencias"
 
 #: Glade/main.glade:456
 msgid "_Help"
-msgstr ""
+msgstr "A_yuda"
 
 #: Glade/main.glade:499
 msgid "Mode:"
-msgstr ""
+msgstr "Modo:"
 
 #: Glade/main.glade:531
 msgid "Site:"
-msgstr ""
+msgstr "Sitio:"
 
 #: Glade/main.glade:581
 msgid "Search movie:"
-msgstr ""
+msgstr "Buscar pelicula:"
 
 #: Glade/main.glade:696
 msgid "Filter:  "
-msgstr ""
+msgstr "Filtrar:  "
 
 #: Glade/main.glade:844
 msgid "column"
@@ -384,27 +398,27 @@ msgstr ""
 
 #: Glade/main.glade:960
 msgid "Remove from favorites"
-msgstr ""
+msgstr "Eliminar de favoritos"
 
 #: Glade/main.glade:984
 msgid "Add to favorites"
-msgstr ""
+msgstr "Agregar a favoritos"
 
 #: Glade/settings.glade:9
 msgid "Settings"
-msgstr ""
+msgstr "Preferencias"
 
 #: Glade/settings.glade:42
 msgid "The directory where the files will be temporary downloaded"
-msgstr ""
+msgstr "El directorio en donde se bajaran los archivos temporalmente"
 
 #: Glade/settings.glade:44
 msgid "Cache directory:"
-msgstr ""
+msgstr "Directorio de cache:"
 
 #: Glade/settings.glade:59
 msgid "Select A Folder"
-msgstr ""
+msgstr "Elija una carpeta"
 
 #: Glade/settings.glade:87
 msgid ""
@@ -414,30 +428,35 @@ msgid ""
 "<episode> with the episode's number\n"
 "<name> with the episode's name"
 msgstr ""
+"Plantilla para el nombre de archivo. \n"
+"<show> se reemplazara con el nombre del show\n"
+"<season> se reemplazara con el numero de temporada\n"
+"<episode> se reemplazara con el numero de episodio\n"
+"<name> se reemplazara con el nombre del episodio"
 
 #: Glade/settings.glade:89
 msgid "Filename template:"
-msgstr ""
+msgstr "Plantilla para nombre de archivo:"
 
 #: Glade/settings.glade:132
 msgid "Add Custom Resolver to prevent DNS blocking"
-msgstr ""
+msgstr "Agregar resolucion personalizada para evitar el bloqueo de DNS"
 
 #: Glade/settings.glade:134
 msgid "Use Custom Resolver:"
-msgstr ""
+msgstr "Usar resolucion personalizada:"
 
 #: Glade/settings.glade:144 Glade/settings.glade:186 Glade/settings.glade:230
 msgid "Enable"
-msgstr ""
+msgstr "Habilitado"
 
 #: Glade/settings.glade:174
 msgid "Mark episodes as watched right after watching or downloading them."
-msgstr ""
+msgstr "Marcar los episodios automaticamente despues de verlos o descargarlos"
 
 #: Glade/settings.glade:176
 msgid "Automatic marks:"
-msgstr ""
+msgstr "Marcas automaticas:"
 
 #: Glade/settings.glade:217
 msgid ""
@@ -445,6 +464,9 @@ msgid ""
 "You can also skip this right clicking on the movie or episode and "
 "choosing 'Choose Host'."
 msgstr ""
+"Automaticamente elegir megaupload si es posible.\n"
+"Puedes saltar esta opcion apretando click derecho en la pelicula o "
+"episodio y eligiendo 'Elegir fuente'"
 
 #: Glade/settings.glade:220
 msgid ""
@@ -454,27 +476,27 @@ msgstr ""
 
 #: Glade/settings.glade:257
 msgid "General"
-msgstr ""
+msgstr "General"
 
 #: Glade/settings.glade:293
 msgid "Player location:"
-msgstr ""
+msgstr "Ubicacion del reproductor:"
 
 #: Glade/settings.glade:307 Glade/wizard.glade:62
 msgid "Select the player"
-msgstr ""
+msgstr "Seleccione el reproductor"
 
 #: Glade/settings.glade:332
 msgid "Extra arguments that the player may need."
-msgstr ""
+msgstr "Argumentos extra que el reprouctor pueda necesitar."
 
 #: Glade/settings.glade:334
 msgid "Player arguments:"
-msgstr ""
+msgstr "Argumentos del reproductor:"
 
 #: Glade/settings.glade:373
 msgid "Player"
-msgstr ""
+msgstr "Reproductor"
 
 #: Glade/settings.glade:448
 msgid "Megaupload"
@@ -482,11 +504,11 @@ msgstr ""
 
 #: Glade/settings.glade:469
 msgid "Accounts"
-msgstr ""
+msgstr "Cuentas"
 
 #: Glade/settings.glade:484
 msgid "(not required)"
-msgstr ""
+msgstr "(no requerido)"
 
 #: Glade/wizard.glade:8
 msgid "Wizard"
@@ -501,4 +523,10 @@ msgid ""
 "Configure your player to get started\n"
 "with shows and movies right away!"
 msgstr ""
+
+#~ msgid "Automatically use megaupload:"
+#~ msgstr "Usar Megaupload automaticamente:"
+
+#~ msgid "Cuevana"
+#~ msgstr ""
 

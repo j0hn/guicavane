@@ -1,8 +1,13 @@
-'''helpers for logging, now you don't have excuse to use logging
+#!/usr/bin/env python
+# coding: utf-8
+
+"""
+Helpers for logging, now you don't have excuse to use logging
 
 https://github.com/marianoguerra/me/blob/master/code/python/mlog/mlog.py
-'''
+"""
 
+import sys
 import inspect
 import logging
 import logging.handlers
@@ -61,6 +66,7 @@ def istty(handler):
     return getattr(handler.stream, 'isatty', lambda: False)()
 
 def _get_logger(name, logger, handler, level, format):
+    first_logger = logger and False or True
     if logger is None:
         if name is None:
             name = get_caller_module(3)
@@ -70,6 +76,11 @@ def _get_logger(name, logger, handler, level, format):
 
     if format is None:
         format = DEFAULT_FORMAT
+
+    # don't add more handlers if the logger already have one
+    # and it's not a logger that need a new handler
+    if first_logger and logger.handlers:
+        return logger
 
     # Do not insert ansi colours in a non tty handler
     if istty(handler):
@@ -83,8 +94,14 @@ def _get_logger(name, logger, handler, level, format):
 
     return logger
 
-def console(name=None, level=logging.INFO, logger=None, format=None):
+def console(name=None, logger=None, format=None):
     handler = logging.StreamHandler()
+
+    if "-v" in sys.argv:
+        level = logging.DEBUG
+    else:
+        level = logging.WARN
+
     return _get_logger(name, logger, handler, level, format)
 
 def file(path, when=None, name=None, level=logging.DEBUG, logger=None,

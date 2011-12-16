@@ -15,7 +15,7 @@ Requires
 --------
 * Python
 * Gtk
-* PyGtk (Ubuntu package python-gtk2-dev)
+* PyGtk (Ubuntu package python-gtk2)
 
 Linux Users
 -----------
@@ -37,7 +37,7 @@ the settings dialog.
 
 Current Version
 ---------------
-1.6.1
+1.6.2
 
 Features List
 -------------
