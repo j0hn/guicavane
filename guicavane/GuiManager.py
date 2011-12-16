@@ -90,6 +90,15 @@ class GuiManager(object):
         self.fill_sites_combobox()
         self.fill_mode_combobox()
 
+        # Set last window position and size
+        last_x, last_y = self.config.get_key("last_window_pos")
+        last_width, last_height = self.config.get_key("last_window_size")
+        self.main_window.move(last_x, last_y)
+        self.main_window.resize(last_width, last_height)
+
+        # Now we show the window
+        self.main_window.show_all()
+
         # Start on last mode
         try:
             self.mode_combo.set_active(self.avaliable_modes.index(last_mode))
@@ -102,15 +111,6 @@ class GuiManager(object):
         if is_first_time:
             wizard = Wizard(self.main_window)
             wizard.show()
-
-        # Set last window position and size
-        last_x, last_y = self.config.get_key("last_window_pos")
-        last_width, last_height = self.config.get_key("last_window_size")
-        self.main_window.move(last_x, last_y)
-        self.main_window.resize(last_width, last_height)
-
-        # Now we show the window
-        self.main_window.show_all()
 
     def login_accounts(self):
         accounts = self.config.get_key("accounts")
