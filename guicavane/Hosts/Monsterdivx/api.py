@@ -18,7 +18,7 @@ from guicavane.Utils.UrlOpen import UrlOpen
 
 display_name = "Monsterdivx"
 display_image = "monsterdivx.png"
-implements = ["Shows", "Movies"]
+implements = ["Shows", "Movies", "Recomended", "Latest"]
 
 url_open = UrlOpen()
 
@@ -131,6 +131,8 @@ class Movie(BaseMovie):
     _hosts_re = re.compile("onclick=\"goSource\('(?P<id>.*?)'," \
                            "'(?P<name>.*?)'\)")
     _real_id_re = re.compile("var postID = (.*?);")
+    _recomended_movies_re = re.compile('<h2><a href="(?P<url>.*?)">' \
+                                       '(?P<name>.*?)</a></h2>')
 
     def __init__(self, id, name, url):
         self._id = id
@@ -186,3 +188,24 @@ class Movie(BaseMovie):
 
     def get_subtitle_url(self, lang="ES", quality=None):
         return urls.sub_show % (self.id, lang)
+
+    @classmethod
+    def get_latest(cls):
+        return cls._get_movies_from_url(urls.latest_movies)
+
+    @classmethod
+    def get_recomended(cls):
+        return cls._get_movies_from_url(urls.recomended_movies)
+
+    @classmethod
+    def _get_movies_from_url(cls, url):
+        data = url_open(url)
+        data = data.split("<h2>LISTADO DE PELICULAS</h2>")[1]
+
+        for movie in cls._recomended_movies_re.finditer(data):
+            movie = movie.groupdict()
+
+            _id = None
+            name = movie["name"]
+            url = movie["url"].replace(urls.host, "")
+            yield Movie(_id, name, url)
