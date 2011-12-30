@@ -217,7 +217,7 @@
 You can also skip this right clicking on the movie or episode and choosing 'Choose Host'.</property>
                         <property name="xalign">0</property>
                         <property name="label" translatable="yes">Automatically start
-when ther's only 1 host:</property>
+when there is only 1 host:</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
