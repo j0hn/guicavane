@@ -23,8 +23,8 @@ class Megaupload(BaseAccount):
     """ Megaupload's Account. """
 
     name = "Megaupload"
-    account_wait = {None: 60,
-                    'Regular' : 60,
+    account_wait = {None: 10,
+                    'Regular' : 10,
                     'Premium' : 0}
 
     def __init__(self):
