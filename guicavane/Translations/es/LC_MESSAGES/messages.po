@@ -471,8 +471,10 @@ msgstr ""
 #: Glade/settings.glade:220
 msgid ""
 "Automatically start\n"
-"when ther's only 1 host:"
+"when there is only 1 host:"
 msgstr ""
+"Reproducir automaticamente\n"
+"cuando halla solo una fuente:"
 
 #: Glade/settings.glade:257
 msgid "General"

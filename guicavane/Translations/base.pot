@@ -449,7 +449,7 @@ msgstr ""
 #: Glade/settings.glade:220
 msgid ""
 "Automatically start\n"
-"when ther's only 1 host:"
+"when there is only 1 host:"
 msgstr ""
 
 #: Glade/settings.glade:257
