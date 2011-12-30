@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: guicavane 1.6.3\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2011-12-14 04:07-0300\n"
-"PO-Revision-Date: 2011-12-04 16:54-0300\n"
-"Last-Translator: j0hn <j0hn.com.ar@gmail.com>\n"
+"PO-Revision-Date: 2011-12-30 00:21-0300\n"
+"Last-Translator: Emilio López <turl@tuxfamily.org>\n"
 "Language-Team: Argentinian\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
@@ -37,7 +37,8 @@ msgstr "Últimas películas"
 msgid "Recomended movies"
 msgstr "Películas recomendadas"
 
-#: GuiManager.py:123 GuiManager.py:147
+#: GuiManager.py:123
+#: GuiManager.py:147
 msgid "Loading..."
 msgstr "Cargando..."
 
@@ -62,7 +63,8 @@ msgstr "Cargando peliculas recomendadas..."
 msgid "Error loading favorites: %s"
 msgstr "Error cargando favoritos: %s"
 
-#: GuiManager.py:343 GuiManager.py:419
+#: GuiManager.py:343
+#: GuiManager.py:419
 msgid "Not avaliable for this site"
 msgstr "No disponible para este sitio"
 
@@ -105,11 +107,11 @@ msgid ""
 "Problem fetching movies, please try again in a few minutes.\n"
 "details: %s"
 msgstr ""
-"Problema obteniendo peliculas, por favor intente nuevamente en unos "
-"minutos.\n"
+"Problema obteniendo peliculas, por favor intente nuevamente en unos minutos.\n"
 "detalles: %s"
 
-#: GuiManager.py:490 GuiManager.py:521
+#: GuiManager.py:490
+#: GuiManager.py:521
 #, python-format
 msgid "Loading show %s..."
 msgstr "Cargando serie %s..."
@@ -172,7 +174,7 @@ msgstr "No hay fuentes disponibles"
 
 #: Player.py:109
 msgid "Only one host found, starting download..."
-msgstr ""
+msgstr "Unica fuente encontrada, comenzando descarga..."
 
 #: Player.py:141
 msgid "Downloading subtitles..."
@@ -224,7 +226,8 @@ msgstr "unos segundos restantes"
 msgid "Download subtitle failed"
 msgstr "Descarga de subtitulos fallida"
 
-#: Downloaders/Bitshare.py:92 Downloaders/Megaupload.py:56
+#: Downloaders/Bitshare.py:92
+#: Downloaders/Megaupload.py:56
 #: Downloaders/Wupload.py:101
 #, python-format
 msgid "Please wait %d second%s..."
@@ -248,11 +251,13 @@ msgstr "Enviando captcha..."
 msgid "Not success finding the bitshare download link. Got: %s"
 msgstr "No se encontro el link de descarga de bitshare. Se obtuvo: %s"
 
-#: Downloaders/Bitshare.py:170 Downloaders/Wupload.py:180
+#: Downloaders/Bitshare.py:170
+#: Downloaders/Wupload.py:180
 msgid "Wrong captcha"
 msgstr "Captcha erroneo"
 
-#: Downloaders/Bitshare.py:183 Downloaders/Megaupload.py:126
+#: Downloaders/Bitshare.py:183
+#: Downloaders/Megaupload.py:126
 #: Downloaders/Wupload.py:190
 #, python-format
 msgid "Download finish with error: %s"
@@ -314,18 +319,11 @@ msgstr "Guicavane en github"
 msgid ""
 "Copyright 2011 Gonzalo García Berrotaran\n"
 "\n"
-"This program is free software: you can redistribute it and/or modify it "
-"under the terms of the GNU General Public License as published by the "
-"Free Software Foundation, either version 3 of the License, or (at your "
-"option) any later version.\n"
+"This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.\n"
 "\n"
-"This program is distributed in the hope that it will be useful, but "
-"WITHOUT ANY WARRANTY; without even the implied warranty of "
-"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General"
-" Public License for more details.\n"
+"This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\n"
 "\n"
-"You should have received a copy of the GNU General Public License along "
-"with this program.  If not, see <http://www.gnu.org/licenses/>."
+"You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>."
 msgstr ""
 
 #: Glade/main.glade:59
@@ -446,7 +444,9 @@ msgstr "Agregar resolucion personalizada para evitar el bloqueo de DNS"
 msgid "Use Custom Resolver:"
 msgstr "Usar resolucion personalizada:"
 
-#: Glade/settings.glade:144 Glade/settings.glade:186 Glade/settings.glade:230
+#: Glade/settings.glade:144
+#: Glade/settings.glade:186
+#: Glade/settings.glade:230
 msgid "Enable"
 msgstr "Habilitado"
 
@@ -461,12 +461,10 @@ msgstr "Marcas automaticas:"
 #: Glade/settings.glade:217
 msgid ""
 "Automatically choose megaupload if it's posible.\n"
-"You can also skip this right clicking on the movie or episode and "
-"choosing 'Choose Host'."
+"You can also skip this right clicking on the movie or episode and choosing 'Choose Host'."
 msgstr ""
 "Automaticamente elegir megaupload si es posible.\n"
-"Puedes saltar esta opcion apretando click derecho en la pelicula o "
-"episodio y eligiendo 'Elegir fuente'"
+"Puedes saltar esta opcion apretando click derecho en la pelicula o episodio y eligiendo 'Elegir fuente'"
 
 #: Glade/settings.glade:220
 msgid ""
@@ -484,7 +482,8 @@ msgstr "General"
 msgid "Player location:"
 msgstr "Ubicacion del reproductor:"
 
-#: Glade/settings.glade:307 Glade/wizard.glade:62
+#: Glade/settings.glade:307
+#: Glade/wizard.glade:62
 msgid "Select the player"
 msgstr "Seleccione el reproductor"
 
@@ -514,21 +513,22 @@ msgstr "(no requerido)"
 
 #: Glade/wizard.glade:8
 msgid "Wizard"
-msgstr ""
+msgstr "Asistente"
 
 #: Glade/wizard.glade:25
 msgid "New in guicavane?"
-msgstr ""
+msgstr "¿Primera vez que utilizas guicavane?"
 
 #: Glade/wizard.glade:48
 msgid ""
 "Configure your player to get started\n"
 "with shows and movies right away!"
 msgstr ""
+"Configura tu reproductor para\n"
+"comenzar a ver series y peliculas!"
 
 #~ msgid "Automatically use megaupload:"
 #~ msgstr "Usar Megaupload automaticamente:"
 
 #~ msgid "Cuevana"
 #~ msgstr ""
-
