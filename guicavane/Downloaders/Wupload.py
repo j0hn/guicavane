@@ -8,10 +8,13 @@ Wupload's Downloader.
 import re
 import time
 import gobject
+import base64
 
 from guicavane.Gettext import gettext
 from guicavane.Paths import HOSTS_IMAGES_DIR, SEP
 from guicavane.Utils.UrlOpen import UrlOpen, DownloadError
+from guicavane.Config import Config
+from guicavane.Accounts import ACCOUNTS
 from CaptchaWindow import CaptchaWindow, CAPTCHA_IMAGE_PATH
 
 from Base import BaseDownloader
@@ -25,6 +28,7 @@ log = console("Downloaders Wupload")
 RECAPTCHA_CHALLENGE_URL = "http://api.recaptcha.net/challenge?k="
 RECAPTCHA_IMAGE_URL = "http://www.google.com/recaptcha/api/image?c="
 
+URL_ID_RE = re.compile(".*/file/(.*)/.*")
 REGULAR_URL_RE = re.compile('href="(.*?\?start=1)"')
 RECAPTCHA_CHALLENGE_ID_RE = re.compile('Recaptcha.create\("(.*?)"')
 RECAPTCHA_NEW_CHALLENGE_RE = re.compile("challenge : '(.+?)',")
@@ -33,9 +37,10 @@ TM_RE = re.compile("id='tm' name='tm' value='(\d+)' />")
 TM_HASH_RE = re.compile("id='tm_hash' name='tm_hash' value='(?P<value>[0-9a-f]*?)' />")
 FILE_URL_RE = re.compile('<span>Download Ready </span></h3>.*?' \
                          '<p><a href="(.*?)">', re.DOTALL)
-
+API_DOWNLOAD="http://api.wupload.com/link?method=getDownloadLink&u=%s&p=%s&ids=%s&redirect=true"
 CAPTCHA_URL_OPEN = UrlOpen(use_cache=False)
 
+ACCOUNT=ACCOUNTS["wupload"]
 
 class Wupload(BaseDownloader):
     """ Wupload's Downloader. """
@@ -47,6 +52,18 @@ class Wupload(BaseDownloader):
     def __init__(self, gui_manager, url):
         self.MAIN_URL_OPEN = UrlOpen(use_cache=False)
 
+        self.config = Config.get()
+        self.password = None
+        self.user = None
+        accounts = self.config.get_key("accounts")
+        for t, v in accounts:
+            if t != "wupload":
+                continue
+            self.user = v["username"]
+            try:
+                self.password = base64.b64decode(v["password"])
+            except:
+                pass
         BaseDownloader.__init__(self, self.MAIN_URL_OPEN, gui_manager, url)
 
         self.gui_manager = gui_manager
@@ -70,8 +87,14 @@ class Wupload(BaseDownloader):
                         self.on_waiting_finish, unfreeze=False)
 
     def start_regular(self):
-        page_data = self.MAIN_URL_OPEN(self.url)
+        if self.user and self.password and ACCOUNT.account_type=="Premium":
+            console("trying with cool API")
+            id_ = URL_ID_RE.search(self.url).group(1)
+            self.file_url = API_DOWNLOAD % (self.user, self.password, id_)
+            console(self.file_url)
+            return False
 
+        page_data = self.MAIN_URL_OPEN(self.url)
         try:
             self.regular_url = REGULAR_URL_RE.search(page_data).group(1)
             self.regular_url = "http://www.wupload.com/file/" + self.regular_url

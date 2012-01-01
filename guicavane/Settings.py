@@ -15,6 +15,7 @@ from guicavane.Paths import SETTINGS_GUI_FILE
 # accounts information
 HOSTS_INPUTS = {
     "megaupload": ("megaupload_username", "megaupload_password"),
+    "wupload": ("wupload_username", "wupload_password"),
 }
 
 
@@ -35,8 +36,10 @@ class SettingsDialog(object):
         # Widgets
         glade_objects = [
             "settings_dialog", "player_location_button",
-            "player_arguments_entry", "megaupload_user_entry",
-            "megaupload_pass_entry", "cache_dir_button", "automatic_marks",
+            "player_arguments_entry", 
+            "megaupload_user_entry", "megaupload_pass_entry", 
+            "wupload_user_entry", "wupload_pass_entry",
+            "cache_dir_button", "automatic_marks",
             "use_custom_resolve", "filename_template", "automatic_start",
         ]
 
@@ -111,7 +114,6 @@ class SettingsDialog(object):
         for host in HOSTS_INPUTS:
             user = self.builder.get_object(HOSTS_INPUTS[host][0]).get_text()
             passwd = self.builder.get_object(HOSTS_INPUTS[host][1]).get_text()
-
             accounts.append((host, {"username": user,
                 "password": base64.b64encode(passwd)}))
 
