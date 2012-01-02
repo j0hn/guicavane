@@ -47,7 +47,7 @@ class Wupload(BaseDownloader):
 
     name = "Wupload"
     icon_path = HOSTS_IMAGES_DIR + SEP + "wupload.png"
-    accept_ranges = False
+    accept_ranges = True
 
     def __init__(self, gui_manager, url):
         self.MAIN_URL_OPEN = UrlOpen(use_cache=False)
@@ -189,6 +189,8 @@ class Wupload(BaseDownloader):
         self.file_url = FILE_URL_RE.search(page_data).group(1)
 
     def _download_loop(self):
+        self.add_range(self.MAIN_URL_OPEN)
+
         handler = self.MAIN_URL_OPEN(self.file_url, handle=True)
 
         # Using the BaseDownloader download function
