@@ -36,11 +36,12 @@ class SettingsDialog(object):
         # Widgets
         glade_objects = [
             "settings_dialog", "player_location_button",
-            "player_arguments_entry", 
-            "megaupload_user_entry", "megaupload_pass_entry", 
+            "player_arguments_entry",
+            "megaupload_user_entry", "megaupload_pass_entry",
             "wupload_user_entry", "wupload_pass_entry",
             "cache_dir_button", "automatic_marks",
             "use_custom_resolve", "filename_template", "automatic_start",
+            "download_subtitles",
         ]
 
         for glade_object in glade_objects:
@@ -57,6 +58,7 @@ class SettingsDialog(object):
         use_custom_resolve = self.config.get_key("use_custom_resolve")
         filename_template = self.config.get_key("filename_template")
         automatic_start = self.config.get_key("automatic_start")
+        download_subtitles = self.config.get_key("download_subtitles")
 
         # Set the values
         self.player_location_button.set_filename(player_location)
@@ -66,6 +68,7 @@ class SettingsDialog(object):
         self.use_custom_resolve.set_active(use_custom_resolve)
         self.filename_template.set_text(filename_template)
         self.automatic_start.set_active(automatic_start)
+        self.download_subtitles.set_active(download_subtitles)
 
         # Accounts
         accounts = self.config.get_key("accounts")
@@ -96,6 +99,7 @@ class SettingsDialog(object):
         use_custom_resolve = self.use_custom_resolve.get_active()
         filename_template = self.filename_template.get_text()
         automatic_start = self.automatic_start.get_active()
+        download_subtitles = self.download_subtitles.get_active()
 
         # Save the new values to the config
         if player_location != None:
@@ -107,7 +111,7 @@ class SettingsDialog(object):
         self.config.set_key("player_arguments", player_arguments)
         self.config.set_key("filename_template", filename_template)
         self.config.set_key("automatic_start", automatic_start)
-        self.config.save()
+        self.config.set_key("download_subtitles", download_subtitles)
 
         # Accounts:
         accounts = []

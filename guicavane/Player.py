@@ -131,8 +131,9 @@ class Player(object):
         self.gui_manager.background_task(self.pre_download,
             self.open_player, unfreeze=False)
 
-        self.gui_manager.background_task(self.download_subtitle,
-            self._on_download_subtitle_finish, unfreeze=False)
+        if self.config.get_key("download_subtitles"):
+            self.gui_manager.background_task(self.download_subtitle,
+                self._on_download_subtitle_finish, unfreeze=False)
 
     def pre_download(self):
         """ Downloads some content to start safely the player. """
