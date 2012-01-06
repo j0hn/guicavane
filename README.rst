@@ -54,3 +54,8 @@ Features List
 * Latest movies list
 * Recomended movies list
 * Multiple site support (cuevana, pelispedia, moviezet, cuevana using freevana)
+
+
+Facebook fan page
+-----------------
+https://www.facebook.com/guicavane
