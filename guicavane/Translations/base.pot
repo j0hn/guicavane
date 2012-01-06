@@ -1,14 +1,14 @@
 # Translations template for PROJECT.
-# Copyright (C) 2011 ORGANIZATION
+# Copyright (C) 2012 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2011.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2012.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2011-12-14 04:07-0300\n"
+"POT-Creation-Date: 2012-01-06 17:10-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,36 +37,36 @@ msgstr ""
 msgid "Recomended movies"
 msgstr ""
 
-#: GuiManager.py:123 GuiManager.py:147
+#: GuiManager.py:131 GuiManager.py:155
 msgid "Loading..."
 msgstr ""
 
-#: GuiManager.py:249
+#: GuiManager.py:257
 msgid "Obtaining shows list"
 msgstr ""
 
-#: GuiManager.py:269
+#: GuiManager.py:277
 msgid "Loading favorites"
 msgstr ""
 
-#: GuiManager.py:276
+#: GuiManager.py:284
 msgid "Loading latest movies..."
 msgstr ""
 
-#: GuiManager.py:283
+#: GuiManager.py:291
 msgid "Loading recomended movies..."
 msgstr ""
 
-#: GuiManager.py:323
+#: GuiManager.py:331
 #, python-format
 msgid "Error loading favorites: %s"
 msgstr ""
 
-#: GuiManager.py:343 GuiManager.py:419
+#: GuiManager.py:351 GuiManager.py:427
 msgid "Not avaliable for this site"
 msgstr ""
 
-#: GuiManager.py:345
+#: GuiManager.py:353
 #, python-format
 msgid ""
 "Problem fetching shows:\n"
@@ -74,7 +74,7 @@ msgid ""
 "details: %s"
 msgstr ""
 
-#: GuiManager.py:358
+#: GuiManager.py:366
 #, python-format
 msgid ""
 "Problem fetching seasons:\n"
@@ -82,7 +82,7 @@ msgid ""
 "details: %s"
 msgstr ""
 
-#: GuiManager.py:373
+#: GuiManager.py:381
 #, python-format
 msgid ""
 "Problem fetching episodes:\n"
@@ -90,130 +90,130 @@ msgid ""
 "details: %s"
 msgstr ""
 
-#: GuiManager.py:421
+#: GuiManager.py:429
 #, python-format
 msgid ""
 "Problem fetching movies, please try again in a few minutes.\n"
 "details: %s"
 msgstr ""
 
-#: GuiManager.py:490 GuiManager.py:521
+#: GuiManager.py:502 GuiManager.py:533
 #, python-format
 msgid "Loading show %s..."
 msgstr ""
 
-#: GuiManager.py:604
+#: GuiManager.py:616
 msgid "Dowload to..."
 msgstr ""
 
-#: GuiManager.py:689
+#: GuiManager.py:701
 msgid "Option not avaliable in this site"
 msgstr ""
 
-#: GuiManager.py:692
+#: GuiManager.py:704
 #, python-format
 msgid "Error opening original url: %s"
 msgstr ""
 
-#: GuiManager.py:712
+#: GuiManager.py:724
 #, python-format
 msgid "Searching movies with title %s..."
 msgstr ""
 
-#: GuiManager.py:739
+#: GuiManager.py:757
 msgid "<b>Cast:</b> "
 msgstr ""
 
-#: GuiManager.py:740
+#: GuiManager.py:758
 msgid "<b>Genere:</b> "
 msgstr ""
 
-#: GuiManager.py:741
+#: GuiManager.py:759
 msgid "<b>Language:</b> "
 msgstr ""
 
-#: GuiManager.py:750
+#: GuiManager.py:768
 msgid "Information not supported for this site"
 msgstr ""
 
-#: GuiManager.py:752
+#: GuiManager.py:770
 #, python-format
 msgid "Error downloading information: %s"
 msgstr ""
 
-#: GuiManager.py:793
+#: GuiManager.py:811
 msgid "Problem downloading show image"
 msgstr ""
 
-#: Player.py:67
+#: Player.py:68
 msgid "Fetching hosts..."
 msgstr ""
 
-#: Player.py:92
+#: Player.py:93
 #, python-format
 msgid "Error fetching hosts: %s"
 msgstr ""
 
-#: Player.py:98
+#: Player.py:99
 msgid "No host found"
 msgstr ""
 
-#: Player.py:109
+#: Player.py:110
 msgid "Only one host found, starting download..."
 msgstr ""
 
-#: Player.py:141
+#: Player.py:143
 msgid "Downloading subtitles..."
 msgstr ""
 
-#: Player.py:145
+#: Player.py:147
 msgid "Please wait..."
 msgstr ""
 
-#: Player.py:153
+#: Player.py:155
 msgid "Filling cache..."
 msgstr ""
 
-#: Player.py:173
+#: Player.py:176
 #, python-format
 msgid "Error pre-downloading: %s"
 msgstr ""
 
-#: Player.py:177
+#: Player.py:180
 #, python-format
 msgid "Downloading: %s"
 msgstr ""
 
-#: Player.py:179
+#: Player.py:182
 #, python-format
 msgid "Playing: %s"
 msgstr ""
 
-#: Player.py:220
+#: Player.py:223
 #, python-format
 msgid "%d minute left"
 msgstr ""
 
-#: Player.py:222
+#: Player.py:225
 #, python-format
 msgid "%d minutes left"
 msgstr ""
 
-#: Player.py:225
+#: Player.py:228
 #, python-format
 msgid "%d seconds left"
 msgstr ""
 
-#: Player.py:227
+#: Player.py:230
 msgid "a few seconds left"
 msgstr ""
 
-#: Player.py:353
+#: Player.py:359
 msgid "Download subtitle failed"
 msgstr ""
 
 #: Downloaders/Bitshare.py:92 Downloaders/Megaupload.py:56
-#: Downloaders/Wupload.py:101
+#: Downloaders/Wupload.py:124
 #, python-format
 msgid "Please wait %d second%s..."
 msgstr ""
@@ -236,12 +236,12 @@ msgstr ""
 msgid "Not success finding the bitshare download link. Got: %s"
 msgstr ""
 
-#: Downloaders/Bitshare.py:170 Downloaders/Wupload.py:180
+#: Downloaders/Bitshare.py:170 Downloaders/Wupload.py:205
 msgid "Wrong captcha"
 msgstr ""
 
 #: Downloaders/Bitshare.py:183 Downloaders/Megaupload.py:126
-#: Downloaders/Wupload.py:190
+#: Downloaders/Wupload.py:215
 #, python-format
 msgid "Download finish with error: %s"
 msgstr ""
@@ -261,7 +261,7 @@ msgstr ""
 msgid "Error downloading from megaupload: %s"
 msgstr ""
 
-#: Downloaders/Wupload.py:127
+#: Downloaders/Wupload.py:150
 #, python-format
 msgid "Error obtaining wuploads's link: %s"
 msgstr ""
@@ -420,23 +420,24 @@ msgid "Filename template:"
 msgstr ""
 
 #: Glade/settings.glade:132
-msgid "Add Custom Resolver to prevent DNS blocking"
+msgid "Mark episodes as watched right after watching or downloading them."
 msgstr ""
 
 #: Glade/settings.glade:134
-msgid "Use Custom Resolver:"
+msgid "Automatic marks:"
 msgstr ""
 
 #: Glade/settings.glade:144 Glade/settings.glade:186 Glade/settings.glade:230
+#: Glade/settings.glade:388
 msgid "Enable"
 msgstr ""
 
 #: Glade/settings.glade:174
-msgid "Mark episodes as watched right after watching or downloading them."
+msgid "Add Custom Resolver to prevent DNS blocking"
 msgstr ""
 
 #: Glade/settings.glade:176
-msgid "Automatic marks:"
+msgid "Use Custom Resolver:"
 msgstr ""
 
 #: Glade/settings.glade:217
@@ -472,19 +473,27 @@ msgstr ""
 msgid "Player arguments:"
 msgstr ""
 
-#: Glade/settings.glade:373
+#: Glade/settings.glade:378
+msgid "Download subtitles:"
+msgstr ""
+
+#: Glade/settings.glade:416
 msgid "Player"
 msgstr ""
 
-#: Glade/settings.glade:448
+#: Glade/settings.glade:491
+msgid "Wupload"
+msgstr ""
+
+#: Glade/settings.glade:552
 msgid "Megaupload"
 msgstr ""
 
-#: Glade/settings.glade:469
+#: Glade/settings.glade:573
 msgid "Accounts"
 msgstr ""
 
-#: Glade/settings.glade:484
+#: Glade/settings.glade:588
 msgid "(not required)"
 msgstr ""
 
