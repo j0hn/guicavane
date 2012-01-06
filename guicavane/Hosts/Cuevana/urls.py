@@ -3,7 +3,7 @@ host = 'http://www.cuevana.tv'
 static_host = 'http://sc.cuevana.tv'
 
 # Shows
-shows = host + '/web/series?&todas'
+shows = host + '/web/series'
 show_info = host + '/web/series?&%s&%s&%s'
 seasons = host + '/web/series?&%s&%s'
 

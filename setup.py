@@ -6,7 +6,7 @@ import sys
 from distutils.core import setup
 from distutils.command.install import install
 
-VERSION_NUMBER = "1.6.1"
+VERSION_NUMBER = "1.6.3"
 
 
 class CustomInstall(install):

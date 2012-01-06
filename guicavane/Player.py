@@ -90,8 +90,8 @@ class Player(object):
         gobject.idle_add(self.gui_manager.set_status_message, "")
 
         if is_error:
-            self.gui_manager.report_error(gettext("Error fetching hosts: %s") % \
-                                          result)
+            self.gui_manager.report_error(gettext("Error fetching hosts: " \
+                                                  "%s") % result)
             gobject.idle_add(self.gui_manager.progress_box.hide)
             return
 
@@ -131,8 +131,9 @@ class Player(object):
         self.gui_manager.background_task(self.pre_download,
             self.open_player, unfreeze=False)
 
-        self.gui_manager.background_task(self.download_subtitle,
-            self._on_download_subtitle_finish, unfreeze=False)
+        if self.config.get_key("download_subtitles"):
+            self.gui_manager.background_task(self.download_subtitle,
+                self._on_download_subtitle_finish, unfreeze=False)
 
     def pre_download(self):
         """ Downloads some content to start safely the player. """
@@ -171,7 +172,8 @@ class Player(object):
         """ Fires up a new process with the player runing. """
 
         if is_error:
-            self.gui_manager.report_error(gettext("Error pre-downloading: %s") % result)
+            self.gui_manager.report_error(
+                gettext("Error pre-downloading: %s") % result)
             return
 
         if self.download_only:
@@ -300,10 +302,9 @@ class Player(object):
                 str(self.file_object.number))
             result = result.replace("<name>", self.file_object.name)
         else:
-            raise Exception("Error traying to obtain filename from a non " \
+            raise Exception("Error obtaining filename from a non " \
                             "Movie/Episode object: %s (%s)." % \
                             (self.file_object, type(self.file_object)))
-
 
         result = ''.join(c for c in result if c in valid_chars)
         result = result + ".mp4"
@@ -317,7 +318,8 @@ class Player(object):
         url = self.file_object.get_subtitle_url(quality=self.selected_quality)
         filename = self.file_path.replace(".mp4", ".srt")
 
-        log.debug("Traying to download subtitles from: %s and save it to: %s" % (url, filename))
+        log.debug("Attempting to download subtitles from: " \
+                  "%s and save it to: %s" % (url, filename))
 
         url_open(url, filename=filename)
 

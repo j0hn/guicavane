@@ -37,7 +37,7 @@ the settings dialog.
 
 Current Version
 ---------------
-1.6.2
+1.6.3
 
 Features List
 -------------

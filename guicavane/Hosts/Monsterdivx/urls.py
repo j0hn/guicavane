@@ -8,6 +8,8 @@ episodes = host + "/wp-content/themes/monsterdivx-old/scripts/getList.php?post&i
 episode = host + "/%s/"
 
 # Movies
+recomended_movies = host + "/-/peliculas/?mas-vistas"
+latest_movies = host + "/-/peliculas/"
 
 # Sources
 sources = host + "/wp-content/plugins/monsterdivx-player/scripts/source-iframe.php?" \

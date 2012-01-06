@@ -17,7 +17,7 @@ if "-d" in sys.argv or "--dummy" in sys.argv:
 AVALIABLE_HOSTS = {
     "megaupload": Megaupload,
     "bitshare": Bitshare,
-    "filefactory": Filefactory,
+    #"filefactory": Filefactory,  #FIXME
     "hotfile": Hotfile,
     "wupload": Wupload,
 }

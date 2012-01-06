@@ -28,6 +28,7 @@ DEFAULT_VALUES = {
     "site": "Cuevana",
     "last_window_pos": [0, 0],
     "last_window_size": [900, 500],
+    "download_subtitles": True,
 }
 
 if not os.path.exists(CONFIG_DIR):
