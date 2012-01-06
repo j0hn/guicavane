@@ -125,14 +125,16 @@ class Season(BaseSeason):
 
 
 class Show(BaseShow):
-    _shows_json_re = re.compile("'#list'\).list\(\{l:(.*?]), page:", re.DOTALL)
+    _shows_json_re = re.compile("c.listSerie\('',(.*?)\);", re.DOTALL)
     _seasons_json_re = re.compile("serieList\({l:({.*?}),e", re.DOTALL)
 
     def __init__(self, id, name, url):
-        self.id = id
         self.name = name
         self.url = url
-        self.urlname = self.url.rsplit("/", 1)[-1]
+
+        split_url = self.url.rsplit("/")
+        self.urlname = split_url[-1]
+        self.id = split_url[-2]
 
     @property
     def seasons(self):
@@ -155,7 +157,7 @@ class Show(BaseShow):
         for show in jsondata:
             try:
                 if not name or name in show['tit'].lower():
-                    yield Show(show["id"], show["tit"], show["url"])
+                    yield Show(None, show["tit"], show["url"])
             except Exception, error:
                 log.warn("Show '%s' couldn't be loaded: %s" % \
                     (show["tit"], error))
