@@ -39,7 +39,7 @@ HOSTNAMES = {'mega1': 'megaupload',
 url_open = UrlOpen()
 
 
-class Hosts(object):
+class Resource(BaseResource):
     __hosts = None
 
     @property
@@ -68,7 +68,7 @@ class Hosts(object):
         return self.__hosts
 
 
-class Episode(Hosts, BaseEpisode):
+class Episode(Resource, BaseEpisode):
     _hosts_re = re.compile('var (?P<host>mega[0-9]) = "(?P<id>.*?)";')
 
     def __init__(self, id, name, number, season, show, url):
@@ -140,7 +140,7 @@ class Show(BaseShow):
                 yield Show(**show_dict)
 
 
-class Movie(BaseMovie, Hosts):
+class Movie(Resource, BaseMovie):
     _search_re = re.compile('<div class="titletip"><b><a '\
             'href="(?P<url>.*?)">(?P<name>.*?)</a></b></div>')
     _hosts_re = re.compile('var (?P<host>mega[0-9]) = "(?P<id>.*?)";')
