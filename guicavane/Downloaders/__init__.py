@@ -15,7 +15,7 @@ if "-d" in sys.argv or "--dummy" in sys.argv:
     DUMMY_ENABLE = True
 
 AVALIABLE_HOSTS = {
-    "megaupload": Megaupload,
+    #"megaupload": Megaupload,  # R.I.P
     "bitshare": Bitshare,
     #"filefactory": Filefactory,  #FIXME
     "hotfile": Hotfile,
