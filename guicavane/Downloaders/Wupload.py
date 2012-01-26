@@ -29,7 +29,7 @@ RECAPTCHA_CHALLENGE_URL = "http://api.recaptcha.net/challenge?k="
 RECAPTCHA_IMAGE_URL = "http://www.google.com/recaptcha/api/image?c="
 
 URL_ID_RE = re.compile(".*/file/(.*)/.*")
-REGULAR_URL_RE = re.compile('href="(.*?\?start=1)"')
+REGULAR_URL_RE = re.compile('href="(.*?)\?start=1"')
 RECAPTCHA_CHALLENGE_ID_RE = re.compile('Recaptcha.create\("(.*?)"')
 RECAPTCHA_NEW_CHALLENGE_RE = re.compile("challenge : '(.+?)',")
 WAITING_TIME_RE = re.compile('var countDownDelay = (\d+);')
@@ -97,7 +97,7 @@ class Wupload(BaseDownloader):
         page_data = self.MAIN_URL_OPEN(self.url)
         try:
             self.regular_url = REGULAR_URL_RE.search(page_data).group(1)
-            self.regular_url = "http://www.wupload.com/file/" + self.regular_url
+            self.regular_url = "http://www.wupload.com/file/" + self.regular_url + "/" + self.regular_url + "?start=1"
         except Exception, e:
             msg = "Regular link not found"
             log.error(msg)
@@ -106,6 +106,7 @@ class Wupload(BaseDownloader):
             raise DownloadError(msg)
 
         self.MAIN_URL_OPEN.add_headers({"X-Requested-With": "XMLHttpRequest"})
+        print "REGULAR URL", self.regular_url
         regular_data = self.MAIN_URL_OPEN(self.regular_url)
 
 
