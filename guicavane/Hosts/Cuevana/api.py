@@ -13,6 +13,7 @@ import re
 import json
 
 import urls
+from guicavane.Gettext import gettext
 from guicavane.Hosts.Base import *
 from guicavane.Utils.Log import console
 from guicavane.Utils.Debug import tmp_dump
@@ -213,7 +214,11 @@ class Movie(BaseMovie):
     def file_hosts(self):
         hosts = {}
         data = url_open(urls.movie_sources % self.id)
-        sources = json.loads(self._sources_re.search(data).group(1))
+
+        try:
+            sources = json.loads(self._sources_re.search(data).group(1))
+        except AttributeError:
+            raise Exception(gettext("No host found"))
 
         for quality in sources:
             for host in sources[quality]["2"]:
