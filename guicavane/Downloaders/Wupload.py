@@ -51,23 +51,19 @@ class Wupload(BaseDownloader):
 
     def __init__(self, gui_manager, url):
         self.MAIN_URL_OPEN = UrlOpen(use_cache=False)
-
-        self.config = Config.get()
-        self.password = None
-        self.user = None
-        accounts = self.config.get_key("accounts")
-        for t, v in accounts:
-            if t != "wupload":
-                continue
-            self.user = v["username"]
-            try:
-                self.password = base64.b64decode(v["password"])
-            except:
-                pass
         BaseDownloader.__init__(self, self.MAIN_URL_OPEN, gui_manager, url)
 
-        self.gui_manager = gui_manager
         self.url = url
+        self.gui_manager = gui_manager
+        self.config = Config.get()
+        self.user = None
+        self.password = None
+        accounts = self.config.get_key("accounts")
+
+        for host, data in accounts:
+            if host == "wupload":
+                self.user = data["username"]
+                self.password = base64.b64decode(data["password"])
 
         self.captcha_window = CaptchaWindow(gui_manager, self._on_captcha_ok)
 
@@ -95,6 +91,10 @@ class Wupload(BaseDownloader):
             return False
 
         page_data = self.MAIN_URL_OPEN(self.url)
+
+        if "this file has been removed" in page_data:
+            raise Exception(gettext("File removed"))
+
         try:
             self.regular_url = REGULAR_URL_RE.search(page_data).group(1)
             self.regular_url = "http://www.wupload.com/file/" + self.regular_url + "/" + self.regular_url + "?start=1"
