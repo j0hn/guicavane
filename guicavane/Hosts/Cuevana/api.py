@@ -82,7 +82,7 @@ class Episode(BaseEpisode):
         try:
             sources = json.loads(self._sources_re.search(data).group(1))
         except AttributeError:
-            raise Exception("No host found")
+            raise Exception(gettext("No host found"))
 
         for quality in sources:
             for host in sources[quality]["2"]:
